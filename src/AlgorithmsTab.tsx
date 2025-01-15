@@ -1,3 +1,4 @@
+import { CloseCircleOutlined } from '@ant-design/icons';
 import { Collapse, Tabs, TabsProps } from 'antd';
 
 const algorithms = [
@@ -11,7 +12,7 @@ const algorithms = [
     'Thuật toán Moore-Dijkstra',
 ]
 
-export default function AlgorithmsComponent() {
+export default function AlgorithmsTab() {
     const tabs: TabsProps['items'] = [
         {
             key: '1',
@@ -20,13 +21,18 @@ export default function AlgorithmsComponent() {
                 return {
                     key: index.toString(),
                     label: `${index + 1}. ${algo}`,
-                    children: <p>{"a"}</p>,
+                    children: <div className='text-[red]'>
+                        <CloseCircleOutlined className='me-2'/>
+                        <span>
+                            Đồ thị phải là đồ thị vô hướng
+                        </span>
+                    </div>,
                 }
             })} expandIconPosition='end'/>
         },
     ];
 
     return (
-        <Tabs className='mx-2' items={tabs}/>
+        <Tabs items={tabs} className='expanded-tabs'/>
     );
 }

@@ -1,3 +1,4 @@
+import { ElementDefinition } from 'cytoscape';
 import UnweightedGraph from './UnweightedGraph';
 
 export default class GraphParser
@@ -39,5 +40,44 @@ export default class GraphParser
                 return undefined;
             }
         }
+    }
+
+    public static toCytoscapeGraph(graph: UnweightedGraph): ElementDefinition[]
+    {
+        const newElements: ElementDefinition[] = [];
+        
+        const u = graph.oneIndex ? 1 : 0;
+        const count = graph.vertexCount + u;
+
+        for (let i = u; i < count; i++) {
+            newElements.push({ data: { id: i.toString(), label: i.toString() } });
+        }
+
+        const mat = graph.matrix;
+
+        if (graph.directed) {
+            for (let i = 0; i < graph.vertexCount; i++) {
+                for (let j = 0; j < graph.vertexCount; j++) {
+                    for (let k = 0; k < mat[i][j]; k++) {
+                        newElements.push({ data: { source: i.toString(), target: j.toString() }, classes: 'directed' });
+                    }
+                }
+            }
+        }
+        else {
+            for (let i = 0; i < graph.vertexCount; i++) {
+                for (let k = 0; k < mat[i][i] / 2; k++) {
+                    newElements.push({ data: { source: i.toString(), target: i.toString() } });
+                }
+    
+                for (let j = i + 1; j < graph.vertexCount; j++) {
+                    for (let k = 0; k < mat[i][j]; k++) {
+                        newElements.push({ data: { source: i.toString(), target: j.toString() } });
+                    }
+                }
+            }
+        }
+
+        return newElements;
     }
 }

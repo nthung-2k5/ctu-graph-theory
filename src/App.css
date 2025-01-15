@@ -1,5 +1,17 @@
 #root {
   margin: 0 auto;
   height: 100vh;
-  /* padding: 0.5rem; */
+}
+
+.expanded-tabs {
+  width: 100%;
+  height: 100%;
+}
+
+.expanded-tabs .ant-tabs, .expanded-tabs .ant-tabs-tabpane {
+  height: 100%;
+}
+
+.expanded-tabs .ant-tabs-content-holder {
+  display: flex;
 }
