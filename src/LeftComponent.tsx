@@ -1,5 +1,6 @@
-import { Tabs } from 'antd';
-import type { TabsProps } from 'antd';
+import { Tabs, type TabsProps } from 'antd';
+import GraphInput from './GraphInput';
+import UnweightedGraph from './lib/UnweightedGraph';
 
 import "prism-react-editor/prism/languages/c"
 
@@ -8,8 +9,7 @@ import "prism-react-editor/themes/github-light.css"
 
 // Required by the basic setup
 import "prism-react-editor/search.css"
-import GraphInput from './GraphInput';
-import { UnweightedGraph } from './lib/Graph';
+
 const LeftComponent = ({onGraphChanged}: Partial<{onGraphChanged: (graph: UnweightedGraph) => void}>) => {
 
     const tabs: TabsProps['items'] = [
@@ -20,7 +20,7 @@ const LeftComponent = ({onGraphChanged}: Partial<{onGraphChanged: (graph: Unweig
         },
         {
             key: '2',
-            label: 'Cài đặt đồ thị',
+            label: 'Biểu diễn đồ thị',
         },
     ];
 

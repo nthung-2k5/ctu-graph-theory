@@ -1,10 +1,4 @@
-export interface Edge
-{
-    u: number;
-    v: number;
-}
-
-export class UnweightedGraph
+export default class UnweightedGraph
 {
     private _matrix: number[][];
     private _directed: boolean;
@@ -23,7 +17,7 @@ export class UnweightedGraph
 
     public oneIndex: boolean = false;
 
-    constructor(n: number, directed: boolean = false)
+    constructor(n: number = 0, directed: boolean = false)
     {
         this._matrix = [];
         for (let i = 0; i < n; i++) {
@@ -46,7 +40,14 @@ export class UnweightedGraph
             throw new Error('Vertex out of range');
         }
 
-        return this._matrix[this._vertexIndex(u)].map((value, index) => value !== 0 ? (this.oneIndex ? index + 1 : index) : -1).filter(value => value !== -1);
+        const neighbors: number[] = [];
+        for (let v = 0; v < this.vertexCount; v++) {
+            for (let k = 0; k < this._matrix[u][v]; k++) {
+                neighbors.push(v);
+            }
+        }
+
+        return neighbors;
     }
 
     public degree(u: number): number {
@@ -98,5 +99,23 @@ export class UnweightedGraph
         {
             this._matrix[this._vertexIndex(v)][this._vertexIndex(u)] += 1;
         }
+    }
+
+    public equals(other: UnweightedGraph): boolean
+    {
+        if (this.vertexCount !== other.vertexCount || this._directed !== other._directed)
+        {
+            return false;
+        }
+
+        for (let i = 0; i < this.vertexCount; i++)
+        {
+            if (!this.matrix[i].every((value, index) => value === other.matrix[i][index]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

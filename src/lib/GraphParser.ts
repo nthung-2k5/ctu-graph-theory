@@ -1,8 +1,8 @@
-import { Edge, UnweightedGraph } from './Graph';
+import UnweightedGraph from './UnweightedGraph';
 
 export default class GraphParser
 {
-    public static parse(input: string): UnweightedGraph
+    public static parseUnweighted(input: string, directed: boolean = false): UnweightedGraph
     {
         const lines = input.split('\n');
         
@@ -11,29 +11,28 @@ export default class GraphParser
         try
         {
             const [n, m] = lines[0].split(' ').map(value => parseInt(value));
-            graph = new UnweightedGraph(n);
+            graph = new UnweightedGraph(n, directed);
 
             for (let i = 1; i <= m; i++)
             {
                 const edge = parseEdge(lines[i]);
                 if (edge === undefined) continue;
     
-                graph.addEdge(edge.u, edge.v);
+                graph.addEdge(edge[0], edge[1]);
             }
     
             return graph;
         }
         catch
         {
-            return graph ?? new UnweightedGraph(0);
+            return graph ?? new UnweightedGraph(0, directed);
         }
         
-        function parseEdge(edge: string): Edge | undefined
+        function parseEdge(edge: string): [number, number] | undefined
         {
             try
             {
-                const [u, v] = edge.split(' ').map(value => parseInt(value));
-                return { u, v } as Edge;
+                return edge.split(' ').map(value => parseInt(value)) as [number, number];
             }
             catch
             {
