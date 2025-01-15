@@ -3,10 +3,12 @@ import './app.css'
 import { Col, Row } from 'antd'
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape, { ElementDefinition, Stylesheet } from 'cytoscape';
+// @ts-expect-error Made for Javascript version so no type
 import COSEBilkent from 'cytoscape-cose-bilkent';
 import { useEffect, useRef, useState } from 'react';
 import LeftComponent from './LeftComponent';
 import UnweightedGraph from './lib/UnweightedGraph';
+import AlgorithmsComponent from './AlgorithmsComponent';
 
 const defaultGraphStyle: Stylesheet[] = [
     {
@@ -41,7 +43,7 @@ const defaultGraphStyle: Stylesheet[] = [
 
 cytoscape.use(COSEBilkent);
 
-const App = () => {
+export default function App() {
     const cy = useRef<cytoscape.Core | null>(null);
     const [performing, setPerforming] = useState(false);
     const [elements, setElements] = useState<ElementDefinition[]>([]);
@@ -112,11 +114,9 @@ const App = () => {
                     <CytoscapeComponent className='mx-4 my-auto border-2 border-black rounded w-[30vw] h-[85vh]' elements={elements} stylesheet={defaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} autoungrabify={performing} />
                 </Col>
                 <Col span={8}>
-                    <h1>A</h1>
+                    <AlgorithmsComponent/>
                 </Col>
             </Row>
         </div>
     )
 }
-
-export default App;

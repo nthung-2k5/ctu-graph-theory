@@ -1,19 +1,16 @@
 import { Editor } from "prism-react-editor"
 import { BasicSetup } from "prism-react-editor/setups"
 import { Segmented, Switch } from 'antd'
-
-import "prism-react-editor/prism/languages/c"
-
-import "prism-react-editor/layout.css"
-import "prism-react-editor/themes/github-light.css"
-
-// Required by the basic setup
-import "prism-react-editor/search.css"
-import { UnweightedGraph } from './lib/UnweightedGraph'
+import UnweightedGraph from './lib/UnweightedGraph'
 import GraphParser from './lib/GraphParser'
 import { useRef, useState } from 'react'
 
-const GraphInput = ({onGraphChanged}: Partial<{onGraphChanged: (graph: UnweightedGraph) => void}>) => {
+import "prism-react-editor/prism/languages/c"
+import "prism-react-editor/layout.css"
+import "prism-react-editor/themes/github-light.css"
+import "prism-react-editor/search.css"
+
+export default function GraphInput({onGraphChanged}: Partial<{onGraphChanged: (graph: UnweightedGraph) => void}>) {
     const directed = useRef(false);
     const [input, setInput] = useState('');
     const [weighted, setWeighted] = useState(false);
@@ -39,5 +36,3 @@ const GraphInput = ({onGraphChanged}: Partial<{onGraphChanged: (graph: Unweighte
         </div>
     );
 };
-
-export default GraphInput;

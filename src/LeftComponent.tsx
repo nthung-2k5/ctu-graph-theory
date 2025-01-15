@@ -10,8 +10,7 @@ import "prism-react-editor/themes/github-light.css"
 // Required by the basic setup
 import "prism-react-editor/search.css"
 
-const LeftComponent = ({onGraphChanged}: Partial<{onGraphChanged: (graph: UnweightedGraph) => void}>) => {
-
+export default function LeftComponent({onGraphChanged}: Partial<{onGraphChanged: (graph: UnweightedGraph) => void}>) {
     const tabs: TabsProps['items'] = [
         {
             key: '1',
@@ -28,5 +27,3 @@ const LeftComponent = ({onGraphChanged}: Partial<{onGraphChanged: (graph: Unweig
         <Tabs className='mx-2' items={tabs}/>
     );
 };
-
-export default LeftComponent;
