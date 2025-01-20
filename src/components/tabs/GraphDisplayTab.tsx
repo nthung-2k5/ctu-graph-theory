@@ -1,8 +1,9 @@
 import { Tabs } from 'antd';
-import VisualGraphComponent from './VisualGraphComponent';
-import MemoryGraphComponent from './MemoryGraphComponent';
+import VisualGraphComponent from '../../VisualGraphComponent';
+import MemoryGraphComponent from '../../MemoryGraphComponent';
 
-export default function GraphDisplayTab() {
+export default function GraphDisplayTab() 
+{
     return (
         <Tabs items={[
             {
@@ -15,6 +16,6 @@ export default function GraphDisplayTab() {
                 label: 'Biểu diễn trong bộ nhớ',
                 children: <MemoryGraphComponent/>
             }
-        ]} className='mx-4 expanded-tabs'/>
+        ]} className='expanded-tabs'/>
     );
 }

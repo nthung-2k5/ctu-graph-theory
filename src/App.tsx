@@ -5,19 +5,24 @@ import cytoscape from 'cytoscape';
 // @ts-expect-error Made for Javascript version so no type
 import COSEBilkent from 'cytoscape-cose-bilkent';
 import { useState } from 'react';
-import GraphInputTab from './GraphInputTab';
-import UnweightedGraph from './lib/UnweightedGraph';
-import AlgorithmsTab from './AlgorithmsTab';
+import GraphInputTab from './components/tabs/GraphInputTab';
+import AlgorithmsTab from './components/tabs/AlgorithmsTab';
 import { GraphContext } from './lib/GraphContext';
-import GraphDisplayTab from './GraphDisplayTab';
+import GraphDisplayTab from './components/tabs/GraphDisplayTab';
+import EdgeList from './lib/graphs/unweighted/EdgeList';
+import Graph from './lib/graphs/Graph';
+
 
 cytoscape.use(COSEBilkent);
 
-export default function App() {
-    const [graph, setGraph] = useState(new UnweightedGraph());
+export default function App() 
+{
+    const [graph, setGraph] = useState<Graph>(new EdgeList());
 
-    const onGraphChanged = (g: UnweightedGraph) => {
-        if (graph.equals(g)) {
+    const onGraphChanged = (g: Graph) => 
+    {
+        if (graph.equals(g)) 
+        {
             return;
         }
 
@@ -25,19 +30,19 @@ export default function App() {
     }
 
     return (
-        <div className={'flex flex-col h-screen pb-4'}>
-            <div className={'p-2 border-b flex items-end h-[10vh]'}>
-                <CTULogo className={'h-[7vh] my-auto w-auto'} />
+        <div className='flex flex-col h-screen pb-4'>
+            <div className='p-2 border-b flex items-end h-[10vh]'>
+                <CTULogo className='h-[7vh] my-auto w-auto' />
             </div>
             <GraphContext.Provider value={{ graph: graph, onGraphChanged }}>
-                <Row className='h-full mx-4'>
-                    <Col span={8}>
+                <Row className='max-h-[calc(90vh-1rem)]  h-[calc(90vh-1rem)] mx-4'>
+                    <Col span={8} className='flex h-full'>
                         <GraphInputTab/>
                     </Col>
-                    <Col span={8} className='flex'>
+                    <Col span={8} className='flex h-full px-4'>
                         <GraphDisplayTab/>
                     </Col>
-                    <Col span={8}>
+                    <Col span={8} className='flex h-full'>
                         <AlgorithmsTab/>
                     </Col>
                 </Row>

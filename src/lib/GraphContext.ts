@@ -1,8 +1,7 @@
 import { createContext } from 'react';
-import UnweightedGraph from './UnweightedGraph';
-
+import Graph from './graphs/Graph';
 
 export const GraphContext = createContext<{
-    graph: UnweightedGraph,
-    onGraphChanged: (graph: UnweightedGraph) => void
-}>({ graph: new UnweightedGraph(), onGraphChanged: () => {} });
+    graph: Graph,
+    onGraphChanged: (graph: Graph) => void
+}>({ graph: null!, onGraphChanged: () => {} });

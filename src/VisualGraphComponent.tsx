@@ -1,21 +1,46 @@
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { GraphContext } from './lib/GraphContext';
-import GraphParser from './lib/GraphParser';
 import CytoscapeComponent from 'react-cytoscapejs';
-import { Stylesheet } from 'cytoscape';
+import cytoscape, { Stylesheet } from 'cytoscape';
 
-export default function VisualGraphComponent() {
-    const cy = useRef<cytoscape.Core | null>(null);
+export default function VisualGraphComponent() 
+{
+    const cy = useRef<cytoscape.Core>(null!);
     const { graph } = useContext(GraphContext);
 
-    useEffect(() => {
-        cy.current?.pan({ x: 100, y: 300});
+    const elements = useMemo(() => graph.toGraph(), [graph]);
+
+    useEffect(() =>
+    {
+        cy.current.on('mouseover', 'node', (e) =>
+        {
+            if (e.target === null) return;
+            if (e.target === cy) return;
+            e.cy.startBatch();
+            const sel = e.target as cytoscape.NodeSingular;
+            
+            sel.addClass('highlight')
+                .outgoers()
+                .addClass('highlight');
+            e.cy.endBatch();
+        }).on('mouseout', 'node', (e) =>
+        {
+            if (e.target === null) return;
+            if (e.target === cy) return;
+            e.cy.startBatch();
+            const sel = e.target as cytoscape.NodeSingular;
+            
+            sel.removeClass('highlight')
+                .outgoers()
+                .removeClass('highlight');
+            e.cy.endBatch();
+        });
     }, []);
 
-    const elements = useMemo(() => GraphParser.toCytoscapeGraph(graph), [graph]);
-
-    useEffect(() => {
+    useEffect(() => 
+    {
         cy.current?.layout({ name: 'cose-bilkent' }).run();
+        cy.current?.center();
     }, [elements]);
 
     return (
@@ -50,6 +75,13 @@ const DefaultGraphStyle: Stylesheet[] = [
             "target-arrow-shape": "triangle",
             "target-arrow-color": "#000",
             "arrow-scale": 1.5
+        }
+    },
+    {
+        selector: '.highlight',
+        style: {
+            "border-width": 2,
+            "line-outline-width": 1,
         }
     }
 ];

@@ -2,20 +2,22 @@ import { Segmented, Switch, Tabs } from 'antd';
 import { Editor } from 'prism-react-editor';
 import { BasicSetup } from 'prism-react-editor/setups';
 import { useRef, useState, useContext } from 'react';
-import { GraphContext } from './lib/GraphContext';
-import GraphParser from './lib/GraphParser';
+import { GraphContext } from '../../lib/GraphContext';
+import GraphParser from '../../lib/GraphParser';
 
 import "prism-react-editor/layout.css"
 import "prism-react-editor/themes/github-light.css"
 import "prism-react-editor/search.css"
 
-export default function GraphInputTab() {
+export default function GraphInputTab() 
+{
     const directed = useRef(false);
     const [input, setInput] = useState('');
     const [weighted, setWeighted] = useState(false);
     const { onGraphChanged } = useContext(GraphContext);
 
-    const onInputUpdate = (input: string) => {
+    const onInputUpdate = (input: string) => 
+    {
         setInput(input);
         onGraphChanged?.(GraphParser.parseUnweighted(input, directed.current));
     };
