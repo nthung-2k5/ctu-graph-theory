@@ -1,9 +1,6 @@
 import CTULogo from '/public/CTU.svg?react';
 import './app.css'
 import { Col, Row } from 'antd'
-import cytoscape from 'cytoscape';
-// @ts-expect-error Made for Javascript version so no type
-import COSEBilkent from 'cytoscape-cose-bilkent';
 import { useState } from 'react';
 import GraphInputTab from './components/tabs/GraphInputTab';
 import AlgorithmsTab from './components/tabs/AlgorithmsTab';
@@ -11,9 +8,6 @@ import { GraphContext } from './lib/GraphContext';
 import GraphDisplayTab from './components/tabs/GraphDisplayTab';
 import EdgeList from './lib/graphs/unweighted/EdgeList';
 import Graph from './lib/graphs/Graph';
-
-
-cytoscape.use(COSEBilkent);
 
 export default function App() 
 {

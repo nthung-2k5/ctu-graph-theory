@@ -2,6 +2,13 @@ import { useContext, useEffect, useMemo, useRef } from 'react';
 import { GraphContext } from './lib/GraphContext';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape, { Stylesheet } from 'cytoscape';
+// @ts-expect-error Made for Javascript version so no type
+import cola from 'cytoscape-cola';
+// @ts-expect-error Made for Javascript version so no type
+import automove from 'cytoscape-automove';
+
+cytoscape.use(cola);
+cytoscape.use(automove);
 
 export default function VisualGraphComponent() 
 {
@@ -17,34 +24,38 @@ export default function VisualGraphComponent()
             if (e.target === null) return;
             if (e.target === cy) return;
             e.cy.startBatch();
-            const sel = e.target as cytoscape.NodeSingular;
+            const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
             
-            sel.addClass('highlight')
-                .outgoers()
-                .addClass('highlight');
+            (graph.directed ? sel.outgoers() : sel.connectedEdges()).addClass('highlight');
             e.cy.endBatch();
         }).on('mouseout', 'node', (e) =>
         {
             if (e.target === null) return;
             if (e.target === cy) return;
             e.cy.startBatch();
-            const sel = e.target as cytoscape.NodeSingular;
-            
-            sel.removeClass('highlight')
-                .outgoers()
-                .removeClass('highlight');
+            const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
+
+            (graph.directed ? sel.outgoers() : sel.connectedEdges()).removeClass('highlight');
             e.cy.endBatch();
+        }).unbind('layoutready').bind('layoutready', () =>
+        {
+            cy.current?.fit();
+            cy.current?.center();
         });
-    }, []);
+    }, [graph.directed]);
+
+    const r = useRef<HTMLDivElement>(null);
 
     useEffect(() => 
     {
-        cy.current?.layout({ name: 'cose-bilkent' }).run();
-        cy.current?.center();
+        cy.current.automove({ nodesMatching: () => true, reposition: 'viewport' });
+        cy.current?.layout({ name: 'cola', infinite: true }).run();
     }, [elements]);
 
     return (
-        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} />
+        <div className='my-auto border-2 border-black rounded h-full' ref={r}>
+            <CytoscapeComponent className='h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} boxSelectionEnabled={false} />
+        </div>
     );
 }
 

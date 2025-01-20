@@ -62,9 +62,11 @@ export default abstract class UnweightedGraph implements Graph
             elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
         }
 
-        for (const edge of this.edges) 
+        const edges = this.edges;
+        for (let i = 0; i < edges.length; i++)
         {
-            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}`, source: edge.u.toString(), target: edge.v.toString() }, classes: this._directed ? 'directed' : '' });
+            const edge = this.edges[i];
+            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: this._directed ? 'directed' : '' });
         }
 
         return elements;
