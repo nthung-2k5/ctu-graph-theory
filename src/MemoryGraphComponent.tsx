@@ -1,9 +1,6 @@
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, MenuProps } from 'antd';
 import { useContext, useMemo, useState } from 'react';
-import AdjacencyMatrixGraph from './components/AdjacencyMatrixGraph';
-import AdjacencyListGraph from './components/AdjacencyListGraph';
-import EdgeListGraph from './components/EdgeListGraph';
 import { GraphContext } from './lib/GraphContext';
 import LabeledNumber from './components/LabeledNumber';
 import GraphConverter from './lib/graphs/unweighted/GraphConverter';

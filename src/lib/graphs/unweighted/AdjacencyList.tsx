@@ -55,7 +55,7 @@ export default class AdjacencyList extends UnweightedGraph
                 <div/>
                 <strong className='mb-2'>adj</strong>
                 {this._adjList.map((row, rowIndex) => [
-                    <span key={-rowIndex} className='h-full inline-flex items-center justify-end mr-2'>{rowIndex + 1}</span>,
+                    <span key={"Vertex " + (rowIndex + 1)} className='h-full inline-flex items-center justify-end mr-2'>{rowIndex + 1}</span>,
                     <div key={rowIndex} className='flex text-center p-2 border border-border'>
                         {Array.from({length: maxEdges}).map((_, i) => (
                             <span key={i} className='w-8 h-8 border border-border inline-flex items-center justify-center'>

@@ -7,7 +7,11 @@ export default class GraphParser
 {
     public static parseUnweighted(input: string, directed: boolean = false): UnweightedGraph
     {
-        const numbers = new Queue<number>(input.trim().split(/\s+/).map(value => parseInt(value)));
+        const numbers = new Queue<number>(input.trim().split(/\s+/).map(value =>
+        {
+            const parsed = parseInt(value);
+            return isNaN(parsed) ? undefined : parsed;
+        }));
         
         const n = numbers.shift() ?? 0;
         const graph = new EdgeList(n, directed);

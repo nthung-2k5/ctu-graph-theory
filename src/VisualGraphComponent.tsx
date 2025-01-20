@@ -12,14 +12,14 @@ cytoscape.use(automove);
 
 export default function VisualGraphComponent() 
 {
-    const cy = useRef<cytoscape.Core>(null!);
+    const cy = useRef<cytoscape.Core | null>(null);
     const { graph } = useContext(GraphContext);
 
     const elements = useMemo(() => graph.toGraph(), [graph]);
 
     useEffect(() =>
     {
-        cy.current.on('mouseover', 'node', (e) =>
+        cy.current?.on('mouseover', 'node', (e) =>
         {
             if (e.target === null) return;
             if (e.target === cy) return;
@@ -37,25 +37,19 @@ export default function VisualGraphComponent()
 
             (graph.directed ? sel.outgoers() : sel.connectedEdges()).removeClass('highlight');
             e.cy.endBatch();
-        }).unbind('layoutready').bind('layoutready', () =>
-        {
-            cy.current?.fit();
-            cy.current?.center();
         });
     }, [graph.directed]);
 
-    const r = useRef<HTMLDivElement>(null);
-
     useEffect(() => 
     {
-        cy.current.automove({ nodesMatching: () => true, reposition: 'viewport' });
+        // @ts-expect-error Made for Javascript version so no type
+        cy.current?.automove({ nodesMatching: () => true, reposition: 'viewport' });
+        // @ts-expect-error Made for Javascript version so no type
         cy.current?.layout({ name: 'cola', infinite: true }).run();
     }, [elements]);
 
     return (
-        <div className='my-auto border-2 border-black rounded h-full' ref={r}>
-            <CytoscapeComponent className='h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} boxSelectionEnabled={false} />
-        </div>
+        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} boxSelectionEnabled={false} />
     );
 }
 

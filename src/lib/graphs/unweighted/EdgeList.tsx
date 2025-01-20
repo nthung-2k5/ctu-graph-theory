@@ -35,7 +35,7 @@ export default class EdgeList extends UnweightedGraph
                 <div/>
                 <strong className='mb-2'>edges</strong>
                 {this._edges.map(({ u, v }, rowIndex) => [
-                    <span key={-rowIndex} className='h-full inline-flex items-center justify-end mr-2'>{rowIndex + 1}</span>,
+                    <span key={"index of " + rowIndex} className='h-full inline-flex items-center justify-end mr-2'>{rowIndex + 1}</span>,
                     
                     <div key={rowIndex} className='flex flex-col text-center border border-b-0 border-border'>
                         <div className='flex py-2 p-3'>

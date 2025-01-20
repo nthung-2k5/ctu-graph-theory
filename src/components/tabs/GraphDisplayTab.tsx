@@ -9,7 +9,8 @@ export default function GraphDisplayTab()
             {
                 key: '1',
                 label: 'Biểu diễn trực quan',
-                children: <VisualGraphComponent/>
+                children: <VisualGraphComponent/>,
+                destroyInactiveTabPane: true
             },
             {
                 key: '2',
