@@ -1,28 +1,37 @@
-import { useContext, useEffect, useMemo, useRef } from 'react';
-import { GraphContext } from './lib/GraphContext';
+import { useEffect, useMemo, useRef } from 'react';
+import { useGraph } from '../lib/GraphContext';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape, { Stylesheet } from 'cytoscape';
 // @ts-expect-error Made for Javascript version so no type
 import cola from 'cytoscape-cola';
 // @ts-expect-error Made for Javascript version so no type
 import automove from 'cytoscape-automove';
+import GraphAnimator from '../lib/GraphAnimator';
 
 cytoscape.use(cola);
 cytoscape.use(automove);
 
 export default function VisualGraphComponent() 
 {
+    const { graph, animator, animating } = useGraph();
     const cy = useRef<cytoscape.Core | null>(null);
-    const { graph } = useContext(GraphContext);
-
     const elements = useMemo(() => graph.toGraph(), [graph]);
+
+    const assignCytoscape = (cyCore: cytoscape.Core) =>
+    {
+        cy.current = cyCore;
+
+        // ???
+        if (animating) return;
+        animator.current = new GraphAnimator(cy.current!);
+    };
 
     useEffect(() =>
     {
         cy.current?.on('mouseover', 'node', (e) =>
         {
             if (e.target === null) return;
-            if (e.target === cy) return;
+            if (e.target === cy.current) return;
             e.cy.startBatch();
             const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
             
@@ -31,7 +40,7 @@ export default function VisualGraphComponent()
         }).on('mouseout', 'node', (e) =>
         {
             if (e.target === null) return;
-            if (e.target === cy) return;
+            if (e.target === cy.current) return;
             e.cy.startBatch();
             const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
 
@@ -49,7 +58,7 @@ export default function VisualGraphComponent()
     }, [elements]);
 
     return (
-        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={(cyCore) => cy.current = cyCore} zoomingEnabled={false} boxSelectionEnabled={false} />
+        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={assignCytoscape} zoomingEnabled={false} boxSelectionEnabled={false} />
     );
 }
 

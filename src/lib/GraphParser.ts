@@ -11,9 +11,11 @@ export default class GraphParser
         {
             const parsed = parseInt(value);
             return isNaN(parsed) ? undefined : parsed;
-        }));
+        }).filter(Boolean));
         
-        const n = numbers.shift() ?? 0;
+        const n = numbers.shift();
+        if (n === undefined || n <= 0) return new EdgeList(0, directed);
+
         const graph = new EdgeList(n, directed);
         
         const m = numbers.shift() ?? 0;
@@ -30,9 +32,10 @@ export default class GraphParser
         function parseEdge(): Edge | undefined
         {
             const u = numbers.shift();
-            const v = numbers.shift();
+            if (u === undefined) return undefined;
 
-            if (u === undefined || v === undefined) return undefined;
+            const v = numbers.shift();
+            if (v === undefined) return undefined;
 
             return { u, v };
         }

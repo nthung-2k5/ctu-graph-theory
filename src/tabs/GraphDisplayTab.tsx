@@ -1,9 +1,11 @@
 import { Tabs } from 'antd';
-import VisualGraphComponent from '../../VisualGraphComponent';
-import MemoryGraphComponent from '../../MemoryGraphComponent';
+import VisualGraphComponent from '../components/VisualGraphComponent';
+import MemoryGraphComponent from '../components/MemoryGraphComponent';
+import { useGraph } from '../lib/GraphContext';
 
 export default function GraphDisplayTab() 
 {
+    const { animating } = useGraph();
     return (
         <Tabs items={[
             {
@@ -15,7 +17,8 @@ export default function GraphDisplayTab()
             {
                 key: '2',
                 label: 'Biểu diễn trong bộ nhớ',
-                children: <MemoryGraphComponent/>
+                children: <MemoryGraphComponent/>,
+                disabled: animating
             }
         ]} className='expanded-tabs'/>
     );

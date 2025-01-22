@@ -1,26 +1,27 @@
 import CTULogo from '/public/CTU.svg?react';
 import './app.css'
 import { Col, Row } from 'antd'
-import { useState } from 'react';
-import GraphInputTab from './components/tabs/GraphInputTab';
-import AlgorithmsTab from './components/tabs/AlgorithmsTab';
+import { useRef, useState } from 'react';
+import GraphInputTab from './tabs/GraphInputTab';
+import AlgorithmsTab from './tabs/AlgorithmsTab';
 import { GraphContext } from './lib/GraphContext';
-import GraphDisplayTab from './components/tabs/GraphDisplayTab';
+import GraphDisplayTab from './tabs/GraphDisplayTab';
 import EdgeList from './lib/graphs/unweighted/EdgeList';
 import Graph from './lib/graphs/Graph';
+import GraphAnimator from './lib/GraphAnimator';
 
 export default function App() 
 {
     const [graph, setGraph] = useState<Graph>(new EdgeList());
+    const [animating, setAnimating] = useState(false);
+    const animator = useRef<GraphAnimator>(null!);
 
-    const onGraphChanged = (g: Graph) => 
+    const setGraphIfNeq = (g: Graph) =>
     {
-        if (graph.equals(g)) 
+        if (!g.equals(graph))
         {
-            return;
+            setGraph(g);
         }
-
-        setGraph(g);
     }
 
     return (
@@ -28,12 +29,12 @@ export default function App()
             <div className='p-2 border-b flex items-end h-[10vh]'>
                 <CTULogo className='h-[7vh] my-auto w-auto' />
             </div>
-            <GraphContext.Provider value={{ graph: graph, onGraphChanged }}>
+            <GraphContext.Provider value={{ graph, setGraph: setGraphIfNeq, animator, animating, setAnimating }}>
                 <Row className='max-h-[calc(90vh-1rem)]  h-[calc(90vh-1rem)] mx-4'>
-                    <Col span={8} className='flex h-full'>
+                    <Col span={6} className='flex h-full'>
                         <GraphInputTab/>
                     </Col>
-                    <Col span={8} className='flex h-full px-4'>
+                    <Col span={10} className='flex h-full px-4'>
                         <GraphDisplayTab/>
                     </Col>
                     <Col span={8} className='flex h-full'>

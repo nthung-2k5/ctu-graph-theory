@@ -1,10 +1,10 @@
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, MenuProps } from 'antd';
-import { useContext, useMemo, useState } from 'react';
-import { GraphContext } from './lib/GraphContext';
-import LabeledNumber from './components/LabeledNumber';
-import GraphConverter from './lib/graphs/unweighted/GraphConverter';
-import UnweightedGraph from './lib/graphs/unweighted/UnweightedGraph';
+import { useMemo, useState } from 'react';
+import { useGraph } from '../lib/GraphContext';
+import LabeledNumber from './LabeledNumber';
+import GraphConverter from '../lib/graphs/unweighted/GraphConverter';
+import UnweightedGraph from '../lib/graphs/unweighted/UnweightedGraph';
 
 const graphTypes = ["Danh sách cạnh", "Ma trận kề", "Danh sách kề", "Ma trận liên thuộc"];
 const graphItems: MenuProps['items'] = graphTypes.map((val, i) => ({ label: <span>{val}</span>, key: i.toString() }));
@@ -65,7 +65,7 @@ edges.forEach(([from, to]) =>
 
 export default function MemoryGraphComponent() 
 {
-    const { graph } = useContext(GraphContext);
+    const { graph } = useGraph();
     const [graphType, setGraphType] = useState(0);
     
     const convertedGraph = useMemo(() =>
