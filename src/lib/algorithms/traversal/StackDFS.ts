@@ -1,7 +1,7 @@
 import { Stack } from 'data-structure-typed';
-import UnweightedGraph from '../../graphs/unweighted/UnweightedGraph';
 import { AlgorithmStep } from '../GraphAlgorithm';
-import TraversalAlgorithm, { TraversalConfig } from './TraversalAlgorithm';
+import TraversalAlgorithm from './TraversalAlgorithm';
+import Graph from '../../graphs/Graph';
 
 export default class StackDFS extends TraversalAlgorithm
 {
@@ -10,13 +10,11 @@ export default class StackDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
 
-    *run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
+    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
-        const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
-
         const stack = new Stack<number>();
-        stack.push(config.startVertex);
-        visited[config.startVertex] = true;
+        stack.push(startVertex);
+        visited[startVertex] = true;
 
         while (!stack.isEmpty())
         {
@@ -30,7 +28,7 @@ export default class StackDFS extends TraversalAlgorithm
                 if (!visited[v])
                 {
                     stack.push(v);
-                    yield { animate: animator => animator.colorVertex(v, 'blue') };
+                    yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(u, v, 'red', g.directed) };
                     visited[v] = true;
                 }
             }

@@ -1,10 +1,11 @@
 import cytoscape from 'cytoscape';
 import { wait } from './AsyncHelper';
 import { AlgorithmStep } from './algorithms/GraphAlgorithm';
+import { KEYWORD } from 'color-convert/conversions';
 
 export default class GraphAnimator
 {
-    private _cytoscape: cytoscape.Core;
+    private _cy: cytoscape.Core;
 
     private _delay: number = 500;
 
@@ -12,28 +13,36 @@ export default class GraphAnimator
 
     public constructor(cy: cytoscape.Core)
     {
-        this._cytoscape = cy;
+        this._cy = cy;
     }
 
-    public resetAll(): void
+    public resetAll(): GraphAnimator
     {
         this._stop = false;
-        this._cytoscape.elements().style({ 'color': 'black', 'border-color': 'black', 'border-width': 1 });
+        this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
+        return this;
     }
 
-    public colorVertex(vertex: number, color: string): void
+    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cytoscape.$id(vertex.toString()).style({ color, 'border-color': color, 'border-width': 2 });
+        this._cy.$id(vertex.toString()).style({ color, 'border-color': color, 'border-width': 2 }).attr('marked', color);
+        return this;
     }
 
-    public colorEdge(edge: number, color: string): void
+    public colorEdge(u: number, v: number, color: KEYWORD, directed: boolean, prevColor: KEYWORD = 'black'): GraphAnimator
     {
-        this._cytoscape.$id(edge.toString()).animate({ style: { color, 'border-color': color } }, { duration: 200 });
+        const source = this._cy.$id(u.toString());
+        const target = this._cy.$id(v.toString());
+
+        const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).filter(e => prevColor === 'black' || e.data('marked') === prevColor).first();
+        edge.style({ 'line-color': color, 'line-outline-width': 1, 'line-outline-color': color }).attr('marked', color);
+        return this;
     }
 
-    public stop(): void
+    public stop(): GraphAnimator
     {
         this._stop = true;
+        return this;
     }
 
     public async run(steps: IterableIterator<AlgorithmStep>): Promise<void>
@@ -41,7 +50,6 @@ export default class GraphAnimator
         this.resetAll();
         for (const step of steps)
         {
-            console.log(this);
             if (this._stop)
             {
                 return;

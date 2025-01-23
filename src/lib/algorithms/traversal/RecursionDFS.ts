@@ -1,6 +1,6 @@
-import UnweightedGraph from '../../graphs/unweighted/UnweightedGraph';
+import Graph from '../../graphs/Graph';
 import { AlgorithmStep } from '../GraphAlgorithm';
-import TraversalAlgorithm, { TraversalConfig } from './TraversalAlgorithm';
+import TraversalAlgorithm from './TraversalAlgorithm';
 
 export default class RecursionDFS extends TraversalAlgorithm
 {
@@ -9,34 +9,19 @@ export default class RecursionDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng đệ quy';
     }
 
-    *run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
+    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
-        const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
+        visited[startVertex] = true;
+        yield { animate: animator => animator.colorVertex(startVertex, 'red') };
 
-        function *dfs(u: number): IterableIterator<AlgorithmStep>
+        const neighbors = g.neighbors(startVertex);
+
+        for (const v of neighbors)
         {
-            visited[u] = true;
-            yield { animate: animator => animator.colorVertex(u, 'red') };
-
-            const neighbors = g.neighbors(u);
-
-            for (const v of neighbors)
+            if (!visited[v])
             {
-                if (!visited[v])
-                {
-                    yield { animate: animator => animator.colorVertex(v, 'blue') };
-                    yield* dfs(v);
-                }
-            }
-        }
-
-        yield* dfs(config.startVertex);
-
-        for (let u = 1; u <= g.vertexCount; u++)
-        {
-            if (!visited[u])
-            {
-                yield* dfs(u);
+                yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(startVertex, v, 'red', g.directed) };
+                yield* this._traverse(g, v, visited);
             }
         }
     }

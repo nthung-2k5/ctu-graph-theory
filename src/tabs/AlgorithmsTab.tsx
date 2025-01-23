@@ -72,12 +72,6 @@ export default function AlgorithmsTab() {
         }
     }
 
-    // const cancel = () =>
-    // {
-    //     animator.current.stop();
-    //     setAnimating(false);
-    // }
-
     const runProps: ButtonProps = {
         htmlType: 'submit',
         disabled: !graph.vertexCount,

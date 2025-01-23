@@ -1,7 +1,7 @@
 import { Queue } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import Graph from '../../graphs/Graph';
-import TraversalAlgorithm, { TraversalConfig } from './TraversalAlgorithm';
+import TraversalAlgorithm from './TraversalAlgorithm';
 
 export default class BFS extends TraversalAlgorithm
 {
@@ -10,13 +10,12 @@ export default class BFS extends TraversalAlgorithm
         return 'Duyệt theo chiều rộng (BFS)';
     }
 
-    *run(g: Graph, config: TraversalConfig): IterableIterator<AlgorithmStep>
+    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         const queue: Queue<number> = new Queue<number>();
-        const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
 
-        queue.push(config.startVertex);
-        visited[config.startVertex] = true;
+        queue.push(startVertex);
+        visited[startVertex] = true;
         
         while (!queue.isEmpty())
         {
@@ -30,7 +29,7 @@ export default class BFS extends TraversalAlgorithm
                 if (!visited[v])
                 {
                     queue.push(v);
-                    yield { animate: animator => animator.colorVertex(v, 'blue') };
+                    yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(u, v, 'red', g.directed) };
                     visited[v] = true;
                 }
             }
