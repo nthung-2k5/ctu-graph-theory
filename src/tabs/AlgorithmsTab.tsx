@@ -4,15 +4,18 @@ import BFS from '../lib/algorithms/traversal/BFS';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
 import RecursionDFS from '../lib/algorithms/traversal/RecursionDFS';
 import StackDFS from '../lib/algorithms/traversal/StackDFS';
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, useMemo, useState } from 'react';
 import { GraphAlgorithm } from '../lib/algorithms/GraphAlgorithm';
 import Title from 'antd/es/typography/Title';
+import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
+import Cycle from '../lib/algorithms/Cycle';
+import Bipartite from '../lib/algorithms/Bipartite';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
     'Duyệt theo chiều sâu (DFS) bằng đệ quy',
     'Duyệt theo chiều sâu (DFS) bằng ngăn xếp',
-    'Kiểm tra đồ thị liên thông',
+    'Kiểm tra đồ thị vô hướng liên thông',
     'Kiểm tra đồ thị chứa chu trình',
     'Kiểm tra đồ thị phân đôi',
     'Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)',
@@ -29,7 +32,10 @@ const algorithms = [
 const algos = [
     new BFS(),
     new RecursionDFS(),
-    new StackDFS()
+    new StackDFS(),
+    new UndirectedConnected(),
+    new Cycle(),
+    new Bipartite(),
 ];
 
 const InvalidMessage = (props: PropsWithChildren) =>
@@ -44,7 +50,8 @@ const InvalidMessage = (props: PropsWithChildren) =>
     )
 }
 
-export default function AlgorithmsTab() {
+export default function AlgorithmsTab()
+{
     const { graph, animator, animating, setAnimating } = useGraph();
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const [form] = Form.useForm();
@@ -55,6 +62,8 @@ export default function AlgorithmsTab() {
             label: (<button type='button' onClick={() => setAlgorithm(algo)}>{`${index + 1}. ${algo.name}`}</button>)
         }
     ));
+
+    const error = useMemo(() => algorithm.predicateCheck(graph), [algorithm, graph]);
 
     const animate = async (values: object) =>
     {
@@ -74,7 +83,7 @@ export default function AlgorithmsTab() {
 
     const runProps: ButtonProps = {
         htmlType: 'submit',
-        disabled: !graph.vertexCount,
+        disabled: !graph.vertexCount || !error.valid,
         children: 'Chạy',
     };
 
@@ -114,7 +123,7 @@ export default function AlgorithmsTab() {
                     <Form layout='vertical' disabled={animating} form={form} onFinish={animate} className='flex-grow w-full h-full flex flex-col'>
                         <div className='flex-grow'>
                             <Title level={5}>{algorithm.name}</Title>
-                            {graph.vertexCount > 0 ? algorithm.configNode(graph) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
+                            {graph.vertexCount > 0 ? (error.valid ? algorithm.configNode(graph) : error.errors?.map((err) => <InvalidMessage>{err}</InvalidMessage>)) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
                         </div>
                         <Button block type='primary' {...(animating ? stopProps : runProps)} />
                     </Form>

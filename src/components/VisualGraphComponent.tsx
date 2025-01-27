@@ -13,7 +13,7 @@ cytoscape.use(automove);
 
 export default function VisualGraphComponent() 
 {
-    const { graph, animator, animating } = useGraph();
+    const { graph, animator } = useGraph();
     const cy = useRef<cytoscape.Core | null>(null);
     const elements = useMemo(() => graph.toGraph(), [graph]);
 
@@ -21,9 +21,13 @@ export default function VisualGraphComponent()
     {
         cy.current = cyCore;
 
-        // ???
-        if (animating) return;
-        animator.current = new GraphAnimator(cy.current!);
+        if (animator.current === null)
+        {
+            animator.current = new GraphAnimator(cy.current!);
+            return;
+        }
+
+        animator.current.setCytoscape(cy.current!);
     };
 
     useEffect(() =>
@@ -33,21 +37,27 @@ export default function VisualGraphComponent()
             if (e.target === null) return;
             if (e.target === cy.current) return;
             e.cy.startBatch();
+
             const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
+            const edgesAndVertices = sel.outgoers();
+            if (!graph.directed) edgesAndVertices.add(sel.incomers());
             
-            (graph.directed ? sel.outgoers() : sel.connectedEdges()).addClass('highlight');
+            edgesAndVertices.addClass('highlight');
             e.cy.endBatch();
         }).on('mouseout', 'node', (e) =>
         {
             if (e.target === null) return;
             if (e.target === cy.current) return;
             e.cy.startBatch();
-            const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
 
-            (graph.directed ? sel.outgoers() : sel.connectedEdges()).removeClass('highlight');
+            const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
+            const edgesAndVertices = sel.outgoers();
+            if (!graph.directed) edgesAndVertices.add(sel.incomers());
+            
+            edgesAndVertices.removeClass('highlight');
             e.cy.endBatch();
         });
-    }, [graph.directed]);
+    }, [graph]);
 
     useEffect(() => 
     {

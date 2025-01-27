@@ -16,6 +16,12 @@ export default class GraphAnimator
         this._cy = cy;
     }
 
+    public setCytoscape(cy: cytoscape.Core): GraphAnimator
+    {
+        this._cy = cy;
+        return this;
+    }
+
     public resetAll(): GraphAnimator
     {
         this._stop = false;
@@ -50,10 +56,8 @@ export default class GraphAnimator
         this.resetAll();
         for (const step of steps)
         {
-            if (this._stop)
-            {
-                return;
-            }
+            if (this._stop) return;
+
             step.animate(this);
             await wait(this._delay);
         }

@@ -31,6 +31,7 @@ export interface AlgorithmStep
     animate: (animator: GraphAnimator) => void;
 }
 
+export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';
 export const MustBeDirectedError = 'Đồ thị phải là đồ thị có hướng';
 export const MustBeDAGError = 'Đồ thị phải là đồ thị không chu trình có hướng';
 export const MustBeWeightedError = 'Đồ thị phải là đồ thị có trọng số';
