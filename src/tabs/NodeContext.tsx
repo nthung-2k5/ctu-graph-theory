@@ -25,13 +25,36 @@ export const NodeProvider = ({ children }: any) => {
 
   const downloadPNG = () => {
     if (cy.current) {
-      const pngData = cy.current.png();  // Lấy dữ liệu PNG từ Cytoscape
-      const link = document.createElement('a');
-      link.href = pngData;
-      link.download = 'graph.png';  // Đặt tên file tải về
-      link.click();  // Mô phỏng click để tải xuống
+      const pngData = cy.current.png({ full: true }); // Lấy PNG từ Cytoscape
+      const img = new Image();
+      img.src = pngData;
+  
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width + 100; // 100px = padding: 100px
+        canvas.height = img.height + 100;
+  
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Vẽ background màu trắng
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+          // Vẽ ảnh Cytoscape lên canvas, ảnh này được vẽ ra chính giữa nên công thức phức tạp 
+          const x = (canvas.width - img.width) / 2;
+          const y = (canvas.height - img.height) / 2;
+          ctx.drawImage(img, x, y);
+  
+          // Tạo link tải xuống
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = 'graph_with_background.png';
+          link.click();
+        }
+      };
     }
   };
+  
 
   return (
     <NodeContext.Provider
