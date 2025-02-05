@@ -1,10 +1,12 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 
 interface NodeContextType {
   nodeColor: string;
   edgeColor: string;
   nodeRadius: number;
   edgeLength: number;
+  cy: any;
+  downloadPNG: () => void;
   setNodeColor: (color: string) => void;
   setEdgeColor: (color: string) => void;
   setNodeRadius: (radius: number) => void;
@@ -19,6 +21,18 @@ export const NodeProvider = ({ children }: any) => {
   const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
   const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
 
+  const cy = useRef<cytoscape.Core | null>(null);
+
+  const downloadPNG = () => {
+    if (cy.current) {
+      const pngData = cy.current.png();  // Lấy dữ liệu PNG từ Cytoscape
+      const link = document.createElement('a');
+      link.href = pngData;
+      link.download = 'graph.png';  // Đặt tên file tải về
+      link.click();  // Mô phỏng click để tải xuống
+    }
+  };
+
   return (
     <NodeContext.Provider
       value={{
@@ -29,20 +43,14 @@ export const NodeProvider = ({ children }: any) => {
         nodeRadius,
         setNodeRadius,
         edgeLength,
-        setEdgeLength
+        setEdgeLength,
+        cy,
+        downloadPNG
       }}
     >
       {children}
     </NodeContext.Provider>
   );
-};
-
-export const useColor = () => {
-  const context = useContext(NodeContext);
-  if (!context) {
-    throw new Error("Nên dùng useColor trong NodeProvider");
-  }
-  return context;
 };
 
 export const useNode = () => {
@@ -51,4 +59,4 @@ export const useNode = () => {
     throw new Error("Nên dùng useNode trong NodeProvider");
   }
   return context;
-}
+};

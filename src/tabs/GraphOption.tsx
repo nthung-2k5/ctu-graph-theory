@@ -2,11 +2,20 @@ import "../index.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "antd";
-import { useColor, useNode } from "./NodeContext";
+import { useNode } from "./NodeContext";
 
 export default function GraphOption() {
-  const { nodeColor, edgeColor, setNodeColor, setEdgeColor } = useColor();
-  const { nodeRadius, setNodeRadius, edgeLength, setEdgeLength } = useNode();
+  const { 
+    nodeColor, 
+    edgeColor,
+    setNodeColor,
+    setEdgeColor,
+    nodeRadius,
+    setNodeRadius,
+    edgeLength,
+    setEdgeLength,
+    downloadPNG
+  } = useNode();
 
   const handleNodeColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const color = e.target.value;
@@ -109,7 +118,7 @@ export default function GraphOption() {
             </select>
           </Col>
         </Row>
-        <button className="option-button">Tải xuống dưới dạng PNG</button>
+        <button className="option-button" onClick={downloadPNG}>Tải xuống dưới dạng PNG</button>
       </div>
     </>
   );
