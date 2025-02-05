@@ -25,3 +25,45 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
+
+.option-text {
+  color: #000;
+  font-size: 16px;
+}
+
+.option-icon {
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.option-input-number,
+.option-input-select {
+  border-width: 1px;
+  border-radius: 4px;
+  padding-left: 4px;
+  width: 100px;
+  height: 30px;
+  display: block;
+  margin: auto;
+}
+
+.option-input-select {
+  padding: 0;
+}
+
+.option-button {
+  color: #fff;
+  background-color: #1f5ca9;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: block;
+  margin: auto;
+  margin-top: 30px;
+  transition: .3s;
+}
+
+.option-button:hover {
+  opacity: .8;
+  transition: .3s;
+}

@@ -9,6 +9,7 @@ import GraphDisplayTab from './tabs/GraphDisplayTab';
 import EdgeList from './lib/graphs/unweighted/EdgeList';
 import Graph from './lib/graphs/Graph';
 import GraphAnimator from './lib/GraphAnimator';
+import { NodeProvider } from './tabs/NodeContext';
 
 export default function App() 
 {
@@ -25,23 +26,25 @@ export default function App()
     }
 
     return (
-        <div className='flex flex-col h-screen pb-4'>
-            <div className='p-2 border-b flex items-end h-[10vh]'>
-                <CTULogo className='h-[7vh] my-auto w-auto' />
+        <NodeProvider>
+            <div className='flex flex-col h-screen pb-4'>
+                <div className='p-2 border-b flex items-end h-[10vh]'>
+                    <CTULogo className='h-[7vh] my-auto w-auto' />
+                </div>
+                <GraphContext.Provider value={{ graph, setGraph: setGraphIfNeq, animator, animating, setAnimating }}>
+                    <Row className='max-h-[calc(90vh-1rem)]  h-[calc(90vh-1rem)] mx-4'>
+                        <Col span={5} className='flex h-full'>
+                            <GraphInputTab/>
+                        </Col>
+                        <Col span={11} className='flex h-full px-4'>
+                            <GraphDisplayTab/>
+                        </Col>
+                        <Col span={8} className='flex h-full'>
+                            <AlgorithmsTab/>
+                        </Col>
+                    </Row>
+                </GraphContext.Provider>
             </div>
-            <GraphContext.Provider value={{ graph, setGraph: setGraphIfNeq, animator, animating, setAnimating }}>
-                <Row className='max-h-[calc(90vh-1rem)]  h-[calc(90vh-1rem)] mx-4'>
-                    <Col span={6} className='flex h-full'>
-                        <GraphInputTab/>
-                    </Col>
-                    <Col span={10} className='flex h-full px-4'>
-                        <GraphDisplayTab/>
-                    </Col>
-                    <Col span={8} className='flex h-full'>
-                        <AlgorithmsTab/>
-                    </Col>
-                </Row>
-            </GraphContext.Provider>
-        </div>
+        </NodeProvider>
     )
 }

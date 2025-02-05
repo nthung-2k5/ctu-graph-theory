@@ -7,68 +7,105 @@ import cola from 'cytoscape-cola';
 // @ts-expect-error Made for Javascript version so no type
 import automove from 'cytoscape-automove';
 import GraphAnimator from '../lib/GraphAnimator';
+import { useColor, useNode } from '../tabs/NodeContext';
 
 cytoscape.use(cola);
 cytoscape.use(automove);
 
-export default function VisualGraphComponent() 
-{
+export default function VisualGraphComponent() {
     const { graph, animator } = useGraph();
     const cy = useRef<cytoscape.Core | null>(null);
     const elements = useMemo(() => graph.toGraph(), [graph]);
 
-    const assignCytoscape = (cyCore: cytoscape.Core) =>
-    {
+    const { nodeColor, edgeColor } = useColor();
+    const { nodeRadius, edgeLength } = useNode();
+
+    const assignCytoscape = (cyCore: cytoscape.Core) => {
         cy.current = cyCore;
 
-        if (animator.current === null)
-        {
+        if (animator.current === null) {
             animator.current = new GraphAnimator(cy.current!);
-            return;
+        } else {
+            animator.current.setCytoscape(cy.current!);
         }
-
-        animator.current.setCytoscape(cy.current!);
     };
 
-    useEffect(() =>
-    {
-        cy.current?.on('mouseover', 'node', (e) =>
-        {
-            if (e.target === null) return;
-            if (e.target === cy.current) return;
+    const updateGraphStyle = () => {
+        if (!cy.current) return;
+
+        cy.current.style()
+            .selector('node')
+            .style({
+                'background-color': nodeColor === 'Màu đen' ? '#fff' : nodeColor === 'Màu đỏ' ? '#f00' : nodeColor === 'Màu cam' ? '#FFA500' : nodeColor === 'Màu hồng' ? '#FFC0CB' : '#00f',
+                'width': nodeRadius,
+                'height': nodeRadius
+            })
+            .selector('edge')
+            .style({
+                'line-color': edgeColor === 'Màu đen' ? '#000' : edgeColor === 'Màu đỏ' ? '#f00' : edgeColor === 'Màu cam' ? '#FFA500' : edgeColor === 'Màu hồng' ? '#FFC0CB' : '#00f',
+                'curve-style': 'bezier',
+                'control-point-distance': edgeLength
+            })
+            .update();
+    };
+    
+    // Cập nhật lại màu mỗi khi nút bị thay đổi, 
+    // Tao đéo ngờ là tao có thể sửa được nó
+    // If you read this... -> You gay
+    // If you gay ... -> You gay!
+    useEffect(() => {
+        updateGraphStyle();  
+    }, [nodeColor, edgeColor, nodeRadius, edgeLength]);
+
+    useEffect(() => {
+        cy.current?.on('mouseover', 'node', (e) => {
+            const target = e.target as cytoscape.NodeSingular;
+            if (!target) return;
+
             e.cy.startBatch();
 
-            const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
+            const sel = target.addClass('highlight');
             const edgesAndVertices = sel.outgoers();
             if (!graph.directed) edgesAndVertices.add(sel.incomers());
-            
+
             edgesAndVertices.addClass('highlight');
             e.cy.endBatch();
-        }).on('mouseout', 'node', (e) =>
-        {
-            if (e.target === null) return;
-            if (e.target === cy.current) return;
+        }).on('mouseout', 'node', (e) => {
+            const target = e.target as cytoscape.NodeSingular;
+            if (!target) return;
+
             e.cy.startBatch();
 
-            const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
+            const sel = target.removeClass('highlight');
             const edgesAndVertices = sel.outgoers();
             if (!graph.directed) edgesAndVertices.add(sel.incomers());
-            
+
             edgesAndVertices.removeClass('highlight');
             e.cy.endBatch();
         });
     }, [graph]);
 
-    useEffect(() => 
-    {
-        // @ts-expect-error Made for Javascript version so no type
-        cy.current?.automove({ nodesMatching: () => true, reposition: 'viewport' });
-        // @ts-expect-error Made for Javascript version so no type
-        cy.current?.layout({ name: 'cola', infinite: true }).run();
+    useEffect(() => {
+        // Layout và Automove sau khi cập nhật elements
+        if (cy.current) {
+            // @ts-expect-error Made for Javascript version so no type
+            cy.current.automove({ nodesMatching: () => true, reposition: 'viewport' });
+            // @ts-expect-error Made for Javascript version so no type
+            cy.current.layout({ name: 'cola', infinite: true }).run();
+        }
     }, [elements]);
 
     return (
-        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={assignCytoscape} zoomingEnabled={false} boxSelectionEnabled={false} />
+        <>
+            <CytoscapeComponent
+                className='my-auto border-2 border-black rounded h-full'
+                elements={elements}
+                stylesheet={DefaultGraphStyle}
+                cy={assignCytoscape}
+                zoomingEnabled={false}
+                boxSelectionEnabled={false}
+            />
+        </>
     );
 }
 
@@ -106,6 +143,8 @@ const DefaultGraphStyle: Stylesheet[] = [
         style: {
             "border-width": 2,
             "line-outline-width": 1,
+            // "background-color": "#FF0",
+            // "line-color": "#FF0",
         }
     }
 ];

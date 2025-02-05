@@ -1,4 +1,12 @@
-import { Button, ButtonProps, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
+import {
+    Button,
+    ButtonProps,
+    Dropdown,
+    Form,
+    Space,
+    Tabs,
+    TabsProps,
+} from 'antd';
 import { useGraph } from '../lib/GraphContext';
 import BFS from '../lib/algorithms/traversal/BFS';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
@@ -38,48 +46,46 @@ const algos = [
     new Bipartite(),
 ];
 
-const InvalidMessage = (props: PropsWithChildren) =>
-{
+const InvalidMessage = (props: PropsWithChildren) => {
     return (
-        <div className='text-[red]'>
-            <CloseCircleOutlined className='me-2' />
-            <span>
-                {props.children}
-            </span>
+        <div className="text-[red]">
+            <CloseCircleOutlined className="me-2" />
+            <span>{props.children}</span>
         </div>
-    )
-}
+    );
+};
 
-export default function AlgorithmsTab()
-{
+export default function AlgorithmsTab() {
     const { graph, animator, animating, setAnimating } = useGraph();
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const [form] = Form.useForm();
 
-    const items = algos.map((algo, index) => (
-        {
-            key: index,
-            label: (<button type='button' onClick={() => setAlgorithm(algo)}>{`${index + 1}. ${algo.name}`}</button>)
-        }
-    ));
+    const items = algos.map((algo, index) => ({
+        key: index,
+        label: (
+            <button
+                type="button"
+                onClick={() => setAlgorithm(algo)}
+            >{`${index + 1}. ${algo.name}`}</button>
+        ),
+    }));
 
-    const error = useMemo(() => algorithm.predicateCheck(graph), [algorithm, graph]);
+    const error = useMemo(
+        () => algorithm.predicateCheck(graph),
+        [algorithm, graph],
+    );
 
-    const animate = async (values: object) =>
-    {
-        if (animating)
-        {
+    const animate = async (values: object) => {
+        if (animating) {
             animator.current.stop();
             setAnimating(false);
-        }
-        else
-        {
+        } else {
             const result = algorithm.run(graph, values);
             setAnimating(true);
             await animator.current.run(result);
             setAnimating(false);
         }
-    }
+    };
 
     const runProps: ButtonProps = {
         htmlType: 'submit',
@@ -109,9 +115,13 @@ export default function AlgorithmsTab()
             //     </div>,
             // }))} expandIconPosition='end' className='h-full scrollbar-thin overflow-y-auto'/>
             children: (
-                <div className='h-full flex flex-col'>
+                <div className="h-full flex flex-col">
                     <div>
-                        <Dropdown trigger={['click']} disabled={animating} menu={{ items }}>
+                        <Dropdown
+                            trigger={['click']}
+                            disabled={animating}
+                            menu={{ items }}
+                        >
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
                                     Chọn thuật toán
@@ -120,15 +130,37 @@ export default function AlgorithmsTab()
                             </a>
                         </Dropdown>
                     </div>
-                    <Form layout='vertical' disabled={animating} form={form} onFinish={animate} className='flex-grow w-full h-full flex flex-col'>
-                        <div className='flex-grow'>
+                    <Form
+                        layout="vertical"
+                        disabled={animating}
+                        form={form}
+                        onFinish={animate}
+                        className="flex-grow w-full h-full flex flex-col"
+                    >
+                        <div className="flex-grow">
                             <Title level={5}>{algorithm.name}</Title>
-                            {graph.vertexCount > 0 ? (error.valid ? algorithm.configNode(graph) : error.errors?.map((err) => <InvalidMessage>{err}</InvalidMessage>)) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
+                            {graph.vertexCount > 0 ? (
+                                error.valid ? (
+                                    algorithm.configNode(graph)
+                                ) : (
+                                    error.errors?.map((err) => (
+                                        <InvalidMessage>{err}</InvalidMessage>
+                                    ))
+                                )
+                            ) : (
+                                <InvalidMessage>
+                                    Đồ thị không được rỗng
+                                </InvalidMessage>
+                            )}
                         </div>
-                        <Button block type='primary' {...(animating ? stopProps : runProps)} />
+                        <Button
+                            block
+                            type="primary"
+                            {...(animating ? stopProps : runProps)}
+                        />
                     </Form>
                 </div>
-            )
+            ),
             // children: <Button onClick={async () =>
             // {
             //     const result = new BFS().run(graph as UnweightedGraph);
@@ -137,7 +169,5 @@ export default function AlgorithmsTab()
         },
     ];
 
-    return (
-        <Tabs items={tabs} className='expanded-tabs' />
-    );
+    return <Tabs items={tabs} className="expanded-tabs" />;
 }
