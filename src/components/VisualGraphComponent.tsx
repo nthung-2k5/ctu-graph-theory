@@ -9,6 +9,9 @@ import automove from 'cytoscape-automove';
 import GraphAnimator from '../lib/GraphAnimator';
 import { useColor, useNode } from '../tabs/NodeContext';
 
+// Khắc phục lag, giới hạn số lần re-render lại theo thời gian khi cập nhật độ dài cạnh 
+import debounce from 'lodash.debounce'; 
+
 cytoscape.use(cola);
 cytoscape.use(automove);
 
@@ -38,13 +41,12 @@ export default function VisualGraphComponent() {
             .style({
                 'background-color': nodeColor === 'Màu đen' ? '#fff' : nodeColor === 'Màu đỏ' ? '#f00' : nodeColor === 'Màu cam' ? '#FFA500' : nodeColor === 'Màu hồng' ? '#FFC0CB' : '#00f',
                 'width': nodeRadius,
-                'height': nodeRadius
+                'height': nodeRadius,
             })
             .selector('edge')
             .style({
                 'line-color': edgeColor === 'Màu đen' ? '#000' : edgeColor === 'Màu đỏ' ? '#f00' : edgeColor === 'Màu cam' ? '#FFA500' : edgeColor === 'Màu hồng' ? '#FFC0CB' : '#00f',
-                'curve-style': 'bezier',
-                'control-point-distance': edgeLength
+                'curve-style': 'bezier'
             })
             .update();
     };
@@ -55,7 +57,7 @@ export default function VisualGraphComponent() {
     // If you gay ... -> You gay!
     useEffect(() => {
         updateGraphStyle();  
-    }, [nodeColor, edgeColor, nodeRadius, edgeLength]);
+    }, [nodeColor, edgeColor, nodeRadius]);
 
     useEffect(() => {
         cy.current?.on('mouseover', 'node', (e) => {
@@ -86,14 +88,26 @@ export default function VisualGraphComponent() {
     }, [graph]);
 
     useEffect(() => {
-        // Layout và Automove sau khi cập nhật elements
         if (cy.current) {
-            // @ts-expect-error Made for Javascript version so no type
-            cy.current.automove({ nodesMatching: () => true, reposition: 'viewport' });
-            // @ts-expect-error Made for Javascript version so no type
-            cy.current.layout({ name: 'cola', infinite: true }).run();
+            if (cy.current) {
+                const updateLayout = debounce(() => {
+                    cy.current?.layout({ 
+                        name: 'cola', 
+                        // @ts-ignore
+                        edgeLength: edgeLength, 
+                        infinite: true
+                    }).run();
+                }, 100);
+        
+                updateLayout();
+        
+                // Clean up function
+                return () => {
+                    updateLayout.cancel();
+                };
+            }
         }
-    }, [elements]);
+    }, [elements, edgeLength]);
 
     return (
         <>

@@ -17,7 +17,7 @@ export const NodeProvider = ({ children }: any) => {
   const [nodeColor, setNodeColor] = useState("Màu đen"); // Màu nút
   const [edgeColor, setEdgeColor] = useState("Màu đen"); // Màu cạnh
   const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
-  const [edgeLength, setEdgeLength] = useState(50); // Độ dài cạnh
+  const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
 
   return (
     <NodeContext.Provider

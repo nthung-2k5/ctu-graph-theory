@@ -59,8 +59,8 @@ export default function GraphOption() {
           <Col span={12} className="flex items-center justify-center">
             <input
               type="range"
-              min="20"
-              max="60"
+              min="50"
+              max="250"
               value={edgeLength}
               onChange={(e) => setEdgeLength(Number(e.target.value))}
               style={{width: "100px"}}
