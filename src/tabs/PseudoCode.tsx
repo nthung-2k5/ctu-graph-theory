@@ -5,14 +5,6 @@ const PseudoCode: React.FC = () => {
 
   const bfsPseudocode = `
     function BFS(đồ_thị, đỉnh_bắt_đầu):
-      1. Tạo một hàng đợi và thêm đỉnh_bắt_đầu vào hàng đợi
-      2. Tạo một tập hợp để theo dõi các đỉnh đã duyệt
-      3. Đánh dấu đỉnh_bắt_đầu là đã duyệt
-      4. Trong khi hàng đợi không rỗng:
-          a. Lấy một đỉnh ra khỏi hàng đợi
-          b. Xử lý đỉnh đó (ví dụ: in ra)
-          c. Thêm tất cả các đỉnh kề chưa duyệt vào hàng đợi
-          d. Đánh dấu từng đỉnh kề là đã duyệt
   `;
 
   // const toggleVisibility = () => setIsHidden(!isHidden);
