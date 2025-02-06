@@ -1,4 +1,5 @@
 // import React, { useState } from "react";
+import { stackDfsPseudoCode } from '../lib/algorithms/traversal/RecursionDFS';
 
 const PseudoCode: React.FC = () => {
   // const [isHidden, setIsHidden] = useState(false);
@@ -11,49 +12,31 @@ const PseudoCode: React.FC = () => {
 
   return (
     <>
-      <div
-        style={{
-          border: "1px solid #E5E7EB",
-          borderRadius: "8px",
-          padding: "16px",
-          backgroundColor: "#fff",
-          fontFamily: "monospace",
-          whiteSpace: "pre-wrap",
-          width: "100%",
-          height: "100%",
-          transition: "transform 0.5s ease", 
-          // transform: isHidden ? "translateX(-100%)" : "translateX(0)",
-        }}
-      >
-        <h3
-          style={{
-            textAlign: "center",
-            fontSize: "20px",
-            fontWeight: "600",
-            color: "#1F5CA9",
-          }}
-        >
-          Mã giả thuật toán BFS
-        </h3>
-        <p>{bfsPseudocode}</p>
+      <div className="pseudoComponent">
+        <div className="comment">
+          Vertex 0 is explored, we have a bidirectional edge (a trivial cycle).
+        </div>
+
+        <hr style={{margin: "8px 0px"}} />
+
+        <div className="pseudoCodeContainer">
+          {stackDfsPseudoCode.map((data, index) => {
+            return (
+              <p 
+                className="pseudoCodeText"
+                style={{ marginLeft: `${data.tab * 18}px` }}
+                key={index}
+              >
+                {data.text}
+              </p>
+            );
+          })}
+          <p>.</p>
+          <p>.</p>
+          <p>.</p>
+          <p>.</p>
+        </div>
       </div>
-      {/* <button
-        onClick={toggleVisibility}
-        style={{
-          position: "fixed",
-          left: "16px",
-          bottom: "16px",
-          padding: "8px 16px",
-          backgroundColor: "#1F5CA9",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          zIndex: 1000,
-        }}
-      >
-        {isHidden ? "Hiện mã giả" : "Ẩn mã giả"}
-      </button> */}
     </>
   );
 };

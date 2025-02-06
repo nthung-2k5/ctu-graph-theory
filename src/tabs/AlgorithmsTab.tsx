@@ -18,6 +18,7 @@ import Title from 'antd/es/typography/Title';
 import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
 import Cycle from '../lib/algorithms/Cycle';
 import Bipartite from '../lib/algorithms/Bipartite';
+import PseudoCode from './PseudoCode';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
@@ -135,9 +136,10 @@ export default function AlgorithmsTab() {
                         disabled={animating}
                         form={form}
                         onFinish={animate}
-                        className="flex-grow w-full h-full flex flex-col"
+                        className="w-full h-full flex flex-col justify-start"
+                        style={{overflowY: "scroll", paddingRight: "8px"}}
                     >
-                        <div className="flex-grow">
+                        <div>
                             <Title level={5}>{algorithm.name}</Title>
                             {graph.vertexCount > 0 ? (
                                 error.valid ? (
@@ -153,6 +155,8 @@ export default function AlgorithmsTab() {
                                 </InvalidMessage>
                             )}
                         </div>
+                        {/* Mã giả */}
+                        <PseudoCode/>
                         <Button
                             block
                             type="primary"

@@ -8,7 +8,7 @@ import GraphParser from "../lib/GraphParser";
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
 import "prism-react-editor/search.css";
-import PseudoCode from "./PseudoCode";
+// import PseudoCode from "./PseudoCode";
 import GraphOption from "./GraphOption";
 
 export default function GraphInputTab() {
@@ -71,11 +71,11 @@ export default function GraphInputTab() {
             </div>
           ),
         },
-        {
-          key: "2",
-          label: "Mã giã",
-          children: <PseudoCode />,
-        },
+        // {
+        //   key: "2",
+        //   label: "Mã giã",
+        //   children: <PseudoCode />,
+        // },
       ]}
       className="expanded-tabs"
     />

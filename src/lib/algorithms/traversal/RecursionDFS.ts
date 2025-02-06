@@ -2,6 +2,14 @@ import Graph from '../../graphs/Graph';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 
+export const stackDfsPseudoCode = [
+    {text: 'DFS(u)', tab: 0},
+    {text: 'In đỉnh u', tab: 0},
+    {text: 'Đánh dấu u đã được duyệt', tab: 0},
+    {text: 'Với mỗi đỉnh kề v của u:', tab: 0},
+    {text: 'Nếu v chưa duyệt, gọi DFS(v)', tab: 1}
+];
+
 export default class RecursionDFS extends TraversalAlgorithm
 {
     public get name()

@@ -3,6 +3,10 @@ import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 import Graph from '../../graphs/Graph';
 
+export const stackDfsPseudoCode = [
+    
+];
+
 export default class StackDFS extends TraversalAlgorithm
 {
     public get name()
