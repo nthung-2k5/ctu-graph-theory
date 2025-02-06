@@ -39,24 +39,14 @@ export default function VisualGraphComponent() {
       .style()
       .selector("node")
       .style({
-        "background-color":
-          nodeColor === "Màu đen"
-            ? "#fff" : nodeColor === "Màu đỏ"
-            ? "#f00" : nodeColor === "Màu cam"
-            ? "#FFA500" : nodeColor === "Màu hồng"
-            ? "#FFC0CB" : "#00f",
+        backgroundColor: nodeColor,
         width: nodeRadius,
         height: nodeRadius,
       })
       .selector("edge")
       .style({
-        "line-color":
-          edgeColor === "Màu đen"
-            ? "#000" : edgeColor === "Màu đỏ"
-            ? "#f00" : edgeColor === "Màu cam"
-            ? "#FFA500" : edgeColor === "Màu hồng"
-            ? "#FFC0CB" : "#00f",
-        "curve-style": "bezier",
+        lineColor: edgeColor,
+        curveStyle: "bezier",
       })
       .update();
   };

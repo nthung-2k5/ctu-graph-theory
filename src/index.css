@@ -37,7 +37,7 @@ html, body {
 }
 
 .option-input-number,
-.option-input-select {
+.option-input-color {
   border-width: 1px;
   border-radius: 4px;
   padding-left: 4px;
@@ -47,7 +47,7 @@ html, body {
   margin: auto;
 }
 
-.option-input-select {
+.option-input-color {
   padding: 0;
 }
 

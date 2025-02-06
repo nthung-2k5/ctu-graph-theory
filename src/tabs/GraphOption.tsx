@@ -17,12 +17,12 @@ export default function GraphOption() {
     downloadPNG
   } = useNode();
 
-  const handleNodeColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleNodeColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const color = e.target.value;
     setNodeColor(color);
   };
 
-  const handleEdgeColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleEdgeColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const color = e.target.value;
     setEdgeColor(color);
   };
@@ -84,7 +84,7 @@ export default function GraphOption() {
             </p>
           </Col>
           <Col span={12}>
-            <select
+            {/* <select
               className="option-input-select"
               value={nodeColor}
               onChange={handleNodeColorChange}
@@ -94,7 +94,14 @@ export default function GraphOption() {
               <option value="Màu cam">Màu cam</option>
               <option value="Màu hồng">Màu hồng</option>
               <option value="Màu xanh">Màu xanh</option>
-            </select>
+            </select> */}
+            <input
+              type="color"
+              name="color-node"
+              className="option-input-color"
+              value={nodeColor}
+              onChange={handleNodeColorChange}
+            ></input>
           </Col>
         </Row>
         <Row className="mb-[10px]">
@@ -105,7 +112,7 @@ export default function GraphOption() {
             </p>
           </Col>
           <Col span={12}>
-            <select
+            {/* <select
               className="option-input-select"
               value={edgeColor}
               onChange={handleEdgeColorChange}
@@ -115,7 +122,14 @@ export default function GraphOption() {
               <option value="Màu cam">Màu cam</option>
               <option value="Màu hồng">Màu hồng</option>
               <option value="Màu xanh">Màu xanh</option>
-            </select>
+            </select> */}
+            <input
+              type="color"
+              name="color-edge"
+              className="option-input-color"
+              value={edgeColor}
+              onChange={handleEdgeColorChange}
+            ></input>
           </Col>
         </Row>
         <button className="option-button" onClick={downloadPNG}>Tải xuống dưới dạng PNG</button>

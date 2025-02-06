@@ -16,8 +16,8 @@ interface NodeContextType {
 const NodeContext = createContext<NodeContextType | undefined>(undefined);
 
 export const NodeProvider = ({ children }: any) => {
-  const [nodeColor, setNodeColor] = useState("Màu đen"); // Màu nút
-  const [edgeColor, setEdgeColor] = useState("Màu đen"); // Màu cạnh
+  const [nodeColor, setNodeColor] = useState("#ffffff"); // Màu nút
+  const [edgeColor, setEdgeColor] = useState("#000000"); // Màu cạnh
   const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
   const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
 
@@ -48,7 +48,7 @@ export const NodeProvider = ({ children }: any) => {
           // Tạo link tải xuống
           const link = document.createElement('a');
           link.href = canvas.toDataURL('image/png');
-          link.download = 'graph_with_background.png';
+          link.download = 'graph.png';
           link.click();
         }
       };
