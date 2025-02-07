@@ -29,6 +29,7 @@ export interface AlgorithmStep
 {
     // description: string;
     animate: (animator: GraphAnimator) => void;
+    // pseudoText: () => void;
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

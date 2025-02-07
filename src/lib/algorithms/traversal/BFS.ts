@@ -5,6 +5,8 @@ import TraversalAlgorithm from './TraversalAlgorithm';
 
 export default class BFS extends TraversalAlgorithm
 {
+    public getInfo = {order: -1};
+    
     public get name()
     {
         return 'Duyệt theo chiều rộng (BFS)';

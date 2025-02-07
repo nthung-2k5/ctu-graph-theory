@@ -47,6 +47,7 @@ const algos = [
     new Bipartite(),
 ];
 
+
 const InvalidMessage = (props: PropsWithChildren) => {
     return (
         <div className="text-[red]">
@@ -57,6 +58,9 @@ const InvalidMessage = (props: PropsWithChildren) => {
 };
 
 export default function AlgorithmsTab() {
+    // if ('getInfo' in algos[1]) {
+    //     console.log(algos[1].getInfo);
+    // }
     const { graph, animator, animating, setAnimating } = useGraph();
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const [form] = Form.useForm();
@@ -162,7 +166,7 @@ export default function AlgorithmsTab() {
                             />
                         </div>
                         {/* Mã giả */}
-                        <PseudoCode/>
+                        <PseudoCode pesudoInfo={algos[1].getInfo} />
                     </Form>
                 </div>
             ),

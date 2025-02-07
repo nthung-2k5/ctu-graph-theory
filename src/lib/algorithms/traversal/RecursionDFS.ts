@@ -2,7 +2,7 @@ import Graph from '../../graphs/Graph';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 
-export const stackDfsPseudoCode = [
+export const recursionDFS = [
     {
         text: 'DFS(u)',
         cmt: (vertex: number) => [`DFS(${vertex})`],
@@ -49,15 +49,64 @@ export const stackDfsPseudoCode = [
 
 export default class RecursionDFS extends TraversalAlgorithm
 {
+    public getInfo = { order: -1 };
+
     public get name()
     {
         return 'Duyệt theo chiều sâu (DFS) bằng đệ quy';
     }
 
+    private static resetPseudoCode() {
+        const pseudoCode = document.querySelectorAll('.pseudoCodeText');
+        pseudoCode.forEach(element => {
+            element.classList.remove('run');
+        });
+    }
+
+    private static runOrder(order: number) {
+        document.querySelector('.pseudoCodeContainer')?.children[order].classList.add('run');
+    }
+    
     *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         visited[startVertex] = true;
-        yield { animate: animator => animator.colorVertex(startVertex, 'red') };
+
+        // Chạy mã giả 1
+        RecursionDFS.resetPseudoCode();
+        RecursionDFS.runOrder(0);
+
+        // 1. DFS(u) -> Cho u màu đỏ
+        yield { 
+            animate: animator => {
+                animator.colorVertex(startVertex, 'red');
+            },
+        };
+
+        // Chạy mã giã 2
+        RecursionDFS.resetPseudoCode();
+        RecursionDFS.runOrder(1);
+
+        // 2. Tiến hành thăm u -> Tô màu nút u màu #2EBBD1
+        yield { 
+            animate: animator => {
+                animator.advancedColorVertex(startVertex, '#2EBBD1', '#fff');
+            },
+        };
+
+        // Chạy mã giã 3
+        RecursionDFS.resetPseudoCode();
+        RecursionDFS.runOrder(2);
+
+        // 3. Xử lý đỉnh u (Ví dụ in ra màn hình)
+        yield { 
+            animate: animator => { 
+                animator.advancedColorVertex(startVertex, '#F98726', '#fff') 
+            }
+        };
+
+        // Chạy mã giã 4
+        RecursionDFS.resetPseudoCode();
+        RecursionDFS.runOrder(3);
 
         const neighbors = g.neighbors(startVertex);
 
@@ -65,7 +114,18 @@ export default class RecursionDFS extends TraversalAlgorithm
         {
             if (!visited[v])
             {
-                yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(startVertex, v, 'red', g.directed) };
+                // 4. Với mỗi đỉnh kề v của u
+                yield { 
+                    animate: animator => { 
+                        animator.colorEdge(startVertex, v, 'red', g.directed);
+                    }
+                };
+
+                // Chạy mã giã 5
+                RecursionDFS.resetPseudoCode();
+                RecursionDFS.runOrder(4);
+
+                // 5. Gọi đệ quy DFS(u)
                 yield* this._traverse(g, v, visited);
             }
         }

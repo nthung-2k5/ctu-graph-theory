@@ -7,7 +7,7 @@ export default class GraphAnimator
 {
     private _cy: cytoscape.Core;
 
-    private _delay: number = 500;
+    private _delay: number = 2000;
 
     private _stop: boolean = false;
 
@@ -32,6 +32,22 @@ export default class GraphAnimator
     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
         this._cy.$id(vertex.toString()).style({ color, 'border-color': color, 'border-width': 2 }).attr('marked', color);
+        return this;
+    }
+    
+    public colorVertex2(vertex: number, color:string ,borderColor: string): GraphAnimator
+    {
+        this._cy.$id(vertex.toString()).style({ color: '', 'border-color': borderColor, 'border-width': 2 }).attr('marked', color);
+        return this;
+    }
+
+    public advancedColorVertex(vertex: number, bkColor: string, colorText: string): GraphAnimator
+    {
+        this._cy.$id(vertex.toString()).style({ 'background-color': bkColor, 'border-color': bkColor, 'color': colorText });
+        return this;
+    }
+
+    public zoomAnimation(vertex: number, zoom: number) {
         return this;
     }
 

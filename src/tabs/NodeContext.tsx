@@ -68,7 +68,7 @@ export const NodeProvider = ({ children }: any) => {
         edgeLength,
         setEdgeLength,
         cy,
-        downloadPNG
+        downloadPNG,
       }}
     >
       {children}

@@ -5,7 +5,7 @@ import App from './App.tsx'
 import { ConfigProvider } from 'antd'
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
+    // <StrictMode>
         <ConfigProvider theme={{
             token: {
                 colorPrimary: "#1f5ca9",
@@ -14,5 +14,5 @@ createRoot(document.getElementById('root')!).render(
         }}>
             <App />
         </ConfigProvider>
-    </StrictMode>,
+    // </StrictMode>,
 )

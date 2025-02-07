@@ -1,7 +1,7 @@
 // import React, { useState } from "react";
-import { stackDfsPseudoCode } from '../lib/algorithms/traversal/RecursionDFS';
+import { recursionDFS } from '../lib/algorithms/traversal/RecursionDFS';
 
-const PseudoCode: React.FC = () => {
+const PseudoCode: React.FC<{ pesudoInfo: any }> = ({ pesudoInfo }) => {
   // const [isHidden, setIsHidden] = useState(false);
 
   const bfsPseudocode = `
@@ -20,7 +20,7 @@ const PseudoCode: React.FC = () => {
         <hr style={{margin: "8px 0px"}} />
 
         <div className="pseudoCodeContainer">
-          {stackDfsPseudoCode.map((data, index) => {
+          {recursionDFS.map((data, index) => {
             return (
               <p 
                 className="pseudoCodeText"
@@ -31,15 +31,15 @@ const PseudoCode: React.FC = () => {
               </p>
             );
           })}
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
-          <p>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
         </div>
       </div>
     </>
