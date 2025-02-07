@@ -137,10 +137,10 @@ export default function AlgorithmsTab() {
                         form={form}
                         onFinish={animate}
                         className="w-full h-full flex flex-col justify-start"
-                        style={{overflowY: "scroll", paddingRight: "8px"}}
+                        style={{overflowY: "auto", paddingRight: "8px"}}
                     >
-                        <div>
-                            <Title level={5}>{algorithm.name}</Title>
+                        <Title level={5}>{algorithm.name}</Title>
+                        <div className="flex justify-between items-center">
                             {graph.vertexCount > 0 ? (
                                 error.valid ? (
                                     algorithm.configNode(graph)
@@ -154,14 +154,15 @@ export default function AlgorithmsTab() {
                                     Đồ thị không được rỗng
                                 </InvalidMessage>
                             )}
+                            <Button
+                                block
+                                type="primary"
+                                {...(animating ? stopProps : runProps)}
+                                style={{ height: '40px', width: '80px' }}
+                            />
                         </div>
                         {/* Mã giả */}
                         <PseudoCode/>
-                        <Button
-                            block
-                            type="primary"
-                            {...(animating ? stopProps : runProps)}
-                        />
                     </Form>
                 </div>
             ),
