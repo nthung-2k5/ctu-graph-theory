@@ -47,9 +47,9 @@ export default class GraphAnimator
         return this;
     }
 
-    public zoomAnimation(vertex: number, zoom: number) {
-        return this;
-    }
+    // public zoomAnimation(vertex: number, zoom: number) {
+    //     return this;
+    // }
 
     public colorEdge(u: number, v: number, color: KEYWORD, directed: boolean, prevColor: KEYWORD = 'black'): GraphAnimator
     {
