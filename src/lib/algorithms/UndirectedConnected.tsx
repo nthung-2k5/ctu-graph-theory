@@ -53,7 +53,11 @@ export default class UndirectedConnected extends GraphAlgorithm<UndirectedConnec
     {
         return (
             <>
-                <Form.Item<UndirectedConnectedConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                <Form.Item<UndirectedConnectedConfig> 
+                    label="Đỉnh bắt đầu"
+                    name="startVertex"
+                    initialValue={1}
+                >   
                     <InputNumber min={1} max={graph.vertexCount} />
                 </Form.Item>
             </>
