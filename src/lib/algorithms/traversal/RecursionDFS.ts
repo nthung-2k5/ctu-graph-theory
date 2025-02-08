@@ -165,7 +165,7 @@ export default class RecursionDFS extends TraversalAlgorithm
             }
         }
 
-        visited[0] = !false;
+        visited[0] = true;
 
         if (visited.every(value => value)) {
             RecursionDFS.resetPseudoCode();
