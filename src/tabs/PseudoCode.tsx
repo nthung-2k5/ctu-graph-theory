@@ -1,21 +1,16 @@
 // import React, { useState } from "react";
 import { recursionDFS } from '../lib/algorithms/traversal/RecursionDFS';
 
-const PseudoCode: React.FC<{ pesudoInfo: any }> = ({ pesudoInfo }) => {
+const PseudoCode = () => {
   // const [isHidden, setIsHidden] = useState(false);
-
-  const bfsPseudocode = `
-    function BFS(đồ_thị, đỉnh_bắt_đầu):
-  `;
+  // const [cmt, setCmt] = useState(pseudoInfo);
 
   // const toggleVisibility = () => setIsHidden(!isHidden);
 
   return (
     <>
       <div className="pseudoComponent">
-        <div className="comment">
-          Vertex 0 is explored, we have a bidirectional edge (a trivial cycle).
-        </div>
+        <div className="comment">// Mã giả chương trình...</div>
 
         <hr style={{margin: "8px 0px"}} />
 
@@ -33,13 +28,13 @@ const PseudoCode: React.FC<{ pesudoInfo: any }> = ({ pesudoInfo }) => {
           })}
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
+          {/* <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
-          <p className='pseudoCodeText'>.</p>
-          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p> */}
         </div>
       </div>
     </>

@@ -7,7 +7,7 @@ export default class GraphAnimator
 {
     private _cy: cytoscape.Core;
 
-    private _delay: number = 2000;
+    private _delay: number = 100;
 
     private _stop: boolean = false;
 

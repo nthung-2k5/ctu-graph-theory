@@ -166,7 +166,7 @@ export default function AlgorithmsTab() {
                             />
                         </div>
                         {/* Mã giả */}
-                        <PseudoCode pesudoInfo={algos[1].getInfo} />
+                        <PseudoCode />
                     </Form>
                 </div>
             ),
