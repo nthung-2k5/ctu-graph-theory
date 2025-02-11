@@ -7,9 +7,15 @@ export default class GraphAnimator
 {
     private _cy: cytoscape.Core;
 
-    private _delay: number = 100;
+    private _delay: number = 200;
 
     private _stop: boolean = false;
+
+    private _colorNodeInput: HTMLInputElement | null = document.querySelector('input[name="color-node"]');
+
+    private _colorEdgeInput: HTMLInputElement | null = document.querySelector('input[name="color-edge"]'); 
+
+    private _colorTextNumberSelect: HTMLSelectElement | null = document.querySelector('select[name="color-text-node"]');
 
     public constructor(cy: cytoscape.Core)
     {
@@ -25,7 +31,15 @@ export default class GraphAnimator
     public resetAll(): GraphAnimator
     {
         this._stop = false;
-        this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
+        this._cy.elements().style({ 
+            'background-color': this._colorNodeInput?.value,
+            'color': this._colorTextNumberSelect?.value, 
+            'line-color': this._colorEdgeInput?.value, 
+            'border-color': 'black', 
+            'border-width': 1, 
+            'line-outline-width': 0 
+        }).removeAttr('marked');
+        // this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
         return this;
     }
 
@@ -70,12 +84,16 @@ export default class GraphAnimator
     public async run(steps: IterableIterator<AlgorithmStep>): Promise<void>
     {
         this.resetAll();
+        // setTimeout(async () => {
+        // this._stop = false;
         for (const step of steps)
         {
+            console.log(step.animate);
             if (this._stop) return;
 
             step.animate(this);
             await wait(this._delay);
         }
+        // }, 600);
     }
 }

@@ -3,6 +3,7 @@ import { createContext, useContext, useRef, useState } from "react";
 interface NodeContextType {
   nodeColor: string;
   edgeColor: string;
+  textNumberColor: string;
   nodeRadius: number;
   edgeLength: number;
   cy: any;
@@ -11,6 +12,7 @@ interface NodeContextType {
   setEdgeColor: (color: string) => void;
   setNodeRadius: (radius: number) => void;
   setEdgeLength: (length: number) => void;
+  setTextNumberColor: (color: string) => void;
 }
 
 const NodeContext = createContext<NodeContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export const NodeProvider = ({ children }: any) => {
   const [edgeColor, setEdgeColor] = useState("#000000"); // Màu cạnh
   const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
   const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
+  const [textNumberColor, setTextNumberColor] = useState('#000000'); // Màu số của nút
 
   const cy = useRef<cytoscape.Core | null>(null);
 
@@ -61,6 +64,7 @@ export const NodeProvider = ({ children }: any) => {
       value={{
         nodeColor,
         edgeColor,
+        textNumberColor,
         setNodeColor,
         setEdgeColor,
         nodeRadius,
@@ -69,6 +73,7 @@ export const NodeProvider = ({ children }: any) => {
         setEdgeLength,
         cy,
         downloadPNG,
+        setTextNumberColor
       }}
     >
       {children}

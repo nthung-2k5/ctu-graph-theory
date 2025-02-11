@@ -26,9 +26,9 @@ const PseudoCode = () => {
               </p>
             );
           })}
-          <p className='pseudoCodeText'>.</p>
-          <p className='pseudoCodeText'>.</p>
           {/* <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
+          <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>
           <p className='pseudoCodeText'>.</p>

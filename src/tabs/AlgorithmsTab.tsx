@@ -58,9 +58,6 @@ const InvalidMessage = (props: PropsWithChildren) => {
 };
 
 export default function AlgorithmsTab() {
-    // if ('getInfo' in algos[1]) {
-    //     console.log(algos[1].getInfo);
-    // }
     const { graph, animator, animating, setAnimating } = useGraph();
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const [form] = Form.useForm();
@@ -86,6 +83,7 @@ export default function AlgorithmsTab() {
             setAnimating(false);
         } else {
             const result = algorithm.run(graph, values);
+            console.log(result);
             setAnimating(true);
             await animator.current.run(result);
             setAnimating(false);
@@ -136,7 +134,7 @@ export default function AlgorithmsTab() {
                         </Dropdown>
                     </div>
                     <Form
-                        layout="vertical"
+                        layout="horizontal"
                         disabled={animating}
                         form={form}
                         onFinish={animate}

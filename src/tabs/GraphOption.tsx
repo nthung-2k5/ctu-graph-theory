@@ -8,8 +8,10 @@ export default function GraphOption() {
   const { 
     nodeColor, 
     edgeColor,
+    textNumberColor,
     setNodeColor,
     setEdgeColor,
+    setTextNumberColor,
     nodeRadius,
     setNodeRadius,
     edgeLength,
@@ -27,6 +29,11 @@ export default function GraphOption() {
     setEdgeColor(color);
   };
 
+  const handleTextNumberColor = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const color = e.target.value;
+    setTextNumberColor(color);
+  }
+
   return (
     <>
       <div
@@ -37,11 +44,11 @@ export default function GraphOption() {
           // borderColor: '#000',
           width: "100%",
           height: "260px",
-          padding: "20px 30px",
+          padding: "15px 30px",
         }}
       >
         <Row className="mb-[10px]">
-          <Col span={12}>
+          <Col span={12} className="flex items-center">
             <p className="option-text">
               <FontAwesomeIcon icon={faQuestion} className="option-icon" />
               Bán kính nút
@@ -53,13 +60,14 @@ export default function GraphOption() {
               min="20"
               max="60"
               value={nodeRadius}
+              className="input-range"
               onChange={(e) => setNodeRadius(Number(e.target.value))}
               style={{width: "100px"}}
             />
           </Col>
         </Row>
         <Row className="mb-[10px]">
-          <Col span={12}>
+          <Col span={12} className="flex items-center">
             <p className="option-text">
               <FontAwesomeIcon icon={faQuestion} className="option-icon" />
               Độ dài cung
@@ -71,30 +79,20 @@ export default function GraphOption() {
               min="50"
               max="250"
               value={edgeLength}
+              className="input-range"
               onChange={(e) => setEdgeLength(Number(e.target.value))}
               style={{width: "100px"}}
             />
           </Col>
         </Row>
         <Row className="mb-[10px]">
-          <Col span={12}>
+          <Col span={12} className="flex items-center">
             <p className="option-text">
               <FontAwesomeIcon icon={faQuestion} className="option-icon" />
               Màu nút
             </p>
           </Col>
-          <Col span={12}>
-            {/* <select
-              className="option-input-select"
-              value={nodeColor}
-              onChange={handleNodeColorChange}
-            >
-              <option value="Màu đen">Màu đen</option>
-              <option value="Màu đỏ">Màu đỏ</option>
-              <option value="Màu cam">Màu cam</option>
-              <option value="Màu hồng">Màu hồng</option>
-              <option value="Màu xanh">Màu xanh</option>
-            </select> */}
+          <Col span={12} className="flex items-center">
             <input
               type="color"
               name="color-node"
@@ -105,24 +103,13 @@ export default function GraphOption() {
           </Col>
         </Row>
         <Row className="mb-[10px]">
-          <Col span={12}>
+          <Col span={12} className="flex items-center">
             <p className="option-text">
               <FontAwesomeIcon icon={faQuestion} className="option-icon" />
               Màu cạnh
             </p>
           </Col>
-          <Col span={12}>
-            {/* <select
-              className="option-input-select"
-              value={edgeColor}
-              onChange={handleEdgeColorChange}
-            >
-              <option value="Màu đen">Màu đen</option>
-              <option value="Màu đỏ">Màu đỏ</option>
-              <option value="Màu cam">Màu cam</option>
-              <option value="Màu hồng">Màu hồng</option>
-              <option value="Màu xanh">Màu xanh</option>
-            </select> */}
+          <Col span={12} className="flex items-center">
             <input
               type="color"
               name="color-edge"
@@ -130,6 +117,26 @@ export default function GraphOption() {
               value={edgeColor}
               onChange={handleEdgeColorChange}
             ></input>
+          </Col>
+        </Row>
+        <Row className="mb-[10px]">
+          <Col span={12} className="flex items-center">
+            <p className="option-text">
+              <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+              Màu số
+            </p>
+          </Col>
+          <Col span={12} className="flex items-center justify-center">
+            <select 
+              name="color-text-node" 
+              id="colorTextNode"
+              value={textNumberColor}
+              onChange={handleTextNumberColor}
+              style={{width: '100px', border: '1px solid #ccc'}}
+            >
+              <option value="#000000">Màu đen</option>
+              <option value="#ffffff">Màu trắng</option>
+            </select>
           </Col>
         </Row>
         <button className="option-button" onClick={downloadPNG}>Tải xuống dưới dạng PNG</button>

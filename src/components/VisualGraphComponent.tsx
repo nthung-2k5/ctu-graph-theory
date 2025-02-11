@@ -11,6 +11,7 @@ import { useNode } from "../tabs/NodeContext";
 
 // Khắc phục lag, giới hạn số lần re-render lại theo thời gian khi cập nhật độ dài cạnh
 import debounce from "lodash.debounce";
+import ControlBar from "./ControlBar";
 
 cytoscape.use(cola);
 cytoscape.use(automove);
@@ -20,7 +21,7 @@ export default function VisualGraphComponent() {
 //   const cy = useRef<cytoscape.Core | null>(null);
   const elements = useMemo(() => graph.toGraph(), [graph]);
 
-  const { nodeColor, edgeColor, nodeRadius, edgeLength, cy } = useNode();
+  const { nodeColor, edgeColor, textNumberColor, nodeRadius, edgeLength, cy } = useNode();
 
   const assignCytoscape = (cyCore: cytoscape.Core) => {
     cy.current = cyCore;
@@ -40,6 +41,7 @@ export default function VisualGraphComponent() {
       .selector("node")
       .style({
         backgroundColor: nodeColor,
+        color: textNumberColor,
         width: nodeRadius,
         height: nodeRadius,
       })
@@ -54,7 +56,7 @@ export default function VisualGraphComponent() {
   // Cập nhật lại màu và độ lơn mỗi khi nút bị thay đổi
   useEffect(() => {
     updateGraphStyle();
-  }, [nodeColor, edgeColor, nodeRadius]);
+  }, [nodeColor, edgeColor, nodeRadius, textNumberColor]);
 
   useEffect(() => {
     cy.current
@@ -113,13 +115,23 @@ export default function VisualGraphComponent() {
   return (
     <>
       <CytoscapeComponent
-        className="my-auto border-2 border-black rounded h-full"
+        className="my-auto border-2"
+        style={{
+          height: 'calc(100% - 45px)',
+          borderTopRightRadius: '4px',
+          borderTopLeftRadius: '4px',
+          borderTop: '2px solid black',
+          borderLeft: '2px solid black',
+          borderRight: '2px solid black',
+          borderBottom: 'none'
+        }}
         elements={elements}
         stylesheet={DefaultGraphStyle}
         cy={assignCytoscape}
         zoomingEnabled={false}
         boxSelectionEnabled={false}
       />
+      <ControlBar />
     </>
   );
 }
