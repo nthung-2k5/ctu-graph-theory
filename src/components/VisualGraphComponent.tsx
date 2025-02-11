@@ -4,12 +4,9 @@ import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape, { Stylesheet } from 'cytoscape';
 // @ts-expect-error Made for Javascript version so no type
 import cola from 'cytoscape-cola';
-// @ts-expect-error Made for Javascript version so no type
-import automove from 'cytoscape-automove';
 import GraphAnimator from '../lib/GraphAnimator';
 
 cytoscape.use(cola);
-cytoscape.use(automove);
 
 export default function VisualGraphComponent() 
 {
@@ -32,43 +29,40 @@ export default function VisualGraphComponent()
 
     useEffect(() =>
     {
-        cy.current?.on('mouseover', 'node', (e) =>
-        {
-            if (e.target === null) return;
-            if (e.target === cy.current) return;
-            e.cy.startBatch();
+        // cy.current?.on('mouseover', 'node', (e) =>
+        // {
+        //     if (e.target === null) return;
+        //     if (e.target === cy.current) return;
+        //     e.cy.startBatch();
 
-            const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
-            const edgesAndVertices = sel.outgoers();
-            if (!graph.directed) edgesAndVertices.add(sel.incomers());
+        //     const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
+        //     const edgesAndVertices = sel.outgoers();
+        //     if (!graph.directed) edgesAndVertices.add(sel.incomers());
             
-            edgesAndVertices.addClass('highlight');
-            e.cy.endBatch();
-        }).on('mouseout', 'node', (e) =>
-        {
-            if (e.target === null) return;
-            if (e.target === cy.current) return;
-            e.cy.startBatch();
+        //     edgesAndVertices.addClass('highlight');
+        //     e.cy.endBatch();
+        // }).on('mouseout', 'node', (e) =>
+        // {
+        //     if (e.target === null) return;
+        //     if (e.target === cy.current) return;
+        //     e.cy.startBatch();
 
-            const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
-            const edgesAndVertices = sel.outgoers();
-            if (!graph.directed) edgesAndVertices.add(sel.incomers());
+        //     const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
+        //     const edgesAndVertices = sel.outgoers();
+        //     if (!graph.directed) edgesAndVertices.add(sel.incomers());
             
-            edgesAndVertices.removeClass('highlight');
-            e.cy.endBatch();
-        });
+        //     edgesAndVertices.removeClass('highlight');
+        //     e.cy.endBatch();
+        // });
     }, [graph]);
 
     useEffect(() => 
     {
-        // @ts-expect-error Made for Javascript version so no type
-        cy.current?.automove({ nodesMatching: () => true, reposition: 'viewport' });
-        // @ts-expect-error Made for Javascript version so no type
-        cy.current?.layout({ name: 'cola', infinite: true }).run();
+        cy.current?.layout({ name: 'cola' }).run();
     }, [elements]);
 
     return (
-        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={assignCytoscape} zoomingEnabled={false} boxSelectionEnabled={false} />
+        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={assignCytoscape} autoungrabify boxSelectionEnabled={false} />
     );
 }
 
@@ -78,10 +72,11 @@ const DefaultGraphStyle: Stylesheet[] = [
         style: {
             "text-valign": "center",
             "text-halign": "center",
+            "font-weight": "bold",
             "label": "data(label)",
             backgroundColor: '#F8FAFC',
             "border-style": "solid",
-            "border-width": 1,
+            "border-width": '3rem',
             "border-color": "#000",
         }
     },
@@ -89,7 +84,7 @@ const DefaultGraphStyle: Stylesheet[] = [
         selector: 'edge',
         style: {
             "line-color": '#000',
-            width: 1,
+            width: '3rem',
             "curve-style": "bezier"
         }
     },

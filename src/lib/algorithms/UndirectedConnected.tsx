@@ -15,9 +15,9 @@ export default class UndirectedConnected extends GraphAlgorithm<UndirectedConnec
         return 'Kiểm tra đồ thị vô hướng liên thông';
     }
 
-    public predicateCheck(g: Graph): { valid: boolean; errors?: string[]; }
+    public predicateCheck(g: Graph): { valid: boolean; error?: string; }
     {
-        return { valid: !g.directed, errors: [MustBeUndirectedError] };
+        return { valid: !g.directed, error: MustBeUndirectedError };
     }
 
     private *_dfs(g: Graph, u: number, visited: boolean[]): IterableIterator<AlgorithmStep>

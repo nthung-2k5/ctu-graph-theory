@@ -13,7 +13,7 @@ export abstract class GraphAlgorithm<Config = object>
         return (<></>);
     }
     
-    public abstract predicateCheck(g: Graph): { valid: boolean, errors?: string[] };
+    public abstract predicateCheck(g: Graph): { valid: boolean, error?: string };
     public abstract run(g: Graph, config: Config): IterableIterator<AlgorithmStep>;
 };
 

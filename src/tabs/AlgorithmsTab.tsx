@@ -123,7 +123,7 @@ export default function AlgorithmsTab()
                     <Form layout='vertical' disabled={animating} form={form} onFinish={animate} className='flex-grow w-full h-full flex flex-col'>
                         <div className='flex-grow'>
                             <Title level={5}>{algorithm.name}</Title>
-                            {graph.vertexCount > 0 ? (error.valid ? algorithm.configNode(graph) : error.errors?.map((err) => <InvalidMessage>{err}</InvalidMessage>)) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
+                            {graph.vertexCount > 0 ? (error.valid ? algorithm.configNode(graph) : <InvalidMessage>{error.error}</InvalidMessage>) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
                         </div>
                         <Button block type='primary' {...(animating ? stopProps : runProps)} />
                     </Form>

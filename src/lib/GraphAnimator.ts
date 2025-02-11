@@ -25,13 +25,13 @@ export default class GraphAnimator
     public resetAll(): GraphAnimator
     {
         this._stop = false;
-        this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
+        this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black' }).removeAttr('marked');
         return this;
     }
 
     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy.$id(vertex.toString()).style({ color, 'border-color': color, 'border-width': 2 }).attr('marked', color);
+        this._cy.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
         return this;
     }
 
@@ -41,7 +41,7 @@ export default class GraphAnimator
         const target = this._cy.$id(v.toString());
 
         const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).filter(e => prevColor === 'black' || e.data('marked') === prevColor).first();
-        edge.style({ 'line-color': color, 'line-outline-width': 1, 'line-outline-color': color }).attr('marked', color);
+        edge.style({ 'line-color': color, 'line-outline-color': color }).attr('marked', color);
         return this;
     }
 

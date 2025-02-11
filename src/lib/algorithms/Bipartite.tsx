@@ -35,7 +35,7 @@ export default class Bipartite extends GraphAlgorithm<BipartiteConfig>
         return 'Kiểm tra đồ thị phân đôi';
     }
 
-    public predicateCheck(): { valid: boolean; errors?: string[]; }
+    public predicateCheck(): { valid: boolean; error?: string; }
     {
         return { valid: true };
     }

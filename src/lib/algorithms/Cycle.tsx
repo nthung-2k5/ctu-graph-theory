@@ -37,7 +37,7 @@ export default class Cycle extends GraphAlgorithm<CycleConfig>
         return 'Kiểm tra đồ thị chứa chu trình';
     }
 
-    public predicateCheck(): { valid: boolean; errors?: string[]; }
+    public predicateCheck(): { valid: boolean; error?: string; }
     {
         return { valid: true };
     }

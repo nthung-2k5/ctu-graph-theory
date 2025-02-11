@@ -11,7 +11,7 @@ export interface TraversalConfig
 
 export default abstract class TraversalAlgorithm extends GraphAlgorithm<TraversalConfig>
 {
-    public predicateCheck(): { valid: boolean; errors?: string[]; }
+    public predicateCheck(): { valid: boolean; error?: string; }
     {
         return { valid: true };
     }
