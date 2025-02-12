@@ -7,7 +7,7 @@ export default class GraphAnimator
 {
     private _cy: cytoscape.Core;
 
-    private _delay: number = 200;
+    private _delay: number = 1000;
 
     private _stop: boolean = false;
 
@@ -16,6 +16,14 @@ export default class GraphAnimator
     private _colorEdgeInput: HTMLInputElement | null = document.querySelector('input[name="color-edge"]'); 
 
     private _colorTextNumberSelect: HTMLSelectElement | null = document.querySelector('select[name="color-text-node"]');
+
+    public setDelay(speed: number) {
+        this._delay = speed;
+    }
+
+    public getDelay() {
+        return this._delay;
+    }
 
     public constructor(cy: cytoscape.Core)
     {
@@ -88,7 +96,6 @@ export default class GraphAnimator
         // this._stop = false;
         for (const step of steps)
         {
-            console.log(step.animate);
             if (this._stop) return;
 
             step.animate(this);

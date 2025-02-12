@@ -7,25 +7,66 @@ import {
   faPause,
   faPlay,
 } from "@fortawesome/free-solid-svg-icons";
+import GraphAnimator from "../lib/GraphAnimator";
+import { MutableRefObject, useState } from "react";
 
-export default function ControlBar() {
+interface ControlBarProps {
+  animator: MutableRefObject<GraphAnimator>;
+}
+
+export default function ControlBar({ animator }: ControlBarProps) {
+
+  const _x = 250;
+  const [ timeDelay, setTimeDelay ] = useState(4);
+
+  const handleTimeDelay = (e: any) => {
+    switch (e.target.value) {
+      case '1':
+        animator.current.setDelay(2650);
+        break;
+      case '2':
+        animator.current.setDelay(2000);
+        break;
+      case '3':
+        animator.current.setDelay(1400);
+        break;
+      case '4':
+        animator.current.setDelay(900);
+        break;
+      case '5':
+        animator.current.setDelay(600);
+        break;
+      case '6':
+        animator.current.setDelay(300);
+        break;
+      case '7':
+        animator.current.setDelay(200);
+        break;
+      default:
+        throw new Error('Giá trị của ô input không nằm trong giới hạn đã cài đặt');
+    }
+    setTimeDelay(e.target.value);
+  }
+
   return (
     <div className="control-bar-container flex justify-between items-center">
-      <div className="control-bar__speed flex justify-between items-center w-[110px]">
+      <div className="control-bar__speed flex justify-between items-center w-[140px]">
         <input
           type="range"
           min="1"
-          max="5"
+          max="7"
+          value={timeDelay}
           className="input-range"
           style={{
-            width: "80px",
+            width: "110px",
             background: "linear-gradient(to right, #ffffff 0%, #ffffff 100%)",
-            backgroundSize: "80px 3px",
+            backgroundSize: "110px 3px",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
+          onInput={(e: any) => handleTimeDelay(e)}
         />
-        <p className="control-bar__seed-number">3X</p>
+        <p className="control-bar__seed-number">{timeDelay}X</p>
       </div>
 
       <div className="control-bar__play flex justify-between items-center h-[100%]">

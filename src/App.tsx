@@ -36,10 +36,10 @@ export default function App()
                         <Col span={5} className='flex h-full'>
                             <GraphInputTab/>
                         </Col>
-                        <Col span={11} className='flex h-full px-4'>
+                        <Col span={12} className='flex h-full px-4'>
                             <GraphDisplayTab/>
                         </Col>
-                        <Col span={8} className='flex h-full'>
+                        <Col span={7} className='flex h-full'>
                             <AlgorithmsTab/>
                         </Col>
                     </Row>

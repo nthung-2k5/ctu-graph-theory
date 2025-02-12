@@ -116,6 +116,10 @@ html, body {
   transition: .2s;
 }
 
+input, select {
+  cursor: pointer;
+}
+
 .input-range {
   -webkit-appearance: none;
   background: linear-gradient(to right, #0D47A1 0%, #0D47A1 100%);
@@ -162,7 +166,6 @@ html, body {
   color: #fff;
   font-size: 16px;
   font-weight: 600;
-  margin-left: 10px;
   margin-top: -3px;
 }
 

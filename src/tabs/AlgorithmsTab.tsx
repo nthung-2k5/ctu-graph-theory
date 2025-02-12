@@ -83,7 +83,6 @@ export default function AlgorithmsTab() {
             setAnimating(false);
         } else {
             const result = algorithm.run(graph, values);
-            console.log(result);
             setAnimating(true);
             await animator.current.run(result);
             setAnimating(false);
