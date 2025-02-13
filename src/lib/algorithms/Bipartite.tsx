@@ -66,6 +66,12 @@ export default class Bipartite extends GraphAlgorithm<BipartiteConfig>
         }
     }
 
+    public numberOfStep = 0;
+    
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
+    }
+
     public *run(g: Graph, config: BipartiteConfig): IterableIterator<AlgorithmStep>
     {
         const ctx = new BipartiteContext(g);

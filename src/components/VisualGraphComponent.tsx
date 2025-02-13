@@ -131,6 +131,7 @@ export default function VisualGraphComponent() {
         zoomingEnabled={false}
         boxSelectionEnabled={false}
       />
+      
       <ControlBar animator={animator} />
     </>
   );

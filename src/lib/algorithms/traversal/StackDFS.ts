@@ -14,6 +14,12 @@ export default class StackDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
 
+    public numberOfStep = 0;
+    
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
+    }
+
     *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         const stack = new Stack<number>();

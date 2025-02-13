@@ -1,11 +1,15 @@
 import { createContext, useContext, useRef, useState } from "react";
+import { GraphAlgorithm } from "../lib/algorithms/GraphAlgorithm";
+import { algos } from "./AlgorithmsTab";
 
 interface NodeContextType {
   nodeColor: string;
   edgeColor: string;
   textNumberColor: string;
+  range: string;
   nodeRadius: number;
   edgeLength: number;
+  algorithm: GraphAlgorithm;
   cy: any;
   downloadPNG: () => void;
   setNodeColor: (color: string) => void;
@@ -13,6 +17,8 @@ interface NodeContextType {
   setNodeRadius: (radius: number) => void;
   setEdgeLength: (length: number) => void;
   setTextNumberColor: (color: string) => void;
+  setAlgorithm: (algo: GraphAlgorithm) => void;
+  setRange: (range: string) => void;
 }
 
 const NodeContext = createContext<NodeContextType | undefined>(undefined);
@@ -23,6 +29,8 @@ export const NodeProvider = ({ children }: any) => {
   const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
   const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
   const [textNumberColor, setTextNumberColor] = useState('#000000'); // Màu số của nút
+  const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
+  const [range, setRange] = useState("0");
 
   const cy = useRef<cytoscape.Core | null>(null);
 
@@ -65,6 +73,8 @@ export const NodeProvider = ({ children }: any) => {
         nodeColor,
         edgeColor,
         textNumberColor,
+        algorithm,
+        setAlgorithm,
         setNodeColor,
         setEdgeColor,
         nodeRadius,
@@ -72,6 +82,8 @@ export const NodeProvider = ({ children }: any) => {
         edgeLength,
         setEdgeLength,
         cy,
+        range,
+        setRange,
         downloadPNG,
         setTextNumberColor
       }}

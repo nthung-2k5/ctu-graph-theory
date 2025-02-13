@@ -19,6 +19,7 @@ import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
 import Cycle from '../lib/algorithms/Cycle';
 import Bipartite from '../lib/algorithms/Bipartite';
 import PseudoCode from './PseudoCode';
+import { useNode } from './NodeContext';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
@@ -38,7 +39,7 @@ const algorithms = [
     'Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)',
 ];
 
-const algos = [
+export const algos = [
     new BFS(),
     new RecursionDFS(),
     new StackDFS(),
@@ -59,7 +60,8 @@ const InvalidMessage = (props: PropsWithChildren) => {
 
 export default function AlgorithmsTab() {
     const { graph, animator, animating, setAnimating } = useGraph();
-    const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
+    // const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
+    const { algorithm, setAlgorithm } = useNode();
     const [form] = Form.useForm();
 
     const items = algos.map((algo, index) => ({
@@ -78,16 +80,29 @@ export default function AlgorithmsTab() {
     );
 
     const animate = async (values: object) => {
+        // console.log(values);
+        algorithm.numberOfStep = 0;
+        algorithm.currentStep = 0;
         if (animating) {
             animator.current.stop();
             setAnimating(false);
         } else {
             const result = algorithm.run(graph, values);
+            if (algorithm instanceof RecursionDFS) {
+                if ('_vertexCount' in graph) {
+                    const visited = new Array(graph._vertexCount).fill(false);
+                    if ('startVertex' in values) {
+                        algorithm.runCode(graph, values.startVertex, visited);
+                    }
+                }
+                // console.log(algorithm.numberOfStep);
+            }
             setAnimating(true);
             await animator.current.run(result);
             setAnimating(false);
         }
     };
+    // console.log(algorithm.name);
 
     const runProps: ButtonProps = {
         htmlType: 'submit',
@@ -106,16 +121,6 @@ export default function AlgorithmsTab() {
         {
             key: '1',
             label: 'Thuật toán',
-            // children: <Collapse items={algorithms.map((algo, index) => ({
-            //     key: index.toString(),
-            //     label: `${index + 1}. ${algo}`,
-            //     children: <div className='text-[red]'>
-            //         <CloseCircleOutlined className='me-2'/>
-            //         <span>
-            //             Đồ thị phải là đồ thị vô hướng
-            //         </span>
-            //     </div>,
-            // }))} expandIconPosition='end' className='h-full scrollbar-thin overflow-y-auto'/>
             children: (
                 <div className="h-full flex flex-col">
                     <div>
@@ -162,16 +167,10 @@ export default function AlgorithmsTab() {
                                 style={{ height: '40px', width: '80px' }}
                             />
                         </div>
-                        {/* Mã giả */}
                         <PseudoCode />
                     </Form>
                 </div>
             ),
-            // children: <Button onClick={async () =>
-            // {
-            //     const result = new BFS().run(graph as UnweightedGraph);
-            //     await animator.current.run(result);
-            // }}>Test</Button>
         },
     ];
 

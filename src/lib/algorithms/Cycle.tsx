@@ -91,6 +91,12 @@ export default class Cycle extends GraphAlgorithm<CycleConfig>
         }
     }
 
+    public numberOfStep = 0;
+    
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
+    }
+
     public override configNode(graph: Graph): ReactNode
     {
         return (
