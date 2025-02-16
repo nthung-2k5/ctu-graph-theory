@@ -49,8 +49,8 @@ export default function VisualGraphComponent()
             })
             .selector("edge")
             .style({
-                lineColor: edgeColor,
-                curveStyle: "bezier",
+                "line-color": edgeColor,
+                "curve-style": "bezier",
             })
             .update();
     };
@@ -105,6 +105,7 @@ export default function VisualGraphComponent()
                 }, 100);
 
                 updateLayout();
+                updateLayout();
 
                 // Clean up function
                 return () => 
@@ -135,7 +136,6 @@ export default function VisualGraphComponent()
                 zoomingEnabled={false}
                 boxSelectionEnabled={false}
             />
-      
             <ControlBar animator={animator} />
         </>
     );
