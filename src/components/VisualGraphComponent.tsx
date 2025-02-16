@@ -1,20 +1,27 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { useGraph } from '../lib/GraphContext';
-import CytoscapeComponent from 'react-cytoscapejs';
-import cytoscape, { Stylesheet } from 'cytoscape';
+import { useEffect, useMemo } from "react";
+import { useGraph } from "../lib/GraphContext";
+import CytoscapeComponent from "react-cytoscapejs";
+import cytoscape, { Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
-import cola from 'cytoscape-cola';
-import GraphAnimator from '../lib/GraphAnimator';
+import cola from "cytoscape-cola";
+import GraphAnimator from "../lib/GraphAnimator";
+import { useNode } from "../tabs/NodeContext";
+
+// Khắc phục lag, giới hạn số lần re-render lại theo thời gian khi cập nhật độ dài cạnh
+import debounce from "lodash.debounce";
+import ControlBar from "./ControlBar";
 
 cytoscape.use(cola);
 
 export default function VisualGraphComponent() 
 {
     const { graph, animator } = useGraph();
-    const cy = useRef<cytoscape.Core | null>(null);
+    //   const cy = useRef<cytoscape.Core | null>(null);
     const elements = useMemo(() => graph.toGraph(), [graph]);
 
-    const assignCytoscape = (cyCore: cytoscape.Core) =>
+    const { nodeColor, edgeColor, textNumberColor, nodeRadius, edgeLength, cy } = useNode();
+
+    const assignCytoscape = (cyCore: cytoscape.Core) => 
     {
         cy.current = cyCore;
 
@@ -26,6 +33,33 @@ export default function VisualGraphComponent()
 
         animator.current.setCytoscape(cy.current!);
     };
+
+    const updateGraphStyle = () => 
+    {
+        if (!cy.current) return;
+    
+        cy.current
+            .style()
+            .selector("node")
+            .style({
+                backgroundColor: nodeColor,
+                color: textNumberColor,
+                width: nodeRadius,
+                height: nodeRadius,
+            })
+            .selector("edge")
+            .style({
+                lineColor: edgeColor,
+                curveStyle: "bezier",
+            })
+            .update();
+    };
+
+    useEffect(() => 
+    {
+        updateGraphStyle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [nodeColor, edgeColor, nodeRadius, textNumberColor]);
 
     useEffect(() =>
     {
@@ -58,11 +92,52 @@ export default function VisualGraphComponent()
 
     useEffect(() => 
     {
-        cy.current?.layout({ name: 'cola' }).run();
-    }, [elements]);
+        if (cy.current) 
+        {
+            if (cy.current) 
+            {
+                const updateLayout = debounce(() => 
+                {
+                    cy.current?.layout({
+                        name: "cola",
+                        edgeLength: edgeLength,
+                    }).run();
+                }, 100);
+
+                updateLayout();
+
+                // Clean up function
+                return () => 
+                {
+                    updateLayout.cancel();
+                };
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [elements, edgeLength]);
 
     return (
-        <CytoscapeComponent className='my-auto border-2 border-black rounded h-full' elements={elements} stylesheet={DefaultGraphStyle} cy={assignCytoscape} autoungrabify boxSelectionEnabled={false} />
+        <>
+            <CytoscapeComponent
+                className="my-auto border-2"
+                style={{
+                    height: 'calc(100% - 45px)',
+                    borderTopRightRadius: '4px',
+                    borderTopLeftRadius: '4px',
+                    borderTop: '2px solid black',
+                    borderLeft: '2px solid black',
+                    borderRight: '2px solid black',
+                    borderBottom: 'none'
+                }}
+                elements={elements}
+                stylesheet={DefaultGraphStyle}
+                cy={assignCytoscape}
+                zoomingEnabled={false}
+                boxSelectionEnabled={false}
+            />
+      
+            <ControlBar animator={animator} />
+        </>
     );
 }
 

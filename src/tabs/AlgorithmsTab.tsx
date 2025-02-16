@@ -1,4 +1,12 @@
-import { Button, ButtonProps, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
+import {
+    Button,
+    ButtonProps,
+    Dropdown,
+    Form,
+    Space,
+    Tabs,
+    TabsProps,
+} from 'antd';
 import { useGraph } from '../lib/GraphContext';
 import BFS from '../lib/algorithms/traversal/BFS';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
@@ -10,6 +18,8 @@ import Title from 'antd/es/typography/Title';
 import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
 import Cycle from '../lib/algorithms/Cycle';
 import Bipartite from '../lib/algorithms/Bipartite';
+import PseudoCode from './PseudoCode';
+import { useNode } from './NodeContext';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
@@ -29,7 +39,7 @@ const algorithms = [
     'Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)',
 ];
 
-const algos = [
+export const algos = [
     new BFS(),
     new RecursionDFS(),
     new StackDFS(),
@@ -38,48 +48,61 @@ const algos = [
     new Bipartite(),
 ];
 
-const InvalidMessage = (props: PropsWithChildren) =>
-{
-    return (
-        <div className='text-[red]'>
-            <CloseCircleOutlined className='me-2' />
-            <span>
-                {props.children}
-            </span>
-        </div>
-    )
-}
 
-export default function AlgorithmsTab()
-{
+const InvalidMessage = (props: PropsWithChildren) => {
+    return (
+        <div className="text-[red]">
+            <CloseCircleOutlined className="me-2" />
+            <span>{props.children}</span>
+        </div>
+    );
+};
+
+export default function AlgorithmsTab() {
     const { graph, animator, animating, setAnimating } = useGraph();
-    const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
+    // const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
+    const { algorithm, setAlgorithm } = useNode();
     const [form] = Form.useForm();
 
-    const items = algos.map((algo, index) => (
-        {
-            key: index,
-            label: (<button type='button' onClick={() => setAlgorithm(algo)}>{`${index + 1}. ${algo.name}`}</button>)
-        }
-    ));
+    const items = algos.map((algo, index) => ({
+        key: index,
+        label: (
+            <button
+                type="button"
+                onClick={() => setAlgorithm(algo)}
+            >{`${index + 1}. ${algo.name}`}</button>
+        ),
+    }));
 
-    const error = useMemo(() => algorithm.predicateCheck(graph), [algorithm, graph]);
+    const error = useMemo(
+        () => algorithm.predicateCheck(graph),
+        [algorithm, graph],
+    );
 
-    const animate = async (values: object) =>
-    {
-        if (animating)
-        {
+    const animate = async (values: object) => {
+        // console.log(values);
+        algorithm.numberOfStep = 0;
+        algorithm.currentStep = 0;
+        if (animating) {
             animator.current.stop();
             setAnimating(false);
-        }
-        else
-        {
+        } else {
             const result = algorithm.run(graph, values);
+            if (algorithm instanceof RecursionDFS) {
+                if ('_vertexCount' in graph) {
+                    const visited = new Array(graph._vertexCount).fill(false);
+                    if ('startVertex' in values) {
+                        algorithm.runCode(graph, values.startVertex, visited);
+                    }
+                }
+                // console.log(algorithm.numberOfStep);
+            }
             setAnimating(true);
             await animator.current.run(result);
             setAnimating(false);
         }
-    }
+    };
+    // console.log(algorithm.name);
 
     const runProps: ButtonProps = {
         htmlType: 'submit',
@@ -98,20 +121,14 @@ export default function AlgorithmsTab()
         {
             key: '1',
             label: 'Thuật toán',
-            // children: <Collapse items={algorithms.map((algo, index) => ({
-            //     key: index.toString(),
-            //     label: `${index + 1}. ${algo}`,
-            //     children: <div className='text-[red]'>
-            //         <CloseCircleOutlined className='me-2'/>
-            //         <span>
-            //             Đồ thị phải là đồ thị vô hướng
-            //         </span>
-            //     </div>,
-            // }))} expandIconPosition='end' className='h-full scrollbar-thin overflow-y-auto'/>
             children: (
-                <div className='h-full flex flex-col'>
+                <div className="h-full flex flex-col">
                     <div>
-                        <Dropdown trigger={['click']} disabled={animating} menu={{ items }}>
+                        <Dropdown
+                            trigger={['click']}
+                            disabled={animating}
+                            menu={{ items }}
+                        >
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
                                     Chọn thuật toán
@@ -120,24 +137,42 @@ export default function AlgorithmsTab()
                             </a>
                         </Dropdown>
                     </div>
-                    <Form layout='vertical' disabled={animating} form={form} onFinish={animate} className='flex-grow w-full h-full flex flex-col'>
-                        <div className='flex-grow'>
-                            <Title level={5}>{algorithm.name}</Title>
-                            {graph.vertexCount > 0 ? (error.valid ? algorithm.configNode(graph) : <InvalidMessage>{error.error}</InvalidMessage>) : (<InvalidMessage>Đồ thị không được rỗng</InvalidMessage>)}
+                    <Form
+                        layout="horizontal"
+                        disabled={animating}
+                        form={form}
+                        onFinish={animate}
+                        className="w-full h-full flex flex-col justify-start"
+                        style={{overflowY: "auto", paddingRight: "8px"}}
+                    >
+                        <Title level={5}>{algorithm.name}</Title>
+                        <div className="flex justify-between items-center">
+                            {graph.vertexCount > 0 ? (
+                                error.valid ? (
+                                    algorithm.configNode(graph)
+                                ) : (
+                                    error.errors?.map((err) => (
+                                        <InvalidMessage>{err}</InvalidMessage>
+                                    ))
+                                )
+                            ) : (
+                                <InvalidMessage>
+                                    Đồ thị không được rỗng
+                                </InvalidMessage>
+                            )}
+                            <Button
+                                block
+                                type="primary"
+                                {...(animating ? stopProps : runProps)}
+                                style={{ height: '40px', width: '80px' }}
+                            />
                         </div>
-                        <Button block type='primary' {...(animating ? stopProps : runProps)} />
+                        <PseudoCode />
                     </Form>
                 </div>
-            )
-            // children: <Button onClick={async () =>
-            // {
-            //     const result = new BFS().run(graph as UnweightedGraph);
-            //     await animator.current.run(result);
-            // }}>Test</Button>
+            ),
         },
     ];
 
-    return (
-        <Tabs items={tabs} className='expanded-tabs' />
-    );
+    return <Tabs items={tabs} className="expanded-tabs" />;
 }

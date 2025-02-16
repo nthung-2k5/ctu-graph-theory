@@ -5,9 +5,17 @@ import TraversalAlgorithm from './TraversalAlgorithm';
 
 export default class BFS extends TraversalAlgorithm
 {
+    public getInfo = {order: -1};
+    
     public get name()
     {
         return 'Duyệt theo chiều rộng (BFS)';
+    }
+
+    public numberOfStep = 0;
+
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
     }
 
     *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>

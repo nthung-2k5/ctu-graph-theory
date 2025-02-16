@@ -49,11 +49,21 @@ export default class UndirectedConnected extends GraphAlgorithm<UndirectedConnec
         }
     }
 
+    public numberOfStep = 0;
+    
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
+    }
+
     public override configNode(graph: Graph): ReactNode
     {
         return (
             <>
-                <Form.Item<UndirectedConnectedConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                <Form.Item<UndirectedConnectedConfig> 
+                    label="Đỉnh bắt đầu"
+                    name="startVertex"
+                    initialValue={1}
+                >   
                     <InputNumber min={1} max={graph.vertexCount} />
                 </Form.Item>
             </>

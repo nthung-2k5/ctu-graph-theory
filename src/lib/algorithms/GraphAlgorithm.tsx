@@ -12,6 +12,9 @@ export abstract class GraphAlgorithm<Config = object>
     {
         return (<></>);
     }
+
+    public numberOfStep = 0;
+    public currentStep = 0;
     
     public abstract predicateCheck(g: Graph): { valid: boolean, error?: string };
     public abstract run(g: Graph, config: Config): IterableIterator<AlgorithmStep>;
@@ -29,6 +32,7 @@ export interface AlgorithmStep
 {
     // description: string;
     animate: (animator: GraphAnimator) => void;
+    // pseudoText: () => void;
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

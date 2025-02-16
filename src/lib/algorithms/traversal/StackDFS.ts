@@ -3,11 +3,21 @@ import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 import Graph from '../../graphs/Graph';
 
+export const stackDfsPseudoCode = [
+    
+];
+
 export default class StackDFS extends TraversalAlgorithm
 {
     public get name()
     {
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
+    }
+
+    public numberOfStep = 0;
+    
+    public runCode(g: Graph, startVertex: any, visited: any[]) {
+
     }
 
     *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
