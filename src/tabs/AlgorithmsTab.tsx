@@ -12,8 +12,7 @@ import BFS from '../lib/algorithms/traversal/BFS';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
 import RecursionDFS from '../lib/algorithms/traversal/RecursionDFS';
 import StackDFS from '../lib/algorithms/traversal/StackDFS';
-import { PropsWithChildren, useMemo, useState } from 'react';
-import { GraphAlgorithm } from '../lib/algorithms/GraphAlgorithm';
+import { PropsWithChildren, useMemo } from 'react';
 import Title from 'antd/es/typography/Title';
 import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
 import Cycle from '../lib/algorithms/Cycle';
@@ -34,8 +33,9 @@ const algorithms = [
     'Tìm đường đi ngắn nhất (Thuật toán Floyd-Warshall)',
     'Sắp xếp topology',
     'Xếp hạng đồ thị',
-    'Tìm cây khung nhỏ nhất (Thuật toán Kruskal)',
-    'Tìm cây khung nhỏ nhất (Thuật toán Prim)',
+    'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Kruskal)',
+    'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Prim)',
+    'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)',
     'Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)',
 ];
 
@@ -49,7 +49,8 @@ export const algos = [
 ];
 
 
-const InvalidMessage = (props: PropsWithChildren) => {
+const InvalidMessage = (props: PropsWithChildren) => 
+{
     return (
         <div className="text-[red]">
             <CloseCircleOutlined className="me-2" />
@@ -58,7 +59,8 @@ const InvalidMessage = (props: PropsWithChildren) => {
     );
 };
 
-export default function AlgorithmsTab() {
+export default function AlgorithmsTab() 
+{
     const { graph, animator, animating, setAnimating } = useGraph();
     // const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const { algorithm, setAlgorithm } = useNode();
@@ -79,19 +81,26 @@ export default function AlgorithmsTab() {
         [algorithm, graph],
     );
 
-    const animate = async (values: object) => {
+    const animate = async (values: object) => 
+    {
         // console.log(values);
         algorithm.numberOfStep = 0;
         algorithm.currentStep = 0;
-        if (animating) {
+        if (animating) 
+        {
             animator.current.stop();
             setAnimating(false);
-        } else {
+        }
+        else 
+        {
             const result = algorithm.run(graph, values);
-            if (algorithm instanceof RecursionDFS) {
-                if ('_vertexCount' in graph) {
+            if (algorithm instanceof RecursionDFS) 
+            {
+                if ('_vertexCount' in graph) 
+                {
                     const visited = new Array(graph._vertexCount).fill(false);
-                    if ('startVertex' in values) {
+                    if ('startVertex' in values) 
+                    {
                         algorithm.runCode(graph, values.startVertex, visited);
                     }
                 }
@@ -148,13 +157,7 @@ export default function AlgorithmsTab() {
                         <Title level={5}>{algorithm.name}</Title>
                         <div className="flex justify-between items-center">
                             {graph.vertexCount > 0 ? (
-                                error.valid ? (
-                                    algorithm.configNode(graph)
-                                ) : (
-                                    error.errors?.map((err) => (
-                                        <InvalidMessage>{err}</InvalidMessage>
-                                    ))
-                                )
+                                error.valid ? (algorithm.configNode(graph)) : (<InvalidMessage>{error.error}</InvalidMessage>)
                             ) : (
                                 <InvalidMessage>
                                     Đồ thị không được rỗng

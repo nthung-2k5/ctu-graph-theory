@@ -17,13 +17,16 @@ export const recursionDFS: RecursionStep[] = [
     },
     {
         text: 'Tiến hành thăm đỉnh u',
-        cmt: (vertex: number, visited: Array<number>) => {
-            let marked : number[] = [];
-            visited.forEach((value, index) => {
-                if (value) {
-                  marked.push(index);
+        cmt: (vertex: number, visited: Array<number>) => 
+        {
+            const marked : number[] = [];
+            visited.forEach((value, index) => 
+            {
+                if (value) 
+                {
+                    marked.push(index);
                 }
-              });
+            });
             return [
                 `Đánh dấu đỉnh ${vertex} đã được thăm`,
                 `visited [${marked.join(', ')}] = true`
@@ -33,14 +36,16 @@ export const recursionDFS: RecursionStep[] = [
     },
     {
         text: 'Xử lý đỉnh u (ví dụ: in ra u)',
-        cmt: (order: Array<number>) => {
+        cmt: (order: Array<number>) => 
+        {
             return `Thứ tự duyệt: ${[...order].join(' -> ')}`;
         },
         tab: 0
     },
     {
         text: 'Với mỗi đỉnh kề v của u:',
-        cmt: (vertex: number, neighbours: Array<number>) => {
+        cmt: (vertex: number, neighbours: Array<number>) => 
+        {
             return [
                 `Các đỉnh kề của ${vertex}`,
                 `neighbours = [${neighbours.join(', ')}]`
@@ -50,10 +55,11 @@ export const recursionDFS: RecursionStep[] = [
     },
     {
         text: 'Nếu v chưa thăm, gọi DFS()',
-        cmt: (vertex: number, mark: boolean ) => {
+        cmt: (vertex: number, mark: boolean ) => 
+        {
             return (
                 mark ? `Đỉnh ${vertex} chưa được thăm -> Đi thăm` 
-                : `Đỉnh ${vertex} đã được thăm -> Bỏ qua`
+                    : `Đỉnh ${vertex} đã được thăm -> Bỏ qua`
             );
         },
         tab: 1   
@@ -69,34 +75,44 @@ export default class RecursionDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng đệ quy';
     }
 
-    private resetPseudoCode() {
+    private resetPseudoCode() 
+    {
         const pseudoCode = document.querySelectorAll('.pseudoCodeText');
-        pseudoCode.forEach(element => {
+        pseudoCode.forEach(element => 
+        {
             element.classList.remove('run');
         });
     }
 
-    private fillPseudoCode(order: number) {
+    private fillPseudoCode(order: number) 
+    {
         document.querySelector('.pseudoCodeContainer')?.children[order].classList.add('run');
     }
 
-    private runPseudoCode(order: number) {
+    private runPseudoCode(order: number) 
+    {
         this.resetPseudoCode();
         this.fillPseudoCode(order);
     }
 
-    private runProgressBar(currentStep: number) {
+    private runProgressBar(currentStep: number) 
+    {
         const progressBar = document.querySelector('.control-bar__progress input') as HTMLInputElement;
         progressBar.value = currentStep.toString();
-        console.log(progressBar);
+        // console.log(progressBar);
     }
 
-    private setComment(cmt: string | string[]) {
+    private setComment(cmt: string | string[]) 
+    {
         const commentWrapper = document.querySelector('.comment');
-        if (commentWrapper) {
-            if (typeof cmt === 'string') {
+        if (commentWrapper) 
+        {
+            if (typeof cmt === 'string') 
+            {
                 commentWrapper.innerHTML = cmt;
-            } else {
+            }
+            else 
+            {
                 commentWrapper.innerHTML = cmt.map(text => `<p>${text}</p>`).join('');
             }
         }
@@ -106,7 +122,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
     public override currentStep: number = 0;
 
-    public runCode(g: Graph, startVertex: any, visited: any[]) {
+    public runCode(g: Graph, startVertex: any, visited: any[]) 
+    {
         visited[startVertex] = true;
 
         this.numberOfStep += 3;
@@ -140,7 +157,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         // 1. DFS(u) -> Cho u màu đỏ
         yield { 
-            animate: animator => {
+            animate: animator => 
+            {
                 animator.colorVertex(startVertex, 'red');
             },
         };
@@ -152,7 +170,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         // 2. Tiến hành thăm u -> Tô màu nút u màu #2EBBD1
         yield { 
-            animate: animator => {
+            animate: animator => 
+            {
                 animator.advancedColorVertex(startVertex, '#2EBBD1', '#fff');
             },
         };
@@ -164,7 +183,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         // 3. Xử lý đỉnh u (Ví dụ in ra màn hình)
         yield { 
-            animate: animator => { 
+            animate: animator => 
+            { 
                 animator.advancedColorVertex(startVertex, '#F98726', '#fff') 
             }
         };
@@ -182,7 +202,8 @@ export default class RecursionDFS extends TraversalAlgorithm
             {
                 // 4. Với mỗi đỉnh kề v của u
                 yield { 
-                    animate: animator => { 
+                    animate: animator => 
+                    { 
                         animator.colorEdge(startVertex, v, 'red', g.directed);
                     }
                 };
@@ -193,7 +214,8 @@ export default class RecursionDFS extends TraversalAlgorithm
                 this.runProgressBar(++this.currentStep);
 
                 yield { 
-                    animate: animator => { 
+                    animate: animator => 
+                    { 
                         animator.colorEdge(startVertex, v, 'red', g.directed);
                     }
                 };
@@ -205,7 +227,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         visited[0] = true;
 
-        if (visited.every(value => value)) {
+        if (visited.every(value => value)) 
+        {
             this.resetPseudoCode();
             this.setComment('// Chương trình kết thúc...');
         }

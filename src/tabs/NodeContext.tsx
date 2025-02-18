@@ -2,23 +2,25 @@ import { createContext, MutableRefObject, PropsWithChildren, useContext, useRef,
 import { GraphAlgorithm } from "../lib/algorithms/GraphAlgorithm";
 import { algos } from "./AlgorithmsTab";
 import cytoscape from 'cytoscape';
+import { Color } from 'antd/es/color-picker';
+import { AggregationColor } from 'antd/es/color-picker/color';
 
 interface NodeContextType 
 {
-    nodeColor: string;
-    edgeColor: string;
-    textNumberColor: string;
+    nodeColor: Color;
+    edgeColor: Color;
+    textNumberColor: Color;
     range: string;
     nodeRadius: number;
     edgeLength: number;
     algorithm: GraphAlgorithm;
     cy: MutableRefObject<cytoscape.Core | null>;
     downloadPNG: () => void;
-    setNodeColor: (color: string) => void;
-    setEdgeColor: (color: string) => void;
+    setNodeColor: (color: Color) => void;
+    setEdgeColor: (color: Color) => void;
     setNodeRadius: (radius: number) => void;
     setEdgeLength: (length: number) => void;
-    setTextNumberColor: (color: string) => void;
+    setTextNumberColor: (color: Color) => void;
     setAlgorithm: (algo: GraphAlgorithm) => void;
     setRange: (range: string) => void;
 }
@@ -27,11 +29,11 @@ const NodeContext = createContext<NodeContextType | undefined>(undefined);
 
 export const NodeProvider: React.FC<PropsWithChildren> = ({ children }) => 
 {
-    const [nodeColor, setNodeColor] = useState("#ffffff"); // Màu nút
-    const [edgeColor, setEdgeColor] = useState("#000000"); // Màu cạnh
+    const [nodeColor, setNodeColor] = useState(new AggregationColor('#ffffff')); // Màu nút
+    const [edgeColor, setEdgeColor] = useState(new AggregationColor('#000000')); // Màu cạnh
     const [nodeRadius, setNodeRadius] = useState(30); // Kích thước nút
     const [edgeLength, setEdgeLength] = useState(100); // Độ dài cạnh
-    const [textNumberColor, setTextNumberColor] = useState('#000000'); // Màu số của nút
+    const [textNumberColor, setTextNumberColor] = useState(new AggregationColor('#000000')); // Màu số của nút
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
     const [range, setRange] = useState("0");
 
@@ -42,6 +44,7 @@ export const NodeProvider: React.FC<PropsWithChildren> = ({ children }) =>
         if (cy.current) 
         {
             const pngData = cy.current.png({ full: true }); // Lấy PNG từ Cytoscape
+            console.log(pngData);
             const img = new Image();
             img.src = pngData;
   

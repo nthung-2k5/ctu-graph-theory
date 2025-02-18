@@ -11,17 +11,21 @@ export default class GraphAnimator
 
     private _stop: boolean = false;
 
+    private _pause: boolean = false;
+
     private _colorNodeInput: HTMLInputElement | null = document.querySelector('input[name="color-node"]');
 
     private _colorEdgeInput: HTMLInputElement | null = document.querySelector('input[name="color-edge"]'); 
 
     private _colorTextNumberSelect: HTMLSelectElement | null = document.querySelector('select[name="color-text-node"]');
 
-    public setDelay(speed: number) {
+    public setDelay(speed: number) 
+    {
         this._delay = speed;
     }
 
-    public getDelay() {
+    public getDelay() 
+    {
         return this._delay;
     }
 
@@ -38,7 +42,7 @@ export default class GraphAnimator
 
     public resetAll(): GraphAnimator
     {
-        this._stop = false;
+        this._stop = this._pause = false;
         this._cy.elements().style({ 
             'background-color': this._colorNodeInput?.value,
             'color': this._colorTextNumberSelect?.value, 
@@ -89,6 +93,12 @@ export default class GraphAnimator
         return this;
     }
 
+    public pause(): GraphAnimator
+    {
+        this._pause = true;
+        return this;
+    }
+
     public async run(steps: IterableIterator<AlgorithmStep>): Promise<void>
     {
         this.resetAll();
@@ -96,6 +106,11 @@ export default class GraphAnimator
         // this._stop = false;
         for (const step of steps)
         {
+            while (this._pause)
+            {
+                if (this._stop) return;
+            }
+            
             if (this._stop) return;
 
             step.animate(this);

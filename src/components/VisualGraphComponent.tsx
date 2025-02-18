@@ -42,14 +42,14 @@ export default function VisualGraphComponent()
             .style()
             .selector("node")
             .style({
-                backgroundColor: nodeColor,
-                color: textNumberColor,
+                backgroundColor: nodeColor.toCssString(),
+                color: textNumberColor.toCssString(),
                 width: nodeRadius,
                 height: nodeRadius,
             })
             .selector("edge")
             .style({
-                "line-color": edgeColor,
+                "line-color": edgeColor.toCssString(),
                 "curve-style": "bezier",
             })
             .update();
@@ -100,11 +100,11 @@ export default function VisualGraphComponent()
                 {
                     cy.current?.layout({
                         name: "cola",
+                        // @ts-expect-error Config in cola layout
                         edgeLength: edgeLength,
                     }).run();
                 }, 100);
 
-                updateLayout();
                 updateLayout();
 
                 // Clean up function
@@ -118,26 +118,17 @@ export default function VisualGraphComponent()
     }, [elements, edgeLength]);
 
     return (
-        <>
+        <div className='border-2 border-black rounded-lg flex flex-col h-full overflow-hidden'>
             <CytoscapeComponent
-                className="my-auto border-2"
-                style={{
-                    height: 'calc(100% - 45px)',
-                    borderTopRightRadius: '4px',
-                    borderTopLeftRadius: '4px',
-                    borderTop: '2px solid black',
-                    borderLeft: '2px solid black',
-                    borderRight: '2px solid black',
-                    borderBottom: 'none'
-                }}
+                className='flex-grow'
                 elements={elements}
                 stylesheet={DefaultGraphStyle}
                 cy={assignCytoscape}
-                zoomingEnabled={false}
+                autoungrabify
                 boxSelectionEnabled={false}
             />
             <ControlBar animator={animator} />
-        </>
+        </div>
     );
 }
 
@@ -151,7 +142,7 @@ const DefaultGraphStyle: Stylesheet[] = [
             "label": "data(label)",
             backgroundColor: '#F8FAFC',
             "border-style": "solid",
-            "border-width": '3rem',
+            "border-width": '2rem',
             "border-color": "#000",
         }
     },
@@ -159,7 +150,7 @@ const DefaultGraphStyle: Stylesheet[] = [
         selector: 'edge',
         style: {
             "line-color": '#000',
-            width: '3rem',
+            width: '2rem',
             "curve-style": "bezier"
         }
     },

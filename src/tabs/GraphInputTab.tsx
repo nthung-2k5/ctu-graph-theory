@@ -35,7 +35,7 @@ export default function GraphInputTab()
             items={[
                 {
                     key: "1",
-                    label: "Nhập đồ thị",
+                    label: "Thiết lập đồ thị",
                     children: (
                         <div className="flex flex-col h-full">
                             <div className="flex">
