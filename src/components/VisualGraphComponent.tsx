@@ -18,6 +18,7 @@ cytoscape.use(automove);
 
 export default function VisualGraphComponent() {
   const { graph, animator } = useGraph();
+  console.log(graph);
 //   const cy = useRef<cytoscape.Core | null>(null);
   const elements = useMemo(() => graph.toGraph(), [graph]);
 
