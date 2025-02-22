@@ -1,35 +1,29 @@
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, MenuProps } from 'antd';
 import { useMemo, useState } from 'react';
-import { useGraph } from '../lib/GraphContext';
 import LabeledNumber from './LabeledNumber';
-import GraphConverter from '../lib/graphs/unweighted/GraphConverter';
 import UnweightedGraph from '../lib/graphs/unweighted/UnweightedGraph';
+import EdgeList from '../lib/graphs/unweighted/EdgeList';
+import AdjacencyMatrix from '../lib/graphs/unweighted/AdjacencyMatrix';
+import AdjacencyList from '../lib/graphs/unweighted/AdjacencyList';
+import IncidenceMatrix from '../lib/graphs/unweighted/IncidenceMatrix';
+import { useAppSelector } from '../lib/context/hooks';
+import { toGraph } from '../lib/graphs/Graph';
 
 const graphTypes = ["Danh sách cạnh", "Ma trận kề", "Danh sách kề", "Ma trận liên thuộc"];
 const graphItems: MenuProps['items'] = graphTypes.map((val, i) => ({ label: <span>{val}</span>, key: i.toString() }));
 
+const graphConstructors: (new(n: number, directed: boolean) => UnweightedGraph)[] = [EdgeList, AdjacencyMatrix, AdjacencyList, IncidenceMatrix];
+
 export default function MemoryGraphComponent() 
 {
-    const { graph } = useGraph();
+    const { vertexCount, edges, directed } = useAppSelector(state => state.graph);
     const [graphType, setGraphType] = useState(0);
     
     const convertedGraph = useMemo(() =>
     {
-        switch (graphType)
-        {
-            case 0:
-                return GraphConverter.toEdgeList(graph as UnweightedGraph);
-            case 1:
-                return GraphConverter.toAdjacencyMatrix(graph as UnweightedGraph);
-            case 2:
-                return GraphConverter.toAdjacencyList(graph as UnweightedGraph);
-            case 3:
-                return GraphConverter.toIncidenceMatrix(graph as UnweightedGraph);
-            default:
-                throw new Error("Invalid graph type");
-        }
-    }, [graph, graphType]); 
+        return toGraph(graphConstructors[graphType], edges, vertexCount, directed, false);
+    }, [graphType, vertexCount, edges, directed]);
 
     return (
         <div className='flex flex-col w-full h-full'>
@@ -42,8 +36,8 @@ export default function MemoryGraphComponent()
                 <div className='flex'>
                     { convertedGraph.toMemoryGraph() }
                     <div className='flex-shrink ms-24 text-center'>
-                        <LabeledNumber label='n' value={graph.vertexCount} />
-                        <LabeledNumber label='m' value={graph.edgeCount} />
+                        <LabeledNumber label='n' value={vertexCount} />
+                        <LabeledNumber label='m' value={edges.length} />
                     </div>
                 </div>
             </div>

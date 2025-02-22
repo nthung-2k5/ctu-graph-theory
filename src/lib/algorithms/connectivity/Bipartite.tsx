@@ -1,7 +1,8 @@
 import { Form, InputNumber, Select } from 'antd';
 import { ReactNode } from 'react';
-import Graph from '../graphs/Graph';
-import { GraphAlgorithm, AlgorithmStep } from './GraphAlgorithm';
+import Graph from '../../graphs/Graph';
+import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
+import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 
 export interface BipartiteConfig
 {
@@ -28,16 +29,18 @@ enum Color
     Red = 1
 }
 
-export default class Bipartite extends GraphAlgorithm<BipartiteConfig>
+export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig>
 {
+    public override get pseudocode(): PseudocodeLine[] 
+    {
+        return [
+
+        ];
+    }
+
     public get name(): string
     {
         return 'Kiểm tra đồ thị phân đôi';
-    }
-
-    public predicateCheck(): { valid: boolean; error?: string; }
-    {
-        return { valid: true };
     }
 
     private *_colorize(g: Graph, u: number, color: Color, ctx: BipartiteContext): IterableIterator<AlgorithmStep>
@@ -66,24 +69,18 @@ export default class Bipartite extends GraphAlgorithm<BipartiteConfig>
         }
     }
 
-    public numberOfStep = 0;
-    
-    public runCode(g: Graph, startVertex: any, visited: any[]) {
-
-    }
-
     public *run(g: Graph, config: BipartiteConfig): IterableIterator<AlgorithmStep>
     {
         const ctx = new BipartiteContext(g);
         yield* this._colorize(g, config.startVertex, config.startColor, ctx);
     }
 
-    public override configNode(graph: Graph): ReactNode
+    public override configNode(vertexCount: number): ReactNode
     {
         return (
             <>
                 <Form.Item<BipartiteConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={graph.vertexCount} />
+                    <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
                 <Form.Item<BipartiteConfig> label="Màu đỉnh đầu tiên" name="startColor" initialValue={Color.Blue}>
                     <Select options={[{ value: Color.Blue, label: <p className='text-[blue]'>Xanh</p> }, { value: Color.Red, label: <p className='text-[red]'>Đỏ</p> }]} />

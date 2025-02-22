@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { AlgorithmStep, GraphAlgorithm } from '../GraphAlgorithm';
+import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Checkbox, Form, InputNumber } from 'antd';
 import Graph from '../../graphs/Graph';
 
@@ -9,13 +9,8 @@ export interface TraversalConfig
     traverseAll: boolean;
 }
 
-export default abstract class TraversalAlgorithm extends GraphAlgorithm<TraversalConfig>
+export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<TraversalConfig>
 {
-    public predicateCheck(): { valid: boolean; error?: string; }
-    {
-        return { valid: true };
-    }
-
     protected abstract _traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>;
 
     public *run(g: Graph, config: TraversalConfig): IterableIterator<AlgorithmStep>
@@ -35,18 +30,18 @@ export default abstract class TraversalAlgorithm extends GraphAlgorithm<Traversa
         }
     }
 
-    public override configNode(graph: Graph): ReactNode
+    public override configNode(vertexCount: number): ReactNode
     {
         return (
             <>
-                <div className="flex items-center space-x-4 gap-8">
+                {/* <div className="flex items-center space-x-4 gap-8">
                     <Form.Item<TraversalConfig>
                         style={{ marginBottom: '5px'}}
                         name="startVertex"
                         initialValue={1}
                         label="Đỉnh bắt đầu"
                     >
-                        <InputNumber min={1} max={graph.vertexCount} />
+                        <InputNumber min={1} max={vertexCount} />
                     </Form.Item>
                     <Form.Item<TraversalConfig> 
                         name="traverseAll"
@@ -55,13 +50,13 @@ export default abstract class TraversalAlgorithm extends GraphAlgorithm<Traversa
                     >
                         <Checkbox>Duyệt tất cả các đỉnh</Checkbox>
                     </Form.Item>
-                </div>
-                {/* <Form.Item<TraversalConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={graph.vertexCount} />
+                </div> */}
+                <Form.Item<TraversalConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                    <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
                 <Form.Item<TraversalConfig> name="traverseAll" valuePropName="checked">
                     <Checkbox>Duyệt tất cả các đỉnh</Checkbox>
-                </Form.Item> */}
+                </Form.Item>
             </>
         )
     }

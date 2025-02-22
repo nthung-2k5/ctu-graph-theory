@@ -1,7 +1,7 @@
 import Graph from '../../graphs/Graph';
+import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
-import { useNode } from '../../../tabs/NodeContext';
 
 type RecursionStep = {
     text: string;
@@ -68,7 +68,18 @@ export const recursionDFS: RecursionStep[] = [
 
 export default class RecursionDFS extends TraversalAlgorithm
 {
-    public getInfo = { order: -1 };
+    public override get pseudocode(): PseudocodeLine[] 
+    {
+        return [
+            { text: 'DFS(u)', tab: 0 },
+            { text: 'if (u đã duyệt)', tab: 1 },
+            { text: 'return', tab: 2 },
+            { text: 'Duyệt u', tab: 1 },
+            { text: 'Đánh dấu u đã duyệt', tab: 1 },
+            { text: 'for (đỉnh kề v chưa duyệt của u)', tab: 1 },
+            { text: 'DFS(v)', tab: 2 },
+        ];
+    }
 
     public get name()
     {
@@ -95,13 +106,6 @@ export default class RecursionDFS extends TraversalAlgorithm
         this.fillPseudoCode(order);
     }
 
-    private runProgressBar(currentStep: number) 
-    {
-        const progressBar = document.querySelector('.control-bar__progress input') as HTMLInputElement;
-        progressBar.value = currentStep.toString();
-        // console.log(progressBar);
-    }
-
     private setComment(cmt: string | string[]) 
     {
         const commentWrapper = document.querySelector('.comment');
@@ -117,33 +121,6 @@ export default class RecursionDFS extends TraversalAlgorithm
             }
         }
     }
-
-    public override numberOfStep: number = 0;
-
-    public override currentStep: number = 0;
-
-    public runCode(g: Graph, startVertex: any, visited: any[]) 
-    {
-        visited[startVertex] = true;
-
-        this.numberOfStep += 3;
-
-        const neighbors = g.neighbors(startVertex);
-        
-        this.numberOfStep++;
-
-        for (const v of neighbors)
-        {
-            if (!visited[v])
-            {
-                this.numberOfStep++;
-                // console.log(this.numberOfStep);
-                this.runCode(g, v, visited);
-            }
-        }
-
-        visited[0] = true;
-    }
     
     *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
@@ -153,7 +130,7 @@ export default class RecursionDFS extends TraversalAlgorithm
         // Chạy mã giả 1
         this.runPseudoCode(0);
         this.setComment(recursionDFS[0].cmt(startVertex));
-        this.runProgressBar(++this.currentStep);
+        // this.runProgressBar(++this.currentStep);
 
         // 1. DFS(u) -> Cho u màu đỏ
         yield { 
@@ -166,7 +143,7 @@ export default class RecursionDFS extends TraversalAlgorithm
         // Chạy mã giã 2
         this.runPseudoCode(1);
         this.setComment(recursionDFS[1].cmt(startVertex, visited));
-        this.runProgressBar(++this.currentStep);
+        // this.runProgressBar(++this.currentStep);
 
         // 2. Tiến hành thăm u -> Tô màu nút u màu #2EBBD1
         yield { 
@@ -179,7 +156,7 @@ export default class RecursionDFS extends TraversalAlgorithm
         // Chạy mã giã 3
         this.runPseudoCode(2);
         this.setComment(recursionDFS[2].cmt([1, 2, 3, 4]));
-        this.runProgressBar(++this.currentStep);
+        // this.runProgressBar(++this.currentStep);
 
         // 3. Xử lý đỉnh u (Ví dụ in ra màn hình)
         yield { 
@@ -193,7 +170,7 @@ export default class RecursionDFS extends TraversalAlgorithm
         // Chạy mã giã 4
         this.runPseudoCode(3);
         this.setComment(recursionDFS[3].cmt(startVertex, neighbors));
-        this.runProgressBar(++this.currentStep);
+        // this.runProgressBar(++this.currentStep);
 
 
         for (const v of neighbors)
@@ -211,7 +188,7 @@ export default class RecursionDFS extends TraversalAlgorithm
                 // Chạy mã giã 5
                 this.runPseudoCode(4);
                 this.setComment(recursionDFS[4].cmt(v, visited));
-                this.runProgressBar(++this.currentStep);
+                // this.runProgressBar(++this.currentStep);
 
                 yield { 
                     animate: animator => 

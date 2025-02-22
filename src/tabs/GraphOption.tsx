@@ -1,83 +1,71 @@
 import "../index.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons";
-import { Button, Col, ColorPicker, Row, Slider } from "antd";
-import { useNode } from "./NodeContext";
+import { FaQuestion } from "react-icons/fa6";
+import { Col, ColorPicker, Row, Slider } from "antd";
+import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
+import { setEdgeColor, setEdgeLength, setLabelColor, setNodeColor, setNodeRadius } from '../lib/context/graphConfigSlice';
 
 export default function GraphOption() 
 {
-    const {
-        nodeColor,
-        edgeColor,
-        textNumberColor,
-        setNodeColor,
-        setEdgeColor,
-        setTextNumberColor,
-        nodeRadius,
-        setNodeRadius,
-        edgeLength,
-        setEdgeLength,
-        downloadPNG
-    } = useNode();
+    const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
+    const dispatch = useAppDispatch();
 
     return (
-        <div className='bg-white rounded-lg border w-full px-8 py-4'>
+        <div className='bg-white rounded-lg border min-w-72 px-8 py-4'>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
-                        <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+                        <FaQuestion className="option-icon" />
                         Bán kính nút
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center justify-center">
-                    <Slider min={20} max={60} value={nodeRadius} onChange={setNodeRadius} className='w-full' />
+                    <Slider min={20} max={60} value={nodeRadius} onChange={(value) => dispatch(setNodeRadius(value))} className='w-full' />
                 </Col>
             </Row>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
-                        <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+                        <FaQuestion className="option-icon" />
                         Độ dài cung
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center justify-center">
-                    <Slider min={50} max={250} value={edgeLength} onChange={setEdgeLength} className='w-full' />
+                    <Slider min={50} max={250} value={edgeLength} onChange={(value) => dispatch(setEdgeLength(value))} className='w-full' />
                 </Col>
             </Row>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
-                        <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+                        <FaQuestion className="option-icon" />
                         Màu nút
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={nodeColor} onChangeComplete={setNodeColor} showText />
+                    <ColorPicker value={nodeColor} onChangeComplete={(value) => { dispatch(setNodeColor(value.toCssString())); }} showText />
                 </Col>
             </Row>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
-                        <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+                        <FaQuestion className="option-icon" />
                         Màu cạnh
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={edgeColor} onChangeComplete={setEdgeColor} showText />
+                    <ColorPicker value={edgeColor} onChangeComplete={(value) => dispatch(setEdgeColor(value.toCssString()))} showText />
                 </Col>
             </Row>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
-                        <FontAwesomeIcon icon={faQuestion} className="option-icon" />
+                        <FaQuestion className="option-icon" />
                         Màu số
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={textNumberColor} onChangeComplete={setTextNumberColor} showText />
+                    <ColorPicker value={labelColor} onChangeComplete={(value) => dispatch(setLabelColor(value.toCssString()))} showText />
                 </Col>
             </Row>
-            <Button className='w-full' type='primary' onClick={downloadPNG}>Tải xuống dưới dạng PNG</Button>
         </div>
     );
 }

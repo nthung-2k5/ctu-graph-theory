@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
-import { AlgorithmStep, GraphAlgorithm } from './GraphAlgorithm';
+import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Form, InputNumber } from 'antd';
-import Graph from '../graphs/Graph';
+import Graph from '../../graphs/Graph';
+import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 
 export interface CycleConfig
 {
@@ -30,16 +31,18 @@ class CycleContext
     }
 }
 
-export default class Cycle extends GraphAlgorithm<CycleConfig>
+export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
 {
+    public override get pseudocode(): PseudocodeLine[] 
+    {
+        return [
+
+        ];
+    }
+
     public get name(): string
     {
         return 'Kiểm tra đồ thị chứa chu trình';
-    }
-
-    public predicateCheck(): { valid: boolean; error?: string; }
-    {
-        return { valid: true };
     }
 
     private *_dfs(g: Graph, u: number, ctx: CycleContext): IterableIterator<AlgorithmStep>
@@ -91,18 +94,12 @@ export default class Cycle extends GraphAlgorithm<CycleConfig>
         }
     }
 
-    public numberOfStep = 0;
-    
-    public runCode(g: Graph, startVertex: any, visited: any[]) {
-
-    }
-
-    public override configNode(graph: Graph): ReactNode
+    public override configNode(vertexCount: number): ReactNode
     {
         return (
             <>
                 <Form.Item<CycleConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={graph.vertexCount} />
+                    <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
             </>
         )

@@ -1,120 +1,105 @@
-import { useEffect, useMemo } from "react";
-import { useGraph } from "../lib/GraphContext";
+import { useEffect, useMemo, useRef } from "react"
 import CytoscapeComponent from "react-cytoscapejs";
-import cytoscape, { Stylesheet } from "cytoscape";
+import cytoscape, { ElementDefinition, Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
 import cola from "cytoscape-cola";
-import GraphAnimator from "../lib/GraphAnimator";
-import { useNode } from "../tabs/NodeContext";
 
-// Khắc phục lag, giới hạn số lần re-render lại theo thời gian khi cập nhật độ dài cạnh
-import debounce from "lodash.debounce";
 import ControlBar from "./ControlBar";
+import { useAppSelector } from '../lib/context/hooks';
 
 cytoscape.use(cola);
 
 export default function VisualGraphComponent() 
 {
-    const { graph, animator } = useGraph();
-    //   const cy = useRef<cytoscape.Core | null>(null);
-    const elements = useMemo(() => graph.toGraph(), [graph]);
+    const cy = useRef<cytoscape.Core>(null!);
+    const { graph } = useAppSelector(state => state.animation);
+    const { vertexCount, edges, directed } = useAppSelector(state => state.graph);
+    const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
 
-    const { nodeColor, edgeColor, textNumberColor, nodeRadius, edgeLength, cy } = useNode();
-
-    const assignCytoscape = (cyCore: cytoscape.Core) => 
+    const assignCytoscape = (core: cytoscape.Core) =>
     {
-        cy.current = cyCore;
+        cy.current = core;
+        graph.setCytoscape(core);
+    };
 
-        if (animator.current === null)
+    const downloadPNG = () => 
+    {
+        const pngData = cy.current.png({ full: true }); // Lấy PNG từ Cytoscape
+        const img = new Image();
+        img.src = pngData;
+    
+        img.onload = () => 
         {
-            animator.current = new GraphAnimator(cy.current!);
-            return;
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width + 100; // 100px = padding: 100px
+            canvas.height = img.height + 100;
+    
+            const ctx = canvas.getContext('2d');
+            if (ctx) 
+            {
+                // Vẽ background màu trắng
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+                // Vẽ ảnh Cytoscape lên canvas, ảnh này được vẽ ra chính giữa nên công thức phức tạp 
+                const x = (canvas.width - img.width) / 2;
+                const y = (canvas.height - img.height) / 2;
+                ctx.drawImage(img, x, y);
+    
+                // Tạo link tải xuống
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'graph.png';
+                link.click();
+            }
+        };
+    };
+
+    const elements = useMemo(() =>
+    {
+        const elements: ElementDefinition[] = [];
+            
+        for (let i = 1; i <= vertexCount; i++) 
+        {
+            elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
         }
 
-        animator.current.setCytoscape(cy.current!);
-    };
+        for (let i = 0; i < edges.length; i++)
+        {
+            const edge = edges[i];
+            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' });
+        }
 
-    const updateGraphStyle = () => 
-    {
-        if (!cy.current) return;
-    
-        cy.current
-            .style()
-            .selector("node")
-            .style({
-                backgroundColor: nodeColor.toCssString(),
-                color: textNumberColor.toCssString(),
-                width: nodeRadius,
-                height: nodeRadius,
-            })
-            .selector("edge")
-            .style({
-                "line-color": edgeColor.toCssString(),
-                "curve-style": "bezier",
-            })
-            .update();
-    };
-
-    useEffect(() => 
-    {
-        updateGraphStyle();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodeColor, edgeColor, nodeRadius, textNumberColor]);
+        return elements;
+    }, [vertexCount, edges, directed]);
 
     useEffect(() =>
     {
-        // cy.current?.on('mouseover', 'node', (e) =>
-        // {
-        //     if (e.target === null) return;
-        //     if (e.target === cy.current) return;
-        //     e.cy.startBatch();
+        cy.current.style().selector('node').style({ backgroundColor: nodeColor }).update();
+    }, [nodeColor]);
 
-        //     const sel = (e.target as cytoscape.NodeSingular).addClass('highlight');
-        //     const edgesAndVertices = sel.outgoers();
-        //     if (!graph.directed) edgesAndVertices.add(sel.incomers());
-            
-        //     edgesAndVertices.addClass('highlight');
-        //     e.cy.endBatch();
-        // }).on('mouseout', 'node', (e) =>
-        // {
-        //     if (e.target === null) return;
-        //     if (e.target === cy.current) return;
-        //     e.cy.startBatch();
+    useEffect(() =>
+    {
+        cy.current.style().selector('node').style({ color: labelColor }).update();
+    }, [labelColor]);
 
-        //     const sel = (e.target as cytoscape.NodeSingular).removeClass('highlight');
-        //     const edgesAndVertices = sel.outgoers();
-        //     if (!graph.directed) edgesAndVertices.add(sel.incomers());
-            
-        //     edgesAndVertices.removeClass('highlight');
-        //     e.cy.endBatch();
-        // });
-    }, [graph]);
+    useEffect(() =>
+    {
+        cy.current.style().selector('node').style({ width: nodeRadius, height: nodeRadius }).update();
+    }, [nodeRadius]);
+
+    useEffect(() =>
+    {
+        cy.current.style().selector('edge').style({ 'line-color': edgeColor }).update();
+    }, [edgeColor]);
 
     useEffect(() => 
     {
-        if (cy.current) 
-        {
-            if (cy.current) 
-            {
-                const updateLayout = debounce(() => 
-                {
-                    cy.current?.layout({
-                        name: "cola",
-                        // @ts-expect-error Config in cola layout
-                        edgeLength: edgeLength,
-                    }).run();
-                }, 100);
-
-                updateLayout();
-
-                // Clean up function
-                return () => 
-                {
-                    updateLayout.cancel();
-                };
-            }
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        cy.current.layout({
+            name: "cola",
+            // @ts-expect-error Config in cola layout
+            edgeLength: edgeLength,
+        }).run();
     }, [elements, edgeLength]);
 
     return (
@@ -127,7 +112,7 @@ export default function VisualGraphComponent()
                 autoungrabify
                 boxSelectionEnabled={false}
             />
-            <ControlBar animator={animator} />
+            <ControlBar onDownloadClicked={downloadPNG}/>
         </div>
     );
 }

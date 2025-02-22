@@ -1,34 +1,34 @@
 import { Button, Segmented, Switch, Tabs } from "antd";
 import { Editor } from "prism-react-editor";
 import { BasicSetup } from "prism-react-editor/setups";
-import { useRef, useState } from "react";
-import { useGraph } from "../lib/GraphContext";
-import GraphParser from "../lib/GraphParser";
+import { useEffect, useRef, useState } from "react";
 
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
 import "prism-react-editor/search.css";
-// import PseudoCode from "./PseudoCode";
-import GraphOption from "./GraphOption";
+// import GraphOption from "./GraphOption";
 import QueueDisplay, { QueueDisplayHandle } from '../components/data_structures/QueueDisplay';
 import StackDisplay, { StackDisplayHandle } from '../components/data_structures/StackDisplay';
 import ListDisplay, { ListDisplayHandle } from '../components/data_structures/ListDisplay';
+import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
+import { setDirected, setGraph } from '../lib/context/graphSlice';
 
 export default function GraphInputTab() 
 {
-    const directed = useRef(false);
     const [input, setInput] = useState('');
     const [weighted, setWeighted] = useState(false);
-    const { animating, setGraph } = useGraph();
+    const { animating } = useAppSelector(state => state.animation);
+
+    const dispatch = useAppDispatch();
+
     const queueRef = useRef<QueueDisplayHandle>(null!);
     const stackRef = useRef<StackDisplayHandle>(null!);
     const listRef = useRef<ListDisplayHandle>(null!);
 
-    const onInputUpdate = (input: string) => 
+    useEffect(() =>
     {
-        setInput(input);
-        setGraph(GraphParser.parseUnweighted(input, directed.current));
-    };
+        dispatch(setGraph({ input, weighted: false }))
+    }, [dispatch, input]);
 
     return (
         <Tabs
@@ -42,11 +42,7 @@ export default function GraphInputTab()
                                 <Segmented
                                     disabled={animating}
                                     options={["Vô hướng", "Có hướng"]}
-                                    onChange={(type) => 
-                                    {
-                                        directed.current = type === "Có hướng";
-                                        onInputUpdate(input);
-                                    }}
+                                    onChange={(type) => dispatch(setDirected(type === "Có hướng"))}
                                     className="mb-2 w-full"
                                     block
                                     defaultValue="Vô hướng"
@@ -58,25 +54,24 @@ export default function GraphInputTab()
                                 <Switch
                                     disabled={animating}
                                     className="ml-2"
-                                    onClick={(check) => setWeighted(check)}
+                                    onClick={setWeighted}
                                 />
                             </div>
 
                             <Editor
-                                value=""
+                                value={input}
                                 readOnly={animating}
                                 style={{
                                     borderWidth: "1px",
                                     flexGrow: "1",
                                     borderRadius: "0.5rem",
-                                    marginBottom: "8px",
                                 }}
-                                onUpdate={onInputUpdate}
+                                onUpdate={setInput}
                                 language=""
                             >
                                 {(editor) => <BasicSetup editor={editor} />}
                             </Editor>
-                            <GraphOption/>
+                            {/* <GraphOption/> */}
                         </div>
                     ),
                 },
