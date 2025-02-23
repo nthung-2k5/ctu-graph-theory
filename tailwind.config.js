@@ -12,6 +12,9 @@ export default {
         'border': colors.gray[400],
       }
     },
+    fontFamily: {
+      'mono': ['Jetbrains\\ Mono']
+    }
   },
   plugins: [require('tailwind-scrollbar')],
 }

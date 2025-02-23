@@ -1,23 +1,31 @@
 import { ReactNode } from 'react';
-import { AlgorithmStep, GraphAlgorithm, MustBeUndirectedError } from './GraphAlgorithm';
+import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Form, InputNumber } from 'antd';
-import Graph from '../graphs/Graph';
+import Graph from '../../graphs/Graph';
+import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 
 export interface UndirectedConnectedConfig
 {
     startVertex: number;
 }
 
-export default class UndirectedConnected extends GraphAlgorithm<UndirectedConnectedConfig>
+export default class UndirectedConnected extends NeutralGraphAlgorithm<UndirectedConnectedConfig>
 {
+    public override get pseudocode(): PseudocodeLine[] 
+    {
+        return [
+
+        ];
+    }
+
     public get name(): string
     {
         return 'Kiểm tra đồ thị vô hướng liên thông';
     }
 
-    public predicateCheck(g: Graph): { valid: boolean; errors?: string[]; }
+    public override get predicate(): AlgorithmRequirements 
     {
-        return { valid: !g.directed, errors: [MustBeUndirectedError] };
+        return { ...super.predicate, directed: false };
     }
 
     private *_dfs(g: Graph, u: number, visited: boolean[]): IterableIterator<AlgorithmStep>
@@ -49,24 +57,16 @@ export default class UndirectedConnected extends GraphAlgorithm<UndirectedConnec
         }
     }
 
-    public numberOfStep = 0;
-    
-    public runCode(g: Graph, startVertex: any, visited: any[]) {
-
-    }
-
-    public override configNode(graph: Graph): ReactNode
+    public override configNode(vertexCount: number): ReactNode
     {
         return (
-            <>
-                <Form.Item<UndirectedConnectedConfig> 
-                    label="Đỉnh bắt đầu"
-                    name="startVertex"
-                    initialValue={1}
-                >   
-                    <InputNumber min={1} max={graph.vertexCount} />
-                </Form.Item>
-            </>
+            <Form.Item<UndirectedConnectedConfig> 
+                label="Đỉnh bắt đầu"
+                name="startVertex"
+                initialValue={1}
+            >   
+                <InputNumber min={1} max={vertexCount} />
+            </Form.Item>
         )
     }
 }

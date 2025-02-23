@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=K2D:wght@800&family=Readex+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -36,45 +37,16 @@ html, body {
   display: inline-block;
 }
 
-.option-input-number,
-.option-input-color {
-  border-width: 1px;
-  border-radius: 4px;
-  padding-left: 4px;
-  width: 100px;
-  height: 30px;
-  display: block;
-  margin: auto;
-}
-
-.option-input-color {
-  padding: 0;
-}
-
-.option-button {
-  color: #fff;
-  background-color: #1f5ca9;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  display: block;
-  margin: auto;
-  margin-top: 20px;
-  transition: .3s;
-  font-size: 14px;
-}
-
-.option-button:hover {
-  opacity: .8;
-  transition: .3s;
-}
-
 .comment {
   font-size: 14px;
   color: #555;
   font-style: italic;
   line-height: 1.4;
   height: 50px;
+}
+
+.control-bar-icon {
+  @apply text-white text-2xl hover:text-blue-400 transition-colors cursor-pointer;  
 }
 
 .pseudoComponent {
@@ -91,33 +63,10 @@ html, body {
   flex-grow: 1;
 }
 
-.pseudoCodeContainer {
-  padding: 18px;
-  background-color: #f7f7f7;
-  /* border-radius: 8px; */
-  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
-  /* overflow-y: scroll; */
-}
-
-.pseudoCodeText {
-  /* font-family: 'Courier New', monospace; */
-  font-size: 16px;
-  line-height: 1.6;
-  color: #333;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  padding: 5px 10px;
-  margin: 4px 0px;
-}
-
 .pseudoCodeText.run {
   background-color: #0D47A1;
   color: #fff;
   transition: .2s;
-}
-
-input, select {
-  cursor: pointer;
 }
 
 .input-range {
@@ -146,27 +95,6 @@ input, select {
   height: var(--size);
   box-shadow: calc(-300px + var(--size)) 0 0 calc(300px - var(--size)) #1DB8F1;
   background-color: #777;
-}
-
-.control-bar-container {
-  --margin-top: 0px;
-  height: calc(45px - var(--margin-top));
-  padding: 12px 20px;
-  margin-top: var(--margin-top);
-  margin-bottom: 16px;
-  background-color: #0D47A1;
-  border-left: 2px solid black;
-  border-right: 2px solid black;
-  border-bottom: 2px solid black;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.control-bar__seed-number {
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: -3px;
 }
 
 .control-bar__icon {

@@ -1,6 +1,5 @@
 import Edge from './Edge';
 import Graph from '../Graph';
-import { ElementDefinition } from 'cytoscape';
 import { ReactNode } from 'react';
 
 export default abstract class UnweightedGraph implements Graph
@@ -51,25 +50,6 @@ export default abstract class UnweightedGraph implements Graph
     {
         this._directed = directed;
         this._vertexCount = n;
-    }
-
-    toGraph(): ElementDefinition[]
-    {
-        const elements: ElementDefinition[] = [];
-
-        for (let i = 1; i <= this._vertexCount; i++) 
-        {
-            elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
-        }
-
-        const edges = this.edges;
-        for (let i = 0; i < edges.length; i++)
-        {
-            const edge = this.edges[i];
-            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: this._directed ? 'directed' : '' });
-        }
-
-        return elements;
     }
 
     abstract toMemoryGraph(): ReactNode;
@@ -135,29 +115,25 @@ export default abstract class UnweightedGraph implements Graph
 
     equals(other: Graph): boolean
     {
-        if (other.weighted || this.directed !== other.directed) 
+        if (other instanceof UnweightedGraph &&
+            this.directed === other.directed &&
+            this.vertexCount === other.vertexCount &&
+            this.edgeCount === other.edgeCount)
         {
-            return false;
-        }
+            const edges = this.edges;
+            const otherEdges = other.edges;
 
-        const otherGraph = other as UnweightedGraph;
-
-        if (this.vertexCount !== otherGraph.vertexCount || this.edgeCount !== otherGraph.edgeCount) 
-        {
-            return false;
-        }
-
-        const edges = this.edges;
-        const otherEdges = otherGraph.edges;
-
-        for (let i = 0; i < edges.length; i++) 
-        {
-            if (edges[i].u !== otherEdges[i].u || edges[i].v !== otherEdges[i].v) 
+            for (let i = 0; i < edges.length; i++) 
             {
-                return false;
+                if (edges[i].u !== otherEdges[i].u || edges[i].v !== otherEdges[i].v) 
+                {
+                    return false;
+                }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 }

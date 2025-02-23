@@ -1,18 +1,19 @@
-import { Tabs } from 'antd';
+import { Popover, Tabs } from 'antd';
 import VisualGraphComponent from '../components/VisualGraphComponent';
 import MemoryGraphComponent from '../components/MemoryGraphComponent';
-import { useGraph } from '../lib/GraphContext';
+import { useAppSelector } from '../lib/context/hooks';
+import { FaGear } from 'react-icons/fa6';
+import GraphOption from './GraphOption';
 
 export default function GraphDisplayTab() 
 {
-    const { animating } = useGraph();
+    const { animating } = useAppSelector(state => state.animation);
     return (
         <Tabs items={[
             {
                 key: '1',
                 label: 'Biểu diễn trực quan',
                 children: <VisualGraphComponent/>,
-                destroyInactiveTabPane: true
             },
             {
                 key: '2',
@@ -20,6 +21,10 @@ export default function GraphDisplayTab()
                 children: <MemoryGraphComponent/>,
                 disabled: animating
             }
-        ]} className='expanded-tabs'/>
+        ]} tabBarExtraContent={(
+            <Popover content={<GraphOption/>} color='white' placement='bottom'>
+                <FaGear className='text-xl'/>
+            </Popover>
+        )} className='expanded-tabs'/>
     );
 }

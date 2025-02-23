@@ -1,10 +1,14 @@
+import { ReactNode } from 'react';
+import Graph from '../Graph';
 import Edge from './Edge';
 
-export default abstract class WeightedGraph
+export default abstract class WeightedGraph implements Graph
 {
     private _directed: boolean;
 
     private _vertexCount: number;
+
+    private _edgeCount: number = 0;
 
     get directed() 
     {
@@ -20,6 +24,34 @@ export default abstract class WeightedGraph
     {
         this._directed = directed;
         this._vertexCount = n;
+    }
+
+    get edges(): Edge[]
+    {
+        const edgeSort = (a: Edge, b: Edge) => a.u - b.u || a.v - b.v || a.weight - b.weight;
+
+        let edges = [...this._directed ? this._getEdgesDirected() : this._getEdgesUndirected()];
+        if (!this.directed)
+        {
+            edges = edges.map(e => e.u > e.v ? { u: e.v, v: e.u, weight: e.weight } : e);
+        }
+
+        return edges.sort(edgeSort).map(({ u, v, weight }) => ({ u: u + 1, v: v + 1, weight }));
+    }
+
+    protected abstract _getEdgesUndirected(): IterableIterator<Edge>;
+    protected abstract _getEdgesDirected(): IterableIterator<Edge>;
+
+    abstract toMemoryGraph(): ReactNode;
+
+    get weighted(): boolean 
+    {
+        return true;
+    }
+
+    get edgeCount(): number 
+    {
+        return this._edgeCount;
     }
 
     addEdge(e: Edge): void 
@@ -49,7 +81,7 @@ export default abstract class WeightedGraph
     protected abstract _weightUndirected(u: number, v: number): number | null;
     protected abstract _weightDirected(u: number, v: number): number | null;
 
-    neighbors(u: number): { v: number, weight: number }[]
+    neighbors(u: number): number[]
     {
         this._assertVertex(u);
 
@@ -59,7 +91,7 @@ export default abstract class WeightedGraph
             const weight = this.weight(u, v);
             if (weight !== null)
             {
-                neighbors.push({ v, weight });
+                neighbors.push(v);
             }
         }
 
@@ -76,24 +108,27 @@ export default abstract class WeightedGraph
         throw new Error(`Vertex ${u} is out of range`);
     }
 
-    equals(other: WeightedGraph)
+    equals(other: Graph): boolean
     {
-        if (this._vertexCount !== other._vertexCount || this._directed !== other._directed) 
+        if (other instanceof WeightedGraph &&
+            this.directed === other.directed &&
+            this.vertexCount === other.vertexCount &&
+            this.edgeCount === other.edgeCount)
         {
-            return false;
-        }
+            const edges = this.edges;
+            const otherEdges = other.edges;
 
-        const edges = this.edges;
-        const otherEdges = other.edges;
-
-        for (let i = 0; i < edges.length; i++) 
-        {
-            if (edges[i].u !== otherEdges[i].u || edges[i].v !== otherEdges[i].v) 
+            for (let i = 0; i < edges.length; i++) 
             {
-                return false;
+                if (edges[i].u !== otherEdges[i].u || edges[i].v !== otherEdges[i].v || edges[i].weight !== otherEdges[i].weight) 
+                {
+                    return false;
+                }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 }

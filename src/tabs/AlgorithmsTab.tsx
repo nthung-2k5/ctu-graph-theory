@@ -1,25 +1,21 @@
 import {
-    Button,
-    ButtonProps,
+    ConfigProvider,
+    // Button,
+    // ButtonProps,
     Dropdown,
     Form,
     Space,
     Tabs,
     TabsProps,
 } from 'antd';
-import { useGraph } from '../lib/GraphContext';
-import BFS from '../lib/algorithms/traversal/BFS';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
-import RecursionDFS from '../lib/algorithms/traversal/RecursionDFS';
-import StackDFS from '../lib/algorithms/traversal/StackDFS';
-import { PropsWithChildren, useMemo, useState } from 'react';
-import { GraphAlgorithm } from '../lib/algorithms/GraphAlgorithm';
+import { PropsWithChildren, useMemo } from 'react';
 import Title from 'antd/es/typography/Title';
-import UndirectedConnected from '../lib/algorithms/UndirectedConnected';
-import Cycle from '../lib/algorithms/Cycle';
-import Bipartite from '../lib/algorithms/Bipartite';
 import PseudoCode from './PseudoCode';
-import { useNode } from './NodeContext';
+import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
+import { start, stop } from '../lib/context/animationSlice';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
+import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
@@ -34,37 +30,32 @@ const algorithms = [
     'Tìm đường đi ngắn nhất (Thuật toán Floyd-Warshall)',
     'Sắp xếp topology',
     'Xếp hạng đồ thị',
-    'Tìm cây khung nhỏ nhất (Thuật toán Kruskal)',
-    'Tìm cây khung nhỏ nhất (Thuật toán Prim)',
+    'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Kruskal)',
+    'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Prim)',
+    'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)',
     'Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)',
 ];
 
-export const algos = [
-    new BFS(),
-    new RecursionDFS(),
-    new StackDFS(),
-    new UndirectedConnected(),
-    new Cycle(),
-    new Bipartite(),
-];
 
-
-const InvalidMessage = (props: PropsWithChildren) => {
+const InvalidMessage = (props: PropsWithChildren) => 
+{
     return (
-        <div className="text-[red]">
-            <CloseCircleOutlined className="me-2" />
+        <div className="text-[red] mb-3">
+            <CloseCircleOutlined className="mr-2" />
             <span>{props.children}</span>
         </div>
     );
 };
 
-export default function AlgorithmsTab() {
-    const { graph, animator, animating, setAnimating } = useGraph();
-    // const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(algos[0]);
-    const { algorithm, setAlgorithm } = useNode();
+export default function AlgorithmsTab() 
+{
+    const { directed, edges, vertexCount } = useAppSelector(state => state.graph);
+    const { animating } = useAppSelector(state => state.animation);
+    const dispatch = useAppDispatch();
+    const { algorithm, setAlgorithm } = useGraphTheory();
     const [form] = Form.useForm();
 
-    const items = algos.map((algo, index) => ({
+    const items = AvailableAlgorithms.map((algo, index) => ({
         key: index,
         label: (
             <button
@@ -74,55 +65,59 @@ export default function AlgorithmsTab() {
         ),
     }));
 
-    const error = useMemo(
-        () => algorithm.predicateCheck(graph),
-        [algorithm, graph],
-    );
+    const error = useMemo(() => 
+    {
+        const predicate = algorithm.predicate;
 
-    const animate = async (values: object) => {
-        // console.log(values);
-        algorithm.numberOfStep = 0;
-        algorithm.currentStep = 0;
-        if (animating) {
-            animator.current.stop();
-            setAnimating(false);
-        } else {
-            const result = algorithm.run(graph, values);
-            if (algorithm instanceof RecursionDFS) {
-                if ('_vertexCount' in graph) {
-                    const visited = new Array(graph._vertexCount).fill(false);
-                    if ('startVertex' in values) {
-                        algorithm.runCode(graph, values.startVertex, visited);
-                    }
-                }
-                // console.log(algorithm.numberOfStep);
-            }
-            setAnimating(true);
-            await animator.current.run(result);
-            setAnimating(false);
+        if (vertexCount === 0)
+        {
+            return { valid: false, error: 'Đồ thị không được rỗng' };
         }
-    };
-    // console.log(algorithm.name);
 
-    const runProps: ButtonProps = {
-        htmlType: 'submit',
-        disabled: !graph.vertexCount || !error.valid,
-        children: 'Chạy',
+        if (predicate.directed !== undefined && predicate.directed !== directed) 
+        {
+            return { valid: false, error: `Đồ thị phải là đồ thị ${ predicate.directed ? "có" : "vô" } hướng` };
+        }
+        
+        if (predicate.weighted !== undefined && (edges.length === 0 || predicate.weighted !== 'weight' in edges[0]))
+        {
+            return { valid: false, error: `Đồ thị phải ${ predicate.weighted ? "có" : "không" } trọng số` };
+        }
+
+        // TODO: Check for acyclic graph
+        // if (predicate.acyclic !== undefined && predicate.acyclic !== edges.acyclic) 
+        // {
+        //     return { valid: false, error: `Đồ thị không được có chu trình` };
+        // }
+
+        return { valid: true };
+        
+    }, [algorithm, directed, edges, vertexCount]);
+
+    const animate = async (values: object) => 
+    {
+        dispatch(animating ? stop() : start());
     };
 
-    const stopProps: ButtonProps = {
-        htmlType: 'submit',
-        danger: true,
-        disabled: false,
-        children: 'Dừng',
-    };
+    // const runProps: ButtonProps = {
+    //     htmlType: 'submit',
+    //     disabled: !vertexCount || !error.valid,
+    //     children: 'Chạy',
+    // };
+
+    // const stopProps: ButtonProps = {
+    //     htmlType: 'submit',
+    //     danger: true,
+    //     disabled: false,
+    //     children: 'Dừng',
+    // };
 
     const tabs: TabsProps['items'] = [
         {
             key: '1',
             label: 'Thuật toán',
             children: (
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col max-h-full">
                     <div>
                         <Dropdown
                             trigger={['click']}
@@ -142,33 +137,28 @@ export default function AlgorithmsTab() {
                         disabled={animating}
                         form={form}
                         onFinish={animate}
-                        className="w-full h-full flex flex-col justify-start"
-                        style={{overflowY: "auto", paddingRight: "8px"}}
+                        className="w-full flex flex-col justify-start"
                     >
                         <Title level={5}>{algorithm.name}</Title>
-                        <div className="flex justify-between items-center">
-                            {graph.vertexCount > 0 ? (
-                                error.valid ? (
-                                    algorithm.configNode(graph)
-                                ) : (
-                                    error.errors?.map((err) => (
-                                        <InvalidMessage>{err}</InvalidMessage>
-                                    ))
-                                )
-                            ) : (
-                                <InvalidMessage>
-                                    Đồ thị không được rỗng
-                                </InvalidMessage>
-                            )}
-                            <Button
+                        <ConfigProvider theme={{
+                            components: {
+                                Form: {
+                                    itemMarginBottom: 8
+                                }
+                            }
+                        }}>
+                            <div className="flex flex-col">
+                                {error.valid ? (algorithm.configNode(vertexCount)) : (<InvalidMessage>{error.error}</InvalidMessage>)}
+                                {/* <Button
                                 block
                                 type="primary"
                                 {...(animating ? stopProps : runProps)}
                                 style={{ height: '40px', width: '80px' }}
-                            />
-                        </div>
-                        <PseudoCode />
+                            /> */}
+                            </div>
+                        </ConfigProvider>
                     </Form>
+                    <PseudoCode />
                 </div>
             ),
         },

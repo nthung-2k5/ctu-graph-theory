@@ -1,178 +1,157 @@
-import { useEffect, useMemo } from "react";
-import { useGraph } from "../lib/GraphContext";
+import { useEffect, useMemo, useRef } from "react"
 import CytoscapeComponent from "react-cytoscapejs";
-import cytoscape, { Stylesheet } from "cytoscape";
+import cytoscape, { ElementDefinition, Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
 import cola from "cytoscape-cola";
-// @ts-expect-error Made for Javascript version so no type
-import automove from "cytoscape-automove";
-import GraphAnimator from "../lib/GraphAnimator";
-import { useNode } from "../tabs/NodeContext";
 
-// Khắc phục lag, giới hạn số lần re-render lại theo thời gian khi cập nhật độ dài cạnh
-import debounce from "lodash.debounce";
 import ControlBar from "./ControlBar";
+import { useAppSelector } from '../lib/context/hooks';
 
 cytoscape.use(cola);
-cytoscape.use(automove);
 
-export default function VisualGraphComponent() {
-  const { graph, animator } = useGraph();
-//   const cy = useRef<cytoscape.Core | null>(null);
-  const elements = useMemo(() => graph.toGraph(), [graph]);
+export default function VisualGraphComponent() 
+{
+    const cy = useRef<cytoscape.Core>(null!);
+    const { graph } = useAppSelector(state => state.animation);
+    const { vertexCount, edges, directed } = useAppSelector(state => state.graph);
+    const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
 
-  const { nodeColor, edgeColor, textNumberColor, nodeRadius, edgeLength, cy } = useNode();
+    const assignCytoscape = (core: cytoscape.Core) =>
+    {
+        cy.current = core;
+        graph.setCytoscape(core);
+    };
 
-  const assignCytoscape = (cyCore: cytoscape.Core) => {
-    cy.current = cyCore;
-
-    if (animator.current === null) {
-      animator.current = new GraphAnimator(cy.current!);
-    } else {
-      animator.current.setCytoscape(cy.current!);
-    }
-  };
-
-  const updateGraphStyle = () => {
-    if (!cy.current) return;
-
-    cy.current
-      .style()
-      .selector("node")
-      .style({
-        backgroundColor: nodeColor,
-        color: textNumberColor,
-        width: nodeRadius,
-        height: nodeRadius,
-      })
-      .selector("edge")
-      .style({
-        lineColor: edgeColor,
-        curveStyle: "bezier",
-      })
-      .update();
-  };
-
-  // Cập nhật lại màu và độ lơn mỗi khi nút bị thay đổi
-  useEffect(() => {
-    updateGraphStyle();
-  }, [nodeColor, edgeColor, nodeRadius, textNumberColor]);
-
-  useEffect(() => {
-    cy.current
-      ?.on("mouseover", "node", (e: any) => {
-        const target = e.target as cytoscape.NodeSingular;
-        if (!target) return;
-
-        e.cy.startBatch();
-
-        const sel = target.addClass("highlight");
-        const edgesAndVertices = sel.outgoers();
-        if (!graph.directed) edgesAndVertices.add(sel.incomers());
-
-        edgesAndVertices.addClass("highlight");
-        e.cy.endBatch();
-      })
-      .on("mouseout", "node", (e: any) => {
-        const target = e.target as cytoscape.NodeSingular;
-        if (!target) return;
-
-        e.cy.startBatch();
-
-        const sel = target.removeClass("highlight");
-        const edgesAndVertices = sel.outgoers();
-        if (!graph.directed) edgesAndVertices.add(sel.incomers());
-
-        edgesAndVertices.removeClass("highlight");
-        e.cy.endBatch();
-      });
-  }, [graph]);
-
-  useEffect(() => {
-    if (cy.current) {
-      if (cy.current) {
-        const updateLayout = debounce(() => {
-          cy.current
-            ?.layout({
-              name: "cola",
-              // @ts-ignore
-              edgeLength: edgeLength,
-              infinite: true,
-            })
-            .run();
-        }, 100);
-
-        updateLayout();
-
-        // Clean up function
-        return () => {
-          updateLayout.cancel();
+    const downloadPNG = () => 
+    {
+        const pngData = cy.current.png({ full: true }); // Lấy PNG từ Cytoscape
+        const img = new Image();
+        img.src = pngData;
+    
+        img.onload = () => 
+        {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width + 100; // 100px = padding: 100px
+            canvas.height = img.height + 100;
+    
+            const ctx = canvas.getContext('2d');
+            if (ctx) 
+            {
+                // Vẽ background màu trắng
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+                // Vẽ ảnh Cytoscape lên canvas, ảnh này được vẽ ra chính giữa nên công thức phức tạp 
+                const x = (canvas.width - img.width) / 2;
+                const y = (canvas.height - img.height) / 2;
+                ctx.drawImage(img, x, y);
+    
+                // Tạo link tải xuống
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'graph.png';
+                link.click();
+            }
         };
-      }
-    }
-  }, [elements, edgeLength]);
+    };
 
-  return (
-    <>
-      <CytoscapeComponent
-        className="my-auto border-2"
-        style={{
-          height: 'calc(100% - 45px)',
-          borderTopRightRadius: '4px',
-          borderTopLeftRadius: '4px',
-          borderTop: '2px solid black',
-          borderLeft: '2px solid black',
-          borderRight: '2px solid black',
-          borderBottom: 'none'
-        }}
-        elements={elements}
-        stylesheet={DefaultGraphStyle}
-        cy={assignCytoscape}
-        zoomingEnabled={false}
-        boxSelectionEnabled={false}
-      />
-      
-      <ControlBar animator={animator} />
-    </>
-  );
+    const elements = useMemo(() =>
+    {
+        const elements: ElementDefinition[] = [];
+            
+        for (let i = 1; i <= vertexCount; i++) 
+        {
+            elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
+        }
+
+        for (let i = 0; i < edges.length; i++)
+        {
+            const edge = edges[i];
+            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' });
+        }
+
+        return elements;
+    }, [vertexCount, edges, directed]);
+
+    useEffect(() =>
+    {
+        cy.current.style().selector('node').style({ backgroundColor: nodeColor }).update();
+    }, [nodeColor]);
+
+    useEffect(() =>
+    {
+        cy.current.style().selector('node').style({ color: labelColor }).update();
+    }, [labelColor]);
+
+    useEffect(() =>
+    {
+        cy.current.style().selector('node').style({ width: nodeRadius, height: nodeRadius }).update();
+    }, [nodeRadius]);
+
+    useEffect(() =>
+    {
+        cy.current.style().selector('edge').style({ 'line-color': edgeColor }).update();
+    }, [edgeColor]);
+
+    useEffect(() => 
+    {
+        cy.current.layout({
+            name: "cola",
+            // @ts-expect-error Config in cola layout
+            edgeLength: edgeLength,
+        }).run();
+    }, [elements, edgeLength]);
+
+    return (
+        <div className='border-2 border-black rounded-lg flex flex-col h-full overflow-hidden'>
+            <CytoscapeComponent
+                className='flex-grow'
+                elements={elements}
+                stylesheet={DefaultGraphStyle}
+                cy={assignCytoscape}
+                autoungrabify
+                boxSelectionEnabled={false}
+            />
+            <ControlBar onDownloadClicked={downloadPNG}/>
+        </div>
+    );
 }
 
 const DefaultGraphStyle: Stylesheet[] = [
-  {
-    selector: "node",
-    style: {
-      "text-valign": "center",
-      "text-halign": "center",
-      label: "data(label)",
-      backgroundColor: "#F8FAFC",
-      "border-style": "solid",
-      "border-width": 1,
-      "border-color": "#000",
+    {
+        selector: 'node',
+        style: {
+            "text-valign": "center",
+            "text-halign": "center",
+            "font-weight": "bold",
+            "label": "data(label)",
+            backgroundColor: '#F8FAFC',
+            "border-style": "solid",
+            "border-width": '2rem',
+            "border-color": "#000",
+        }
     },
-  },
-  {
-    selector: "edge",
-    style: {
-      "line-color": "#000",
-      width: 1,
-      "curve-style": "bezier",
+    {
+        selector: 'edge',
+        style: {
+            "line-color": '#000',
+            width: '2rem',
+            "curve-style": "bezier"
+        }
     },
-  },
-  {
-    selector: "edge.directed",
-    style: {
-      "target-arrow-shape": "triangle",
-      "target-arrow-color": "#000",
-      "arrow-scale": 1.5,
+    {
+        selector: 'edge.directed',
+        style: {
+            "target-arrow-shape": "triangle",
+            "target-arrow-color": "#000",
+            "arrow-scale": 1.5
+        }
     },
-  },
-  {
-    selector: ".highlight",
-    style: {
-      "border-width": 2,
-      "line-outline-width": 1,
-      // "background-color": "#FF0",
-      // "line-color": "#FF0",
-    },
-  },
+    {
+        selector: '.highlight',
+        style: {
+            "border-width": 2,
+            "line-outline-width": 1,
+        }
+    }
 ];

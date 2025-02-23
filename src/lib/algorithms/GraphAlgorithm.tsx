@@ -1,37 +1,56 @@
 import { ReactNode } from 'react';
-// import UnweightedGraph from '../graphs/unweighted/UnweightedGraph';
-import GraphAnimator from '../GraphAnimator';
-import Graph from '../graphs/Graph';
+import GraphAnimator from '../animation/GraphAnimator';
+import GraphType from '../graphs/Graph';
+import PseudocodeAnimator from '../animation/PseudocodeAnimator';
+import { PseudocodeLine } from '../pseudocode/Pseudocode';
+import WeightedGraph from '../graphs/weighted/WeightedGraph';
 
-export abstract class GraphAlgorithm<Config = object>
+// undefined: không quan trọng
+// true: phải có
+// false: không được có
+export interface AlgorithmRequirements
+{
+    directed?: boolean;
+    weighted?: boolean; // nếu không cần trọng số thì thuật toán cũng sẽ thực hiện được với đồ thị có trọng số
+    acyclic?: boolean;
+}
+
+export abstract class GraphAlgorithm<Graph extends GraphType = GraphType, Config = object>
 {
     public abstract get name(): string;
+    public abstract get pseudocode(): PseudocodeLine[];
+    public abstract get predicate(): AlgorithmRequirements;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public configNode(_graph: Graph): ReactNode
+    public configNode(_vertexCount: number): ReactNode
     {
         return (<></>);
     }
-
-    public numberOfStep = 0;
-    public currentStep = 0;
     
-    public abstract predicateCheck(g: Graph): { valid: boolean, errors?: string[] };
     public abstract run(g: Graph, config: Config): IterableIterator<AlgorithmStep>;
 };
 
-// export abstract class ConfigGraphAlgorithm<Config>
-// {
-//     public abstract get name(): string;
-//     public abstract get configNode(): ReactNode;
-//     public abstract predicateCheck(g: Graph): { valid: boolean, errors?: string[] };
-//     public abstract run(g: Graph, conf: Config): IterableIterator<AlgorithmStep>;
-// };
+export abstract class NeutralGraphAlgorithm<Config> extends GraphAlgorithm<GraphType, Config>
+{
+    public override get predicate(): AlgorithmRequirements 
+    {
+        return { };
+    }
+}
+
+export abstract class WeightedGraphAlgorithm<Graph extends WeightedGraph, Config = object> extends GraphAlgorithm<Graph, Config>
+{
+    public override get predicate(): AlgorithmRequirements 
+    {
+        return { weighted: true };
+    }
+}
 
 export interface AlgorithmStep
 {
     // description: string;
-    animate: (animator: GraphAnimator) => void;
+    animate?: (animator: GraphAnimator) => void;
+    pseudocode?: (animator: PseudocodeAnimator) => void;
     // pseudoText: () => void;
 }
 

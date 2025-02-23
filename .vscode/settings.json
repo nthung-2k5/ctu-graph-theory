@@ -1,0 +1,8 @@
+{
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.formatOnPaste": true, // optional
+        "editor.formatOnSave": true, // optional
+        "editor.formatOnSaveMode": "file", // required to format on save
+    }
+}
