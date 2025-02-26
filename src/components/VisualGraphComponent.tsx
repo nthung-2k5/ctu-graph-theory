@@ -6,20 +6,21 @@ import cola from "cytoscape-cola";
 
 import ControlBar from "./ControlBar";
 import { useAppSelector } from '../lib/context/hooks';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 cytoscape.use(cola);
 
 export default function VisualGraphComponent() 
 {
     const cy = useRef<cytoscape.Core>(null!);
-    const { graph } = useAppSelector(state => state.animation);
+    const { animator } = useGraphTheory();
     const { vertexCount, edges, directed } = useAppSelector(state => state.graph);
     const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
 
     const assignCytoscape = (core: cytoscape.Core) =>
     {
         cy.current = core;
-        graph.setCytoscape(core);
+        animator.graph.setCytoscape(core);
     };
 
     const downloadPNG = () => 

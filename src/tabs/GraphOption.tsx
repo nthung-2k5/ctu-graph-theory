@@ -10,7 +10,7 @@ export default function GraphOption()
     const dispatch = useAppDispatch();
 
     return (
-        <div className='bg-white rounded-lg border min-w-72 px-8 py-4'>
+        <div className='bg-white rounded-lg border min-w-72 px-6 py-4'>
             <Row className="mb-[10px]">
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
@@ -18,7 +18,7 @@ export default function GraphOption()
                         Bán kính nút
                     </p>
                 </Col>
-                <Col span={12} className="flex items-center justify-center">
+                <Col span={12} className="flex items-center justify-end">
                     <Slider min={20} max={60} value={nodeRadius} onChange={(value) => dispatch(setNodeRadius(value))} className='w-full' />
                 </Col>
             </Row>
@@ -55,7 +55,7 @@ export default function GraphOption()
                     <ColorPicker value={edgeColor} onChangeComplete={(value) => dispatch(setEdgeColor(value.toCssString()))} showText />
                 </Col>
             </Row>
-            <Row className="mb-[10px]">
+            <Row>
                 <Col span={12} className="flex items-center">
                     <p className="option-text">
                         <FaQuestion className="option-icon" />

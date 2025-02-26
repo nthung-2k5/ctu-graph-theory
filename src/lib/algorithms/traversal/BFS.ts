@@ -1,23 +1,23 @@
 import { Queue } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
-import Graph from '../../graphs/Graph';
 import TraversalAlgorithm from './TraversalAlgorithm';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
 
 export default class BFS extends TraversalAlgorithm
 {
     public override get pseudocode(): PseudocodeLine[] 
     {
         return [
-            { text: 'while (hàng đợi không rỗng)', tab: 0 },
-            { text: 'u = lấy đầu hàng đợi', tab: 1 },
-            { text: 'if (u đã duyệt)', tab: 1 },
-            { text: 'continue', tab: 2 },
-            { text: 'Duyệt u', tab: 1 },
-            { text: 'Đánh dấu u đã duyệt', tab: 1 },
+            { text: 'while (queue != ∅)', tab: 0 },
+            { text: 'u <- queue;', tab: 1 },
+            { text: 'if (duyet[u] == true)', tab: 1 },
+            { text: 'continue;', tab: 2 },
+            { text: '// Duyệt u;', tab: 1, comment: true },
+            { text: 'duyet[u] = true;', tab: 1 },
             { text: 'for (đỉnh v kề với u)', tab: 1 },
-            { text: 'if (v chưa duyệt)', tab: 2 },
-            { text: 'đẩy v vào hàng đợi', tab: 3 },
+            { text: 'if (duyet[v] != true)', tab: 2 },
+            { text: 'queue <- v;', tab: 3 },
         ]
     }
 
@@ -26,7 +26,7 @@ export default class BFS extends TraversalAlgorithm
         return 'Duyệt theo chiều rộng (BFS)';
     }
 
-    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         const queue: Queue<number> = new Queue<number>();
 

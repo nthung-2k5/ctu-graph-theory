@@ -1,19 +1,8 @@
-import {
-    ConfigProvider,
-    // Button,
-    // ButtonProps,
-    Dropdown,
-    Form,
-    Space,
-    Tabs,
-    TabsProps,
-} from 'antd';
+import { ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 import Title from 'antd/es/typography/Title';
 import PseudoCode from './PseudoCode';
-import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
-import { start, stop } from '../lib/context/animationSlice';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
 
@@ -49,10 +38,7 @@ const InvalidMessage = (props: PropsWithChildren) =>
 
 export default function AlgorithmsTab() 
 {
-    const { directed, edges, vertexCount } = useAppSelector(state => state.graph);
-    const { animating } = useAppSelector(state => state.animation);
-    const dispatch = useAppDispatch();
-    const { algorithm, setAlgorithm } = useGraphTheory();
+    const { playing, algorithm, setAlgorithm, config, predicateError } = useGraphTheory();
     const [form] = Form.useForm();
 
     const items = AvailableAlgorithms.map((algo, index) => ({
@@ -65,40 +51,11 @@ export default function AlgorithmsTab()
         ),
     }));
 
-    const error = useMemo(() => 
+    useEffect(() => 
     {
-        const predicate = algorithm.predicate;
-
-        if (vertexCount === 0)
-        {
-            return { valid: false, error: 'Đồ thị không được rỗng' };
-        }
-
-        if (predicate.directed !== undefined && predicate.directed !== directed) 
-        {
-            return { valid: false, error: `Đồ thị phải là đồ thị ${ predicate.directed ? "có" : "vô" } hướng` };
-        }
-        
-        if (predicate.weighted !== undefined && (edges.length === 0 || predicate.weighted !== 'weight' in edges[0]))
-        {
-            return { valid: false, error: `Đồ thị phải ${ predicate.weighted ? "có" : "không" } trọng số` };
-        }
-
-        // TODO: Check for acyclic graph
-        // if (predicate.acyclic !== undefined && predicate.acyclic !== edges.acyclic) 
-        // {
-        //     return { valid: false, error: `Đồ thị không được có chu trình` };
-        // }
-
-        return { valid: true };
-        
-    }, [algorithm, directed, edges, vertexCount]);
-
-    const animate = async (values: object) => 
-    {
-        dispatch(animating ? stop() : start());
-    };
-
+        config.current = form.getFieldsValue();
+    }, [predicateError, config, algorithm, form]);
+    
     // const runProps: ButtonProps = {
     //     htmlType: 'submit',
     //     disabled: !vertexCount || !error.valid,
@@ -121,7 +78,7 @@ export default function AlgorithmsTab()
                     <div>
                         <Dropdown
                             trigger={['click']}
-                            disabled={animating}
+                            disabled={playing}
                             menu={{ items }}
                         >
                             <a onClick={(e) => e.preventDefault()}>
@@ -134,9 +91,9 @@ export default function AlgorithmsTab()
                     </div>
                     <Form
                         layout="horizontal"
-                        disabled={animating}
+                        disabled={playing}
                         form={form}
-                        onFinish={animate}
+                        onValuesChange={(_, values) => config.current = values}
                         className="w-full flex flex-col justify-start"
                     >
                         <Title level={5}>{algorithm.name}</Title>
@@ -148,7 +105,7 @@ export default function AlgorithmsTab()
                             }
                         }}>
                             <div className="flex flex-col">
-                                {error.valid ? (algorithm.configNode(vertexCount)) : (<InvalidMessage>{error.error}</InvalidMessage>)}
+                                {predicateError ? (<InvalidMessage>{predicateError}</InvalidMessage>) : (algorithm.configNode())}
                                 {/* <Button
                                 block
                                 type="primary"

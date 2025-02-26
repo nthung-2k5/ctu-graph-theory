@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
 import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Form, InputNumber } from 'antd';
-import Graph from '../../graphs/Graph';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
+import store from '../../context/store';
 
 export interface CycleConfig
 {
@@ -24,7 +25,7 @@ class CycleContext
 
     public hasCycle: boolean = false;
 
-    constructor(graph: Graph)
+    constructor(graph: UnweightedGraph)
     {
         this.color = Array(graph.vertexCount + 1).fill(Color.White);
         this.parent = Array(graph.vertexCount + 1).fill(-1);
@@ -45,7 +46,7 @@ export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
         return 'Kiểm tra đồ thị chứa chu trình';
     }
 
-    private *_dfs(g: Graph, u: number, ctx: CycleContext): IterableIterator<AlgorithmStep>
+    private *_dfs(g: UnweightedGraph, u: number, ctx: CycleContext): IterableIterator<AlgorithmStep>
     {
         ctx.color[u] = Color.Gray;
         yield { animate: (animator) => animator.colorVertex(u, 'gray') };
@@ -77,7 +78,7 @@ export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
         yield { animate: (animator) => animator.colorVertex(u, 'black') };
     }
 
-    public *run(g: Graph, config: CycleConfig): IterableIterator<AlgorithmStep>
+    protected *_run(g: UnweightedGraph, config: CycleConfig): IterableIterator<AlgorithmStep>
     {
         const ctx = new CycleContext(g);
         yield* this._dfs(g, config.startVertex, ctx);
@@ -94,8 +95,9 @@ export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
         }
     }
 
-    public override configNode(vertexCount: number): ReactNode
+    public override configNode(): ReactNode
     {
+        const vertexCount = store.getState().graph.vertexCount;
         return (
             <>
                 <Form.Item<CycleConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>

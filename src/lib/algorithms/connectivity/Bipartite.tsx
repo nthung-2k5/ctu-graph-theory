@@ -1,8 +1,9 @@
 import { Form, InputNumber, Select } from 'antd';
 import { ReactNode } from 'react';
-import Graph from '../../graphs/Graph';
 import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
+import store from '../../context/store';
 
 export interface BipartiteConfig
 {
@@ -16,7 +17,7 @@ class BipartiteContext
 
     public isBipartite: boolean = true;
 
-    constructor(graph: Graph)
+    constructor(graph: UnweightedGraph)
     {
         this.color = Array(graph.vertexCount + 1).fill(Color.White);
     }
@@ -43,7 +44,7 @@ export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig>
         return 'Kiểm tra đồ thị phân đôi';
     }
 
-    private *_colorize(g: Graph, u: number, color: Color, ctx: BipartiteContext): IterableIterator<AlgorithmStep>
+    private *_colorize(g: UnweightedGraph, u: number, color: Color, ctx: BipartiteContext): IterableIterator<AlgorithmStep>
     {
         ctx.color[u] = color;
         yield { animate: (animator) => animator.colorVertex(u, color === Color.Blue ? 'blue' : 'red') };
@@ -69,14 +70,15 @@ export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig>
         }
     }
 
-    public *run(g: Graph, config: BipartiteConfig): IterableIterator<AlgorithmStep>
+    protected override *_run(g: UnweightedGraph, config: BipartiteConfig): IterableIterator<AlgorithmStep>
     {
         const ctx = new BipartiteContext(g);
         yield* this._colorize(g, config.startVertex, config.startColor, ctx);
     }
 
-    public override configNode(vertexCount: number): ReactNode
+    public override configNode(): ReactNode
     {
+        const vertexCount = store.getState().graph.vertexCount;
         return (
             <>
                 <Form.Item<BipartiteConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>

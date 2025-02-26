@@ -1,34 +1,59 @@
-export default class PseudocodeAnimator
+import SubAnimator from './SubAnimator';
+
+export default class PseudocodeAnimator extends SubAnimator
 {
-    private lines: string[] = [];
+    private handle: PseudoCodeHandle | null = null;
 
-    private currentLine: number = 0;
-
-    public next()
+    public override reset()
     {
-
+        this.handle?.reset();
     }
 
-    public previous()
+    public setHandle(handle: PseudoCodeHandle)
     {
+        this.handle = handle;
+    }
 
+    public get currentLine(): number | null
+    {
+        return this.handle?.currentLine() ?? null;
+    }
+
+    public set currentLine(line: number)
+    {
+        this.handle?.highlightLine(line);
+    }
+
+    public next(by: number = 1)
+    {
+        this.currentLine = this.currentLine ?? 0 + by;
+    }
+
+    public previous(by: number = 1)
+    {
+        this.currentLine = this.currentLine ?? 0 - by;
     }
 
     public moveBy(delta: number)
     {
-        for (let i = 0; i < delta; i++)
+        if (delta > 0)
         {
-            this.next();
+            this.next(delta);
         }
-        
-        for (let i = 0; i > delta; i--)
+        else if (delta < 0)
         {
-            this.previous();
+            this.previous(-delta);
         }
     }
 
     public moveTo(lineNumber: number)
     {
-        this.moveBy(lineNumber - this.currentLine);
+        this.currentLine = lineNumber;
     }
+}
+
+export type PseudoCodeHandle = {
+    currentLine: () => number | null;
+    highlightLine: (line: number) => void;
+    reset: () => void;
 }

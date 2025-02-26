@@ -1,9 +1,11 @@
 import { ReactNode } from 'react';
 import GraphAnimator from '../animation/GraphAnimator';
-import GraphType from '../graphs/Graph';
 import PseudocodeAnimator from '../animation/PseudocodeAnimator';
+import { UnweightedGraph } from './UnweightedGraph';
+import { WeightedGraph } from './WeightedGraph';
+import { GraphState } from '../context/graphSlice';
+import WeightedEdge from '../graphs/weighted/Edge';
 import { PseudocodeLine } from '../pseudocode/Pseudocode';
-import WeightedGraph from '../graphs/weighted/WeightedGraph';
 
 // undefined: không quan trọng
 // true: phải có
@@ -15,43 +17,71 @@ export interface AlgorithmRequirements
     acyclic?: boolean;
 }
 
-export abstract class GraphAlgorithm<Graph extends GraphType = GraphType, Config = object>
+export abstract class GraphAlgorithm<Config = object>
 {
     public abstract get name(): string;
-    public abstract get pseudocode(): PseudocodeLine[];
-    public abstract get predicate(): AlgorithmRequirements;
+    public get pseudocode(): PseudocodeLine[]
+    {
+        return [];
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public configNode(_vertexCount: number): ReactNode
+    public get predicate(): AlgorithmRequirements
+    {
+        return { };
+    }
+
+    public configNode(): ReactNode
     {
         return (<></>);
     }
     
-    public abstract run(g: Graph, config: Config): IterableIterator<AlgorithmStep>;
+    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>;
 };
 
-export abstract class NeutralGraphAlgorithm<Config> extends GraphAlgorithm<GraphType, Config>
+export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
 {
-    public override get predicate(): AlgorithmRequirements 
+    protected abstract _run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+
+    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
     {
-        return { };
+        const graph = new UnweightedGraph(g.vertexCount, g.directed);
+
+        for (const edge of g.edges)
+        {
+            graph.addEdge(edge);
+        }
+
+        return this._run(graph, config);
     }
 }
 
-export abstract class WeightedGraphAlgorithm<Graph extends WeightedGraph, Config = object> extends GraphAlgorithm<Graph, Config>
+export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
 {
     public override get predicate(): AlgorithmRequirements 
     {
         return { weighted: true };
     }
+
+    protected abstract _run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+
+    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
+    {
+        const graph = new WeightedGraph(g.vertexCount, g.directed);
+        const edges = g.edges as WeightedEdge[];
+
+        for (const edge of edges)
+        {
+            graph.addEdge(edge);
+        }
+
+        return this._run(graph, config);
+    }
 }
 
 export interface AlgorithmStep
 {
-    // description: string;
     animate?: (animator: GraphAnimator) => void;
     pseudocode?: (animator: PseudocodeAnimator) => void;
-    // pseudoText: () => void;
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

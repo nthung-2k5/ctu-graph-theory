@@ -1,70 +1,70 @@
-import Graph from '../../graphs/Graph';
+import { UnweightedGraph } from '../UnweightedGraph';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 
-type RecursionStep = {
-    text: string;
-    cmt: (...args: any[]) => string | string[];
-    tab: number;
-};
+// type RecursionStep = {
+//     text: string;
+//     cmt: (...args: any[]) => string | string[];
+//     tab: number;
+// };
 
-export const recursionDFS: RecursionStep[] = [
-    {
-        text: 'DFS(u)',
-        cmt: (vertex: number) => `DFS(${vertex})`,
-        tab: 0
-    },
-    {
-        text: 'Tiến hành thăm đỉnh u',
-        cmt: (vertex: number, visited: Array<number>) => 
-        {
-            const marked : number[] = [];
-            visited.forEach((value, index) => 
-            {
-                if (value) 
-                {
-                    marked.push(index);
-                }
-            });
-            return [
-                `Đánh dấu đỉnh ${vertex} đã được thăm`,
-                `visited [${marked.join(', ')}] = true`
-            ]
-        },
-        tab: 0
-    },
-    {
-        text: 'Xử lý đỉnh u (ví dụ: in ra u)',
-        cmt: (order: Array<number>) => 
-        {
-            return `Thứ tự duyệt: ${[...order].join(' -> ')}`;
-        },
-        tab: 0
-    },
-    {
-        text: 'Với mỗi đỉnh kề v của u:',
-        cmt: (vertex: number, neighbours: Array<number>) => 
-        {
-            return [
-                `Các đỉnh kề của ${vertex}`,
-                `neighbours = [${neighbours.join(', ')}]`
-            ]
-        },
-        tab: 0
-    },
-    {
-        text: 'Nếu v chưa thăm, gọi DFS()',
-        cmt: (vertex: number, mark: boolean ) => 
-        {
-            return (
-                mark ? `Đỉnh ${vertex} chưa được thăm -> Đi thăm` 
-                    : `Đỉnh ${vertex} đã được thăm -> Bỏ qua`
-            );
-        },
-        tab: 1   
-    }
-];
+// export const recursionDFS: RecursionStep[] = [
+//     {
+//         text: 'DFS(u)',
+//         cmt: (vertex: number) => `DFS(${vertex})`,
+//         tab: 0
+//     },
+//     {
+//         text: 'Tiến hành thăm đỉnh u',
+//         cmt: (vertex: number, visited: Array<number>) => 
+//         {
+//             const marked : number[] = [];
+//             visited.forEach((value, index) => 
+//             {
+//                 if (value) 
+//                 {
+//                     marked.push(index);
+//                 }
+//             });
+//             return [
+//                 `Đánh dấu đỉnh ${vertex} đã được thăm`,
+//                 `visited [${marked.join(', ')}] = true`
+//             ]
+//         },
+//         tab: 0
+//     },
+//     {
+//         text: 'Xử lý đỉnh u (ví dụ: in ra u)',
+//         cmt: (order: Array<number>) => 
+//         {
+//             return `Thứ tự duyệt: ${[...order].join(' -> ')}`;
+//         },
+//         tab: 0
+//     },
+//     {
+//         text: 'Với mỗi đỉnh kề v của u:',
+//         cmt: (vertex: number, neighbours: Array<number>) => 
+//         {
+//             return [
+//                 `Các đỉnh kề của ${vertex}`,
+//                 `neighbours = [${neighbours.join(', ')}]`
+//             ]
+//         },
+//         tab: 0
+//     },
+//     {
+//         text: 'Nếu v chưa thăm, gọi DFS()',
+//         cmt: (vertex: number, mark: boolean ) => 
+//         {
+//             return (
+//                 mark ? `Đỉnh ${vertex} chưa được thăm -> Đi thăm` 
+//                     : `Đỉnh ${vertex} đã được thăm -> Bỏ qua`
+//             );
+//         },
+//         tab: 1   
+//     }
+// ];
 
 export default class RecursionDFS extends TraversalAlgorithm
 {
@@ -86,50 +86,50 @@ export default class RecursionDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng đệ quy';
     }
 
-    private resetPseudoCode() 
-    {
-        const pseudoCode = document.querySelectorAll('.pseudoCodeText');
-        pseudoCode.forEach(element => 
-        {
-            element.classList.remove('run');
-        });
-    }
+    // private resetPseudoCode() 
+    // {
+    //     const pseudoCode = document.querySelectorAll('.pseudoCodeText');
+    //     pseudoCode.forEach(element => 
+    //     {
+    //         element.classList.remove('run');
+    //     });
+    // }
 
-    private fillPseudoCode(order: number) 
-    {
-        document.querySelector('.pseudoCodeContainer')?.children[order].classList.add('run');
-    }
+    // private fillPseudoCode(order: number) 
+    // {
+    //     document.querySelector('.pseudoCodeContainer')?.children[order].classList.add('run');
+    // }
 
-    private runPseudoCode(order: number) 
-    {
-        this.resetPseudoCode();
-        this.fillPseudoCode(order);
-    }
+    // private runPseudoCode(order: number) 
+    // {
+    //     this.resetPseudoCode();
+    //     this.fillPseudoCode(order);
+    // }
 
-    private setComment(cmt: string | string[]) 
-    {
-        const commentWrapper = document.querySelector('.comment');
-        if (commentWrapper) 
-        {
-            if (typeof cmt === 'string') 
-            {
-                commentWrapper.innerHTML = cmt;
-            }
-            else 
-            {
-                commentWrapper.innerHTML = cmt.map(text => `<p>${text}</p>`).join('');
-            }
-        }
-    }
+    // private setComment(cmt: string | string[]) 
+    // {
+    //     const commentWrapper = document.querySelector('.comment');
+    //     if (commentWrapper) 
+    //     {
+    //         if (typeof cmt === 'string') 
+    //         {
+    //             commentWrapper.innerHTML = cmt;
+    //         }
+    //         else 
+    //         {
+    //             commentWrapper.innerHTML = cmt.map(text => `<p>${text}</p>`).join('');
+    //         }
+    //     }
+    // }
     
-    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         visited[startVertex] = true;
         // console.log(this.getInfo);
 
         // Chạy mã giả 1
-        this.runPseudoCode(0);
-        this.setComment(recursionDFS[0].cmt(startVertex));
+        // this.runPseudoCode(0);
+        // this.setComment(recursionDFS[0].cmt(startVertex));
         // this.runProgressBar(++this.currentStep);
 
         // 1. DFS(u) -> Cho u màu đỏ
@@ -141,8 +141,8 @@ export default class RecursionDFS extends TraversalAlgorithm
         };
 
         // Chạy mã giã 2
-        this.runPseudoCode(1);
-        this.setComment(recursionDFS[1].cmt(startVertex, visited));
+        // this.runPseudoCode(1);
+        // this.setComment(recursionDFS[1].cmt(startVertex, visited));
         // this.runProgressBar(++this.currentStep);
 
         // 2. Tiến hành thăm u -> Tô màu nút u màu #2EBBD1
@@ -154,8 +154,8 @@ export default class RecursionDFS extends TraversalAlgorithm
         };
 
         // Chạy mã giã 3
-        this.runPseudoCode(2);
-        this.setComment(recursionDFS[2].cmt([1, 2, 3, 4]));
+        // this.runPseudoCode(2);
+        // this.setComment(recursionDFS[2].cmt([1, 2, 3, 4]));
         // this.runProgressBar(++this.currentStep);
 
         // 3. Xử lý đỉnh u (Ví dụ in ra màn hình)
@@ -168,8 +168,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         const neighbors = g.neighbors(startVertex);
         // Chạy mã giã 4
-        this.runPseudoCode(3);
-        this.setComment(recursionDFS[3].cmt(startVertex, neighbors));
+        // this.runPseudoCode(3);
+        // this.setComment(recursionDFS[3].cmt(startVertex, neighbors));
         // this.runProgressBar(++this.currentStep);
 
 
@@ -186,8 +186,8 @@ export default class RecursionDFS extends TraversalAlgorithm
                 };
 
                 // Chạy mã giã 5
-                this.runPseudoCode(4);
-                this.setComment(recursionDFS[4].cmt(v, visited));
+                // this.runPseudoCode(4);
+                // this.setComment(recursionDFS[4].cmt(v, visited));
                 // this.runProgressBar(++this.currentStep);
 
                 yield { 
@@ -206,8 +206,8 @@ export default class RecursionDFS extends TraversalAlgorithm
 
         if (visited.every(value => value)) 
         {
-            this.resetPseudoCode();
-            this.setComment('// Chương trình kết thúc...');
+            // this.resetPseudoCode();
+            // this.setComment('// Chương trình kết thúc...');
         }
     }
 }

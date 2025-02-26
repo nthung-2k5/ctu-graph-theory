@@ -1,34 +1,11 @@
 import cytoscape from 'cytoscape';
-import { wait } from '../AsyncHelper';
-import { AlgorithmStep } from '../algorithms/GraphAlgorithm';
 import { KEYWORD } from 'color-convert/conversions';
-import type storeType from '../context/store';
+import SubAnimator from './SubAnimator';
+import store from '../context/store';
 
-let store: typeof storeType;
-export const injectStore = (_store: typeof storeType) => 
-{
-    store = _store;
-}
-
-export default class GraphAnimator
+export default class GraphAnimator extends SubAnimator
 {
     private _cy: cytoscape.Core | null = null;
-
-    private _delay: number = 1000;
-
-    private _stop: boolean = false;
-
-    private _pause: boolean = false;
-
-    public setDelay(speed: number) 
-    {
-        this._delay = speed;
-    }
-
-    public getDelay() 
-    {
-        return this._delay;
-    }
 
     public setCytoscape(cy: cytoscape.Core): GraphAnimator
     {
@@ -36,9 +13,8 @@ export default class GraphAnimator
         return this;
     }
 
-    public resetAll(): GraphAnimator
+    public override reset(): GraphAnimator
     {
-        this._stop = this._pause = false;
         const config = store.getState().config;
         
         this._cy?.elements().style({ 
@@ -46,7 +22,7 @@ export default class GraphAnimator
             'color': config.labelColor, 
             'line-color': config.edgeColor, 
             'border-color': 'black', 
-            'border-width': 1, 
+            'border-width': 2,
             'line-outline-width': 0
         }).removeAttr('marked');
         // this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
@@ -81,37 +57,5 @@ export default class GraphAnimator
         const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).filter(e => prevColor === 'black' || e.data('marked') === prevColor).first();
         edge.style({ 'line-color': color, 'line-outline-color': color }).attr('marked', color);
         return this;
-    }
-
-    public stop(): GraphAnimator
-    {
-        this._stop = true;
-        return this;
-    }
-
-    public pause(): GraphAnimator
-    {
-        this._pause = true;
-        return this;
-    }
-
-    public async run(steps: IterableIterator<AlgorithmStep>): Promise<void>
-    {
-        this.resetAll();
-        // setTimeout(async () => {
-        // this._stop = false;
-        for (const step of steps)
-        {
-            while (this._pause)
-            {
-                if (this._stop) return;
-            }
-
-            if (this._stop) return;
-
-            step.animate?.(this);
-            await wait(this._delay);
-        }
-        // }, 600);
     }
 }

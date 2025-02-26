@@ -6,18 +6,19 @@ import { useEffect, useRef, useState } from "react";
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
 import "prism-react-editor/search.css";
-// import GraphOption from "./GraphOption";
+import GraphOption from "./GraphOption";
 import QueueDisplay, { QueueDisplayHandle } from '../components/data_structures/QueueDisplay';
 import StackDisplay, { StackDisplayHandle } from '../components/data_structures/StackDisplay';
 import ListDisplay, { ListDisplayHandle } from '../components/data_structures/ListDisplay';
-import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
+import { useAppDispatch } from '../lib/context/hooks';
 import { setDirected, setGraph } from '../lib/context/graphSlice';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 export default function GraphInputTab() 
 {
     const [input, setInput] = useState('');
     const [weighted, setWeighted] = useState(false);
-    const { animating } = useAppSelector(state => state.animation);
+    const { playing } = useGraphTheory();
 
     const dispatch = useAppDispatch();
 
@@ -40,7 +41,7 @@ export default function GraphInputTab()
                         <div className="flex flex-col h-full">
                             <div className="flex">
                                 <Segmented
-                                    disabled={animating}
+                                    disabled={playing}
                                     options={["Vô hướng", "Có hướng"]}
                                     onChange={(type) => dispatch(setDirected(type === "Có hướng"))}
                                     className="mb-2 w-full"
@@ -52,26 +53,27 @@ export default function GraphInputTab()
                             <div className="flex ms-auto mb-2">
                                 <span>{weighted ? "Có trọng số" : "Không có trọng số"}</span>
                                 <Switch
-                                    disabled={animating}
+                                    disabled={playing}
                                     className="ml-2"
                                     onClick={setWeighted}
                                 />
                             </div>
 
                             <Editor
-                                value={input}
-                                readOnly={animating}
+                                value=''
+                                readOnly={playing}
                                 style={{
                                     borderWidth: "1px",
                                     flexGrow: "1",
                                     borderRadius: "0.5rem",
+                                    marginBottom: "1rem"
                                 }}
                                 onUpdate={setInput}
                                 language=""
                             >
                                 {(editor) => <BasicSetup editor={editor} />}
                             </Editor>
-                            {/* <GraphOption/> */}
+                            <GraphOption/>
                         </div>
                     ),
                 },

@@ -1,8 +1,8 @@
 import { Stack } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
-import Graph from '../../graphs/Graph';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
 
 export default class StackDFS extends TraversalAlgorithm
 {
@@ -26,7 +26,7 @@ export default class StackDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
 
-    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         const stack = new Stack<number>();
         stack.push(startVertex);

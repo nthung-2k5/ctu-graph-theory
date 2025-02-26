@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
 import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Form, InputNumber } from 'antd';
-import Graph from '../../graphs/Graph';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
+import store from '../../context/store';
 
 export interface UndirectedConnectedConfig
 {
@@ -28,7 +29,7 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
         return { ...super.predicate, directed: false };
     }
 
-    private *_dfs(g: Graph, u: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    private *_dfs(g: UnweightedGraph, u: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         visited[u] = true;
         yield { animate: (animator) => animator.colorVertex(u, 'green') };
@@ -43,7 +44,7 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
         }
     }
 
-    public *run(g: Graph, config: UndirectedConnectedConfig): IterableIterator<AlgorithmStep>
+    protected *_run(g: UnweightedGraph, config: UndirectedConnectedConfig): IterableIterator<AlgorithmStep>
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
         yield* this._dfs(g, config.startVertex, visited);
@@ -57,8 +58,9 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
         }
     }
 
-    public override configNode(vertexCount: number): ReactNode
+    public override configNode(): ReactNode
     {
+        const vertexCount = store.getState().graph.vertexCount;
         return (
             <Form.Item<UndirectedConnectedConfig> 
                 label="Đỉnh bắt đầu"

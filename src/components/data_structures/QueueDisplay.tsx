@@ -8,7 +8,7 @@ export type QueueDisplayHandle = {
     pop: () => void;
 }
 
-const QueueDisplay = forwardRef<QueueDisplayHandle, unknown>((_, ref) =>
+const QueueDisplay = forwardRef<QueueDisplayHandle>((_, ref) =>
 {
     const queue = useRef(new Queue<ElementType>());
     const [, forceUpdate] = useReducer(o => !o, false);
