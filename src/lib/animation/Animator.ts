@@ -4,7 +4,7 @@ import PseudocodeAnimator from './PseudocodeAnimator';
 import SubAnimator from './SubAnimator';
 
 const PAUSE_INTERVAL = 100;
-const INTERVAL_MULTIPLIER = 1;
+const INTERVAL_MULTIPLIER = 2;
 
 export enum AnimationState
 {
@@ -13,6 +13,15 @@ export enum AnimationState
     STOPPED
 }
 
+const singleToArray = <T>(value: T | T[]): T[] =>
+{
+    if (Array.isArray(value) && !Array.isArray(value[0]))
+    {
+        return [value] as T[];
+    }
+
+    return value as T[];
+}
 
 export default class Animator extends SubAnimator
 {
@@ -67,6 +76,42 @@ export default class Animator extends SubAnimator
         this.onAnimationStateChanged = callback;
     }
 
+    private animate(step: AlgorithmStep)
+    {
+        if (step.colorVertex)
+        {
+            const colorVertices = singleToArray(step.colorVertex);
+            colorVertices.forEach(([vertex, color]) => this.graph.colorVertex(vertex, color));
+        }
+
+        if (step.colorEdge)
+        {
+            const colorEdges = singleToArray(step.colorEdge);
+            colorEdges.forEach(([u, v, color]) => this.graph.colorEdge(u, v, color));
+        }
+
+        if (step.highlightEdge)
+        {
+            const highlightEdges = singleToArray(step.highlightEdge);
+            highlightEdges.forEach(([u, v, highlight]) => (highlight ? this.graph.highlightEdge : this.graph.unhighlightEdge).apply(this.graph, [u, v]));
+        }
+
+        if (step.highlightVertex)
+        {
+            const highlightVertices = singleToArray(step.highlightVertex);
+            highlightVertices.forEach(([vertex, highlight]) => (highlight ? this.graph.highlightVertex : this.graph.unhighlightVertex).apply(this.graph, [vertex]));
+        }
+
+        if (step.codeLine !== undefined)
+        {
+            this.pseudocode.currentLine = step.codeLine;
+        }
+        else
+        {
+            this.pseudocode.reset();
+        }
+    }
+
     public play(steps: IterableIterator<AlgorithmStep>)
     {
         if (this._currentTimeout !== null)
@@ -95,10 +140,9 @@ export default class Animator extends SubAnimator
             else
             {
                 const s = step.value;
-                s.animate?.(this.graph);
-                s.pseudocode?.(this.pseudocode);
-
+                this.animate(s);
                 step = this._currentSteps!.next();
+
                 this._currentTimeout = window.setTimeout(runStep, this.interval);
             }
         };
@@ -133,9 +177,7 @@ export default class Animator extends SubAnimator
         while (!step.done)
         {
             const s = step.value;
-            s.animate?.(this.graph);
-            s.pseudocode?.(this.pseudocode);
-
+            this.animate(s);
             step = this._currentSteps!.next();
         }
 

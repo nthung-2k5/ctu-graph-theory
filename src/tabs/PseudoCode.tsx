@@ -31,7 +31,7 @@ const PseudoCode = () =>
                         <p
                             className={`pseudoCodeText flex text-gray-700 pl-3 text-base my-2 ${data.comment ? 'comment-code' : ''} ${highlightedLine === index ? 'bg-yellow-200' : ''}`}
                             key={index}
-                            onClick={() => setHighlightedLine(index)}
+                            // onClick={() => setHighlightedLine(index)}
                         >
                             <pre>{' '.repeat(data.tab * TAB_SIZE)}</pre>{data.text}
                         </p>

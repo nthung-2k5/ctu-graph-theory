@@ -1,11 +1,10 @@
 import { ReactNode } from 'react';
-import GraphAnimator from '../animation/GraphAnimator';
-import PseudocodeAnimator from '../animation/PseudocodeAnimator';
 import { UnweightedGraph } from './UnweightedGraph';
 import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice';
 import WeightedEdge from '../graphs/weighted/Edge';
 import { PseudocodeLine } from '../pseudocode/Pseudocode';
+import { KEYWORD } from 'color-convert/conversions';
 
 // undefined: không quan trọng
 // true: phải có
@@ -78,10 +77,19 @@ export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgor
     }
 }
 
+export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
+export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD];
+export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
+export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
+type ArrayOrSingle<T> = T | T[];
+
 export interface AlgorithmStep
 {
-    animate?: (animator: GraphAnimator) => void;
-    pseudocode?: (animator: PseudocodeAnimator) => void;
+    colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
+    colorEdge?: ArrayOrSingle<ColorEdgeAnimation>; // tô màu cạnh đầu tiên nối u và v (có thể lọc theo màu previousColor)
+    highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
+    highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
+    codeLine?: number;
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

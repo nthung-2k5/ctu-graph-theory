@@ -12,12 +12,14 @@ export interface TraversalConfig
 
 export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<TraversalConfig>
 {
-    protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>;
+    protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>;
 
     protected *_run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
-        yield* this._traverse(g, config.startVertex, visited);
+        const parent: number[] = Array(g.vertexCount + 1).fill(-1);
+
+        yield* this._traverse(g, config.startVertex, visited, parent);
 
         if (config.traverseAll)
         {
@@ -25,7 +27,7 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
             {
                 if (!visited[u])
                 {
-                    yield* this._traverse(g, u, visited);
+                    yield* this._traverse(g, u, visited, parent);
                 }
             }
         }

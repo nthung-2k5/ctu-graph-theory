@@ -21,7 +21,7 @@ const algorithms = [
     'Xếp hạng đồ thị',
     'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Kruskal)',
     'Tìm cây khung vô hướng nhỏ nhất (Thuật toán Prim)',
-    'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)',
+    // 'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)', (không làm nổi)
     'Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)',
 ];
 

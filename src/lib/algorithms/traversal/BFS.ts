@@ -26,29 +26,59 @@ export default class BFS extends TraversalAlgorithm
         return 'Duyệt theo chiều rộng (BFS)';
     }
 
-    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
     {
         const queue: Queue<number> = new Queue<number>();
 
         queue.push(startVertex);
-        visited[startVertex] = true;
         
+        yield { codeLine: 0 };
         while (!queue.isEmpty())
         {
             const u = queue.shift()!;
-            yield { animate: animator => animator.colorVertex(u, 'red') };
+            yield { codeLine: 1 };
+
+            yield { codeLine: 2 };
+            if (visited[u])
+            {
+                yield { codeLine: 3 };
+                yield { codeLine: 0 };
+                continue;
+            }
+
+            yield {
+                colorVertex: [u, 'red'],
+                colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
+                codeLine: 4
+            };
+
+            visited[u] = true;
+            yield { codeLine: 5 };
 
             const neighbors = g.neighbors(u);
 
+            yield { codeLine: 6 };
             for (const v of neighbors)
             {
+                yield { codeLine: 7 };
                 if (!visited[v])
                 {
                     queue.push(v);
-                    yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(u, v, 'red', g.directed) };
-                    visited[v] = true;
+                    yield {
+                        colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
+                        colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
+                        codeLine: 8
+                    };
+
+                    if (parent[v] === -1)
+                    {
+                        parent[v] = u;
+                    }
                 }
+                yield { codeLine: 6 };
             }
+
+            yield { codeLine: 0 };
         }
     }
 }

@@ -33,23 +33,6 @@ export default class PseudocodeAnimator extends SubAnimator
     {
         this.currentLine = this.currentLine ?? 0 - by;
     }
-
-    public moveBy(delta: number)
-    {
-        if (delta > 0)
-        {
-            this.next(delta);
-        }
-        else if (delta < 0)
-        {
-            this.previous(-delta);
-        }
-    }
-
-    public moveTo(lineNumber: number)
-    {
-        this.currentLine = lineNumber;
-    }
 }
 
 export type PseudoCodeHandle = {
