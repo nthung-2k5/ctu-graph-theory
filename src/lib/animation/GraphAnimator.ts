@@ -23,9 +23,9 @@ export default class GraphAnimator extends SubAnimator
             'line-color': config.edgeColor, 
             'border-color': 'black', 
             'border-width': 2,
-            'line-outline-width': 0
-        }).removeAttr('marked');
-        // this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
+            'line-outline-width': 0,
+            'target-arrow-color': 'black',
+        });
         return this;
     }
 
@@ -34,18 +34,6 @@ export default class GraphAnimator extends SubAnimator
         this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
         return this;
     }
-    
-    // public colorVertex2(vertex: number, color: string, borderColor: string): GraphAnimator
-    // {
-    //     this._cy?.$id(vertex.toString()).style({ color: '', 'border-color': borderColor, 'border-width': 2 }).attr('marked', color);
-    //     return this;
-    // }
-
-    // public advancedColorVertex(vertex: number, bkColor: string, colorText: string): GraphAnimator
-    // {
-    //     this._cy?.$id(vertex.toString()).style({ 'background-color': bkColor, 'border-color': bkColor, 'color': colorText });
-    //     return this;
-    // }
 
     private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
@@ -89,6 +77,6 @@ export default class GraphAnimator extends SubAnimator
 
     public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator
     {
-        return this._setEdgeStyle(u, v, { 'line-color': color });
+        return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
     }
 }

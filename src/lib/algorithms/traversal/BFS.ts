@@ -36,7 +36,7 @@ export default class BFS extends TraversalAlgorithm
         while (!queue.isEmpty())
         {
             const u = queue.shift()!;
-            yield { codeLine: 1 };
+            yield { codeLine: 1, highlightVertex: [u, true] };
 
             yield { codeLine: 2 };
             if (visited[u])
@@ -60,7 +60,7 @@ export default class BFS extends TraversalAlgorithm
             yield { codeLine: 6 };
             for (const v of neighbors)
             {
-                yield { codeLine: 7 };
+                yield { codeLine: 7, highlightVertex: [v, true] };
                 if (!visited[v])
                 {
                     queue.push(v);
@@ -75,10 +75,10 @@ export default class BFS extends TraversalAlgorithm
                         parent[v] = u;
                     }
                 }
-                yield { codeLine: 6 };
+                yield { codeLine: 6, highlightVertex: [v, false] };
             }
 
-            yield { codeLine: 0 };
+            yield { codeLine: 0, highlightVertex: [u, false] };
         }
     }
 }

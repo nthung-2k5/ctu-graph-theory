@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { UnweightedGraph } from './UnweightedGraph';
 import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice';
-import WeightedEdge from '../graphs/weighted/Edge';
 import { PseudocodeLine } from '../pseudocode/Pseudocode';
 import { KEYWORD } from 'color-convert/conversions';
 
@@ -66,9 +65,13 @@ export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgor
     public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
     {
         const graph = new WeightedGraph(g.vertexCount, g.directed);
-        const edges = g.edges as WeightedEdge[];
 
-        for (const edge of edges)
+        if (!g.weighted)
+        {
+            throw new Error();
+        }
+
+        for (const edge of g.edges)
         {
             graph.addEdge(edge);
         }
@@ -86,7 +89,7 @@ type ArrayOrSingle<T> = T | T[];
 export interface AlgorithmStep
 {
     colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
-    colorEdge?: ArrayOrSingle<ColorEdgeAnimation>; // tô màu cạnh đầu tiên nối u và v (có thể lọc theo màu previousColor)
+    colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
     codeLine?: number;

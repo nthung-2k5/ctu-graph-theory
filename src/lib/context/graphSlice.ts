@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import UnweightedEdge from '../graphs/unweighted/Edge';
 import WeightedEdge from '../graphs/weighted/Edge';
-import { InputGraph } from '../graphs/Graph';
 
 class IntStream 
 {
@@ -36,22 +35,37 @@ class IntStream
     }
 }
 
-export interface GraphState 
+export interface GraphStateBase 
 {
     vertexCount: number;
-    edges: InputGraph;
     directed: boolean;
-};
+    weighted: boolean;
+}
+
+export interface WeightedGraphState
+{
+    edges: WeightedEdge[];
+    weighted: true;
+}
+
+export interface UnweightedGraphState
+{
+    edges: UnweightedEdge[];
+    weighted: false;
+}
+
+export type GraphState = GraphStateBase & (WeightedGraphState | UnweightedGraphState);
 
 const initialState: GraphState = {
     vertexCount: 0,
     edges: [],
     directed: false,
+    weighted: false,
 };
 
 export const graphSlice = createSlice({
     name: 'graph',
-    initialState,
+    initialState: initialState as GraphState,
     reducers: {
         setDirected: (state, action: PayloadAction<boolean>) =>
         {
@@ -65,10 +79,11 @@ export const graphSlice = createSlice({
             const stream = new IntStream(input);
 
             state.vertexCount = stream.nextCount();
+            state.weighted = weighted;
 
             const m = stream.nextCount();
 
-            if (weighted)
+            if (state.weighted)
             {
                 const graph: WeightedEdge[] = [];
                 for (let i = 0; i < m; i++)

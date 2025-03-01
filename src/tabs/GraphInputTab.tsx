@@ -28,8 +28,8 @@ export default function GraphInputTab()
 
     useEffect(() =>
     {
-        dispatch(setGraph({ input, weighted: false }))
-    }, [dispatch, input]);
+        dispatch(setGraph({ input, weighted }))
+    }, [dispatch, input, weighted]);
 
     return (
         <Tabs
