@@ -69,7 +69,7 @@ export default function VisualGraphComponent()
         for (let i = 0; i < edges.length; i++)
         {
             const edge = edges[i];
-            const el: ElementDefinition = { group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' };
+            const el: ElementDefinition = { group: 'edges', data: { source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' };
             
             if (weighted)
             {
