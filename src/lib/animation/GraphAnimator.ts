@@ -1,34 +1,11 @@
-import cytoscape from 'cytoscape';
-import { wait } from '../AsyncHelper';
-import { AlgorithmStep } from '../algorithms/GraphAlgorithm';
+import cytoscape, { Css } from 'cytoscape';
 import { KEYWORD } from 'color-convert/conversions';
-import type storeType from '../context/store';
+import SubAnimator from './SubAnimator';
+import store from '../context/store';
 
-let store: typeof storeType;
-export const injectStore = (_store: typeof storeType) => 
-{
-    store = _store;
-}
-
-export default class GraphAnimator
+export default class GraphAnimator extends SubAnimator
 {
     private _cy: cytoscape.Core | null = null;
-
-    private _delay: number = 1000;
-
-    private _stop: boolean = false;
-
-    private _pause: boolean = false;
-
-    public setDelay(speed: number) 
-    {
-        this._delay = speed;
-    }
-
-    public getDelay() 
-    {
-        return this._delay;
-    }
 
     public setCytoscape(cy: cytoscape.Core): GraphAnimator
     {
@@ -36,9 +13,8 @@ export default class GraphAnimator
         return this;
     }
 
-    public resetAll(): GraphAnimator
+    public override reset(): GraphAnimator
     {
-        this._stop = this._pause = false;
         const config = store.getState().config;
         
         this._cy?.elements().style({ 
@@ -46,10 +22,10 @@ export default class GraphAnimator
             'color': config.labelColor, 
             'line-color': config.edgeColor, 
             'border-color': 'black', 
-            'border-width': 1, 
-            'line-outline-width': 0
-        }).removeAttr('marked');
-        // this._cy.elements().style({ 'color': 'black', 'border-color': 'black', 'line-color': 'black', 'border-width': 1, 'line-outline-width': 0 }).removeAttr('marked');
+            'border-width': 2,
+            'line-outline-width': 0,
+            'target-arrow-color': 'black',
+        });
         return this;
     }
 
@@ -58,60 +34,49 @@ export default class GraphAnimator
         this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
         return this;
     }
-    
-    public colorVertex2(vertex: number, color:string ,borderColor: string): GraphAnimator
+
+    private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ color: '', 'border-color': borderColor, 'border-width': 2 }).attr('marked', color);
+        this._cy?.$id(vertex.toString()).style(style);
         return this;
     }
 
-    public advancedColorVertex(vertex: number, bkColor: string, colorText: string): GraphAnimator
-    {
-        this._cy?.$id(vertex.toString()).style({ 'background-color': bkColor, 'border-color': bkColor, 'color': colorText });
-        return this;
-    }
-
-    public colorEdge(u: number, v: number, color: KEYWORD, directed: boolean, prevColor: KEYWORD = 'black'): GraphAnimator
+    private _setEdgeStyle(u: number, v: number, style: Css.Edge): GraphAnimator
     {
         if (!this._cy) return this;
 
         const source = this._cy.$id(u.toString());
         const target = this._cy.$id(v.toString());
 
-        const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).filter(e => prevColor === 'black' || e.data('marked') === prevColor).first();
-        edge.style({ 'line-color': color, 'line-outline-color': color }).attr('marked', color);
+        const directed = store.getState().graph.directed;
+
+        const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).first();
+        edge.style(style);
         return this;
     }
 
-    public stop(): GraphAnimator
+    public highlightVertex(vertex: number): GraphAnimator
     {
-        this._stop = true;
-        return this;
+        return this._setVertexStyle(vertex, { 'border-width': 3 });
     }
 
-    public pause(): GraphAnimator
+    public unhighlightVertex(vertex: number): GraphAnimator
     {
-        this._pause = true;
-        return this;
+        return this._setVertexStyle(vertex, { 'border-width': 2 });
     }
 
-    public async run(steps: IterableIterator<AlgorithmStep>): Promise<void>
+    public highlightEdge(u: number, v: number): GraphAnimator
     {
-        this.resetAll();
-        // setTimeout(async () => {
-        // this._stop = false;
-        for (const step of steps)
-        {
-            while (this._pause)
-            {
-                if (this._stop) return;
-            }
+        return this._setEdgeStyle(u, v, { 'line-outline-width': 1 });
+    }
 
-            if (this._stop) return;
+    public unhighlightEdge(u: number, v: number): GraphAnimator
+    {
+        return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
+    }
 
-            step.animate?.(this);
-            await wait(this._delay);
-        }
-        // }, 600);
+    public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator
+    {
+        return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
     }
 }

@@ -1,8 +1,8 @@
 import { Stack } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
-import Graph from '../../graphs/Graph';
 import { PseudocodeLine } from '../../pseudocode/Pseudocode';
+import { UnweightedGraph } from '../UnweightedGraph';
 
 export const stackDfsPseudoCode = [
     
@@ -13,16 +13,16 @@ export default class StackDFS extends TraversalAlgorithm
     public override get pseudocode(): PseudocodeLine[] 
     {
         return [
-            { text: 'while (ngăn xếp không rỗng)', tab: 0 },
-            { text: 'u = lấy đỉnh ngăn xếp', tab: 1 },
-            { text: 'if (u đã duyệt)', tab: 1 },
-            { text: 'continue', tab: 2 },
-            { text: 'Duyệt u', tab: 1 },
-            { text: 'Đánh dấu u đã duyệt', tab: 1 },
+            { text: 'while (stack != ∅)', tab: 0 },
+            { text: 'u <- stack;', tab: 1 },
+            { text: 'if (duyet[u] == true)', tab: 1 },
+            { text: 'continue;', tab: 2 },
+            { text: '// Duyệt u;', tab: 1, comment: true },
+            { text: 'stack[u] = true;', tab: 1 },
             { text: 'for (đỉnh v kề với u)', tab: 1 },
-            { text: 'if (v chưa duyệt)', tab: 2 },
-            { text: 'đẩy v vào ngăn xếp', tab: 3 },
-        ];
+            { text: 'if (stack[v] != true)', tab: 2 },
+            { text: 'queue <- v;', tab: 3 },
+        ]
     }
 
     public get name()
@@ -30,34 +30,59 @@ export default class StackDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
 
-    public numberOfStep = 0;
-    
-    public runCode(g: Graph, startVertex: any, visited: any[]) {
-
-    }
-
-    *_traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
     {
-        const stack = new Stack<number>();
+        const stack: Stack<number> = new Stack<number>();
+    
         stack.push(startVertex);
-        visited[startVertex] = true;
-
+            
+        yield { codeLine: 0 };
         while (!stack.isEmpty())
         {
             const u = stack.pop()!;
-            yield { animate: animator => animator.colorVertex(u, 'red') };
-
+            yield { codeLine: 1 };
+    
+            yield { codeLine: 2 };
+            if (visited[u])
+            {
+                yield { codeLine: 3 };
+                yield { codeLine: 0 };
+                continue;
+            }
+    
+            yield {
+                colorVertex: [u, 'red'],
+                colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
+                codeLine: 4
+            };
+    
+            visited[u] = true;
+            yield { codeLine: 5 };
+    
             const neighbors = g.neighbors(u);
-
+    
+            yield { codeLine: 6 };
             for (const v of neighbors)
             {
+                yield { codeLine: 7 };
                 if (!visited[v])
                 {
                     stack.push(v);
-                    yield { animate: animator => animator.colorVertex(v, 'blue').colorEdge(u, v, 'red', g.directed) };
-                    visited[v] = true;
+                    yield {
+                        colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
+                        colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
+                        codeLine: 8
+                    };
+
+                    if (parent[v] === -1)
+                    {
+                        parent[v] = u;
+                    }
                 }
+                yield { codeLine: 6 };
             }
+
+            yield { codeLine: 0 };
         }
     }
 }

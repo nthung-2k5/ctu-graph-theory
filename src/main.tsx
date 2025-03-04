@@ -12,7 +12,8 @@ createRoot(document.getElementById('root')!).render(
             <ConfigProvider theme={{
                 token: {
                     colorPrimary: "#1f5ca9",
-                    colorInfo: "#1f5ca9"
+                    colorInfo: "#1f5ca9",
+                    fontFamily: "Readex Pro"
                 },
                 components: {
                     Progress: {

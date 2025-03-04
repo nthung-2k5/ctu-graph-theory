@@ -1,28 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import graphSlice from './graphSlice';
 import configSlice from './graphConfigSlice';
-import animationSlice from './animationSlice';
-import { injectStore } from '../animation/GraphAnimator';
 
 const store = configureStore({
     reducer: {
         graph: graphSlice,
         config: configSlice,
-        animation: animationSlice
-    },
-
-    middleware(getDefaultMiddleware) 
-    {
-        return getDefaultMiddleware({
-            serializableCheck:
-            {
-                ignoredPaths: ['animation.graph', 'animation.pseudocode'],
-            }
-        });
     },
 });
-
-injectStore(store);
 
 export default store;
 

@@ -1,23 +1,24 @@
 import { Button, Segmented, Switch, Tabs } from "antd";
 import { Editor } from "prism-react-editor";
 import { BasicSetup } from "prism-react-editor/setups";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
 import "prism-react-editor/search.css";
-// import GraphOption from "./GraphOption";
+import GraphOption from "./GraphOption";
 import QueueDisplay, { QueueDisplayHandle } from '../components/data_structures/QueueDisplay';
 import StackDisplay, { StackDisplayHandle } from '../components/data_structures/StackDisplay';
 import ListDisplay, { ListDisplayHandle } from '../components/data_structures/ListDisplay';
 import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
 import { setDirected, setGraph } from '../lib/context/graphSlice';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 export default function GraphInputTab() 
 {
-    const [input, setInput] = useState('');
-    const [weighted, setWeighted] = useState(false);
-    const { animating } = useAppSelector(state => state.animation);
+    const inputRef = useRef('');
+    const state = useAppSelector(state => state.graph);
+    const { playing } = useGraphTheory();
 
     const dispatch = useAppDispatch();
 
@@ -25,10 +26,11 @@ export default function GraphInputTab()
     const stackRef = useRef<StackDisplayHandle>(null!);
     const listRef = useRef<ListDisplayHandle>(null!);
 
-    useEffect(() =>
+    const pushGraph = (input: string = inputRef.current, weighted: boolean = state.weighted) =>
     {
-        dispatch(setGraph({ input, weighted: false }))
-    }, [dispatch, input]);
+        inputRef.current = input;
+        dispatch(setGraph({ input, weighted }));
+    }
 
     return (
         <Tabs
@@ -40,7 +42,7 @@ export default function GraphInputTab()
                         <div className="flex flex-col h-full">
                             <div className="flex">
                                 <Segmented
-                                    disabled={animating}
+                                    disabled={playing}
                                     options={["Vô hướng", "Có hướng"]}
                                     onChange={(type) => dispatch(setDirected(type === "Có hướng"))}
                                     className="mb-2 w-full"
@@ -50,28 +52,29 @@ export default function GraphInputTab()
                             </div>
 
                             <div className="flex ms-auto mb-2">
-                                <span>{weighted ? "Có trọng số" : "Không có trọng số"}</span>
+                                <span>{state.weighted ? "Có trọng số" : "Không có trọng số"}</span>
                                 <Switch
-                                    disabled={animating}
+                                    disabled={playing}
                                     className="ml-2"
-                                    onClick={setWeighted}
+                                    onClick={(value) => pushGraph(undefined, value)}
                                 />
                             </div>
 
                             <Editor
-                                value={input}
-                                readOnly={animating}
+                                value=''
+                                readOnly={playing}
                                 style={{
                                     borderWidth: "1px",
                                     flexGrow: "1",
                                     borderRadius: "0.5rem",
+                                    marginBottom: "1rem"
                                 }}
-                                onUpdate={setInput}
+                                onUpdate={(value) => pushGraph(value)}
                                 language=""
                             >
                                 {(editor) => <BasicSetup editor={editor} />}
                             </Editor>
-                            {/* <GraphOption/> */}
+                            <GraphOption/>
                         </div>
                     ),
                 },

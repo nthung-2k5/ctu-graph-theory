@@ -8,7 +8,7 @@ export type StackDisplayHandle = {
     pop: () => void;
 }
 
-const StackDisplay = forwardRef<StackDisplayHandle, unknown>((_, ref) =>
+const StackDisplay = forwardRef<StackDisplayHandle>((_, ref) =>
 {
     const stack = useRef(new Stack<ElementType>());
     const [, forceUpdate] = useReducer(o => !o, false);

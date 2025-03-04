@@ -6,20 +6,22 @@ import cola from "cytoscape-cola";
 
 import ControlBar from "./ControlBar";
 import { useAppSelector } from '../lib/context/hooks';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
+import { GraphState } from '../lib/context/graphSlice';
 
 cytoscape.use(cola);
 
 export default function VisualGraphComponent() 
 {
     const cy = useRef<cytoscape.Core>(null!);
-    const { graph } = useAppSelector(state => state.animation);
-    const { vertexCount, edges, directed } = useAppSelector(state => state.graph);
+    const { animator } = useGraphTheory();
+    const { vertexCount, edges, directed, weighted }: GraphState = useAppSelector(state => state.graph);
     const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
 
     const assignCytoscape = (core: cytoscape.Core) =>
     {
         cy.current = core;
-        graph.setCytoscape(core);
+        animator.graph.setCytoscape(core);
     };
 
     const downloadPNG = () => 
@@ -67,11 +69,18 @@ export default function VisualGraphComponent()
         for (let i = 0; i < edges.length; i++)
         {
             const edge = edges[i];
-            elements.push({ group: 'edges', data: { id: `${edge.u}-${edge.v}[${i}]`, source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' });
+            const el: ElementDefinition = { group: 'edges', data: { source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' };
+            
+            if (weighted)
+            {
+                el.data.label = edges[i].weight.toString();
+            }
+
+            elements.push(el);
         }
 
         return elements;
-    }, [vertexCount, edges, directed]);
+    }, [vertexCount, edges, directed, weighted]);
 
     useEffect(() =>
     {
@@ -124,7 +133,7 @@ const DefaultGraphStyle: Stylesheet[] = [
             "text-valign": "center",
             "text-halign": "center",
             "font-weight": "bold",
-            "label": "data(label)",
+            label: "data(label)",
             backgroundColor: '#F8FAFC',
             "border-style": "solid",
             "border-width": '2rem',
@@ -136,7 +145,10 @@ const DefaultGraphStyle: Stylesheet[] = [
         style: {
             "line-color": '#000',
             width: '2rem',
-            "curve-style": "bezier"
+            "curve-style": "bezier",
+            label: "data(label)",
+            "text-background-color": "#fff",
+            "text-background-opacity": 1,
         }
     },
     {

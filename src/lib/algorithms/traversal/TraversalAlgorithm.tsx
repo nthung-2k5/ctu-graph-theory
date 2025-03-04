@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Checkbox, Form, InputNumber } from 'antd';
-import Graph from '../../graphs/Graph';
+import { UnweightedGraph } from '../UnweightedGraph';
+import store from '../../context/store';
 
 export interface TraversalConfig
 {
@@ -11,12 +12,14 @@ export interface TraversalConfig
 
 export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<TraversalConfig>
 {
-    protected abstract _traverse(g: Graph, startVertex: number, visited: boolean[]): IterableIterator<AlgorithmStep>;
+    protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>;
 
-    public *run(g: Graph, config: TraversalConfig): IterableIterator<AlgorithmStep>
+    protected *_run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
-        yield* this._traverse(g, config.startVertex, visited);
+        const parent: number[] = Array(g.vertexCount + 1).fill(-1);
+
+        yield* this._traverse(g, config.startVertex, visited, parent);
 
         if (config.traverseAll)
         {
@@ -24,14 +27,15 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
             {
                 if (!visited[u])
                 {
-                    yield* this._traverse(g, u, visited);
+                    yield* this._traverse(g, u, visited, parent);
                 }
             }
         }
     }
 
-    public override configNode(vertexCount: number): ReactNode
+    public override configNode(): ReactNode
     {
+        const vertexCount = store.getState().graph.vertexCount;
         return (
             <>
                 {/* <div className="flex items-center space-x-4 gap-8">
