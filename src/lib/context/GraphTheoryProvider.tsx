@@ -9,6 +9,7 @@ import StackDFS from '../algorithms/traversal/StackDFS';
 import UndirectedConnected from '../algorithms/connectivity/UndirectedConnected';
 import Animator, { AnimationState } from '../animation/Animator';
 import { useAppSelector } from './hooks';
+import TopoOrderingBFS from '../algorithms/topological/TopoOrderingBFS';
 
 export const AvailableAlgorithms = [
     new BFS(),
@@ -17,6 +18,7 @@ export const AvailableAlgorithms = [
     new UndirectedConnected(),
     new Cycle(),
     new Bipartite(),
+    new TopoOrderingBFS()
 ];
 
 export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =>
@@ -89,7 +91,8 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
                         animator.current.resume();
                         break;
                     case AnimationState.STOPPED:
-                        animator.current.play(algorithm.run(graphState, config.current));
+                        console.log(animator.current);
+                        animator.current.play(algorithm.run(graphState, config.current, animator.current));
                         break;
                 }
             },
@@ -99,7 +102,7 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
             rewind: () =>
             {
                 animator.current.stop();
-                animator.current.play(algorithm.run(graphState, config.current));
+                animator.current.play(algorithm.run(graphState, config.current, animator.current));
             }
         }}>
             {children}

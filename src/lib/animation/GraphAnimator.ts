@@ -19,7 +19,7 @@ export default class GraphAnimator extends SubAnimator
         
         this._cy?.elements().style({ 
             'background-color': config.nodeColor,
-            'color': config.labelColor, 
+            'color': config.labelColor,
             'line-color': config.edgeColor, 
             'border-color': 'black', 
             'border-width': 2,

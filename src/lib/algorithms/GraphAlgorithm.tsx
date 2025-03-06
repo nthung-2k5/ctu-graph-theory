@@ -4,6 +4,7 @@ import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice';
 import { PseudocodeLine } from '../pseudocode/Pseudocode';
 import { KEYWORD } from 'color-convert/conversions';
+import Animator from '../animation/Animator';
 
 // undefined: không quan trọng
 // true: phải có
@@ -33,14 +34,14 @@ export abstract class GraphAlgorithm<Config = object>
         return (<></>);
     }
     
-    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>;
+    public abstract run(g: GraphState, config: Config, animator?: Animator): IterableIterator<AlgorithmStep>;
 };
 
 export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
 {
-    protected abstract _run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+    protected abstract _run(g: UnweightedGraph, config: Config, animator?: Animator): IterableIterator<AlgorithmStep>;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
+    public run(g: GraphState, config: Config, animator?: Animator): IterableIterator<AlgorithmStep>
     {
         const graph = new UnweightedGraph(g.vertexCount, g.directed);
 
@@ -49,7 +50,7 @@ export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgori
             graph.addEdge(edge);
         }
 
-        return this._run(graph, config);
+        return this._run(graph, config, animator);
     }
 }
 
@@ -60,9 +61,9 @@ export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgor
         return { weighted: true };
     }
 
-    protected abstract _run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+    protected abstract _run(g: WeightedGraph, config: Config, animator?: Animator): IterableIterator<AlgorithmStep>;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
+    public run(g: GraphState, config: Config, animator?: Animator): IterableIterator<AlgorithmStep>
     {
         const graph = new WeightedGraph(g.vertexCount, g.directed);
 
@@ -76,7 +77,7 @@ export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgor
             graph.addEdge(edge);
         }
 
-        return this._run(graph, config);
+        return this._run(graph, config, animator);
     }
 }
 
