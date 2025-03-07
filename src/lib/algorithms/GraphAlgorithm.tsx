@@ -85,12 +85,14 @@ export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
 export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD];
 export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
+export type BackgourndColorVertex = [vertex: number, backgroundColor: KEYWORD];
 type ArrayOrSingle<T> = T | T[];
 
 export interface AlgorithmStep
 {
     colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
     colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
+    backgroundColorVertex?: ArrayOrSingle<BackgourndColorVertex>;
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
     codeLine?: number;

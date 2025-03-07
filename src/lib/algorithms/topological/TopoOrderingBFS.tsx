@@ -87,10 +87,13 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
 
       for (let vertex = 1; vertex <= g.vertexCount; vertex++) {
          yield { 
-            colorVertex: [vertex, 'green'],
-            highlightVertex: [vertex, true],
+            // colorVertex: [vertex, 'green'],
+            // backgroundColorVertex: [vertex, 'green'],
+            // highlightVertex: [vertex, true],
+            // colorVertex: [vertex, 'blue'],
             codeLine: 0 
          }; // Tính bậc cho mỗi đỉnh
+         animator.graph.backgroundColorVertex(vertex, 'green');
          inDegree.set(vertex, 0);
       }
       
@@ -101,26 +104,62 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
       for (let [vertex, degree] of inDegree.entries()) {
          if (degree === 0) { 
             yield { 
-               colorVertex: [vertex, 'deeppink'],
-               highlightVertex: [vertex, true],
+               // colorVertex: [vertex, 'deeppink'],
+               // backgroundColorVertex: [vertex, 'deeppink'],
+               // highlightVertex: [vertex, true],
                codeLine: 1
             }; // Bỏ vertex vào Hàng đợi 
+            animator.graph.backgroundColorVertex(vertex, 'deeppink');
             queue.push(vertex);
          }
       }
 
       yield {};
       animator.graph.reset(); // Reset lại đồ thị
+      queue.forEach(vertex => {
+         animator.graph.backgroundColorVertex(vertex, 'deeppink');
+      });
+      
   
+      yield { codeLine: 2 }
       while (queue.length > 0) {
          let u = queue.shift()!; // Lấy đỉnh đầu hàng đợi
+         yield { 
+            codeLine: 3,
+            colorVertex: [u, 'blue']
+         }
          topoOrder.push(u); // Thêm vào thứ tự topo
+         yield {
+            codeLine: 4,
+            highlightVertex: [u, true]
+         }
+         yield {
+            codeLine: 4,
+         }
 
          for (const edge of g.edges) {
             if (edge.u === u) {
+               yield {
+                  codeLine: 5,
+                  colorEdge: [u, edge.v, 'blue']
+               }
                inDegree.set(edge.v, inDegree.get(edge.v)! - 1);
+               yield {
+                  codeLine: 6,
+                  colorVertex: [edge.v, 'red']
+               }
+               yield {
+                  codeLine: 7,
+                  highlightVertex: [edge.v, true]
+               }
                if (inDegree.get(edge.v) === 0) {
-                     queue.push(edge.v);
+                  queue.push(edge.v);
+                  yield {
+                     codeLine: 8,
+                     colorVertex: [edge.v, 'black'],
+                     highlightVertex: [edge.v, false]
+                  }
+                  animator.graph.backgroundColorVertex(edge.v, 'deeppink');
                }
             }
          }

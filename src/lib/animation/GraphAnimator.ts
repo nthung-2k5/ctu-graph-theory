@@ -79,4 +79,10 @@ export default class GraphAnimator extends SubAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
     }
+
+    public backgroundColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._cy?.$id(vertex.toString()).style({ 'background-color': color });
+        return this;
+    }
 }
