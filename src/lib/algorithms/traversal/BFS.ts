@@ -2,7 +2,6 @@ import { Queue } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
 import { UnweightedGraph } from '../UnweightedGraph';
-import { SequenceType } from '../../../tabs/Debugger';
 
 export default class BFS extends TraversalAlgorithm
 {
@@ -13,7 +12,7 @@ export default class BFS extends TraversalAlgorithm
 void BFS(Graph* G, int s) {
     Queue Q; makeNullQueue(&Q);
 
-    enqueue(Q, s);
+    enqueue(&Q, s);
 
     while (!empty(Q)) {
         int u = front(Q); dequeue(&Q);
@@ -23,7 +22,7 @@ void BFS(Graph* G, int s) {
         mark[u] = 1;
 
         for (int v = 1; v <= n; v++)
-            if (adjacent(G, u, v))
+            if (adjacent(G, u, v) && !mark[v])
                 enqueue(Q, v);
     }
 }`;
@@ -36,19 +35,28 @@ void BFS(Graph* G, int s) {
 
     *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
     {
-        yield { codeLine: 3, pushStackTrace: `BFS(G, ${startVertex})` };
+        yield {
+            codeLine: 3,
+            log: `BFS(G, ${startVertex})`
+        };
         const queue: Queue<number> = new Queue<number>();
-        yield { codeLine: 4, addVariable: ['Q', { type: SequenceType.Queue, value: [] }, 'local'] };
+        yield {
+            codeLine: 4,
+            log: `Q = {}`
+        };
         
         queue.push(startVertex);
         yield { 
             codeLine: 6,
             highlightVertex: [startVertex, true],
             colorVertex: [startVertex, 'orange'],
-            updateVariable: ['Q', queue.toArray(), 'local']
+            log: `Q = {${startVertex}}`
         };
         
-        yield { codeLine: 8 };
+        yield {
+            codeLine: 8,
+            log: `Q = {${startVertex}} => Bắt đầu duyệt`
+        };
         while (!queue.isEmpty())
         {
             const u = queue.shift()!;
@@ -56,15 +64,17 @@ void BFS(Graph* G, int s) {
             yield { 
                 codeLine: 9,
                 highlightVertex: [u, true],
-                colorVertex: [u, 'yellow'],
-                addVariable: ['u', u, 'local'],
-                updateVariable: ['Q', queue.toArray(), 'local']    
+                colorVertex: [u, 'yellow'], 
+                log: `u = ${u}, Q = {${queue.toArray().join(', ')}}`
             };
 
-            yield { codeLine: 10 };
+            yield {
+                codeLine: 10,
+                log: `mark[${u}] = ${visited[u]}`
+            };
             if (visited[u])
             {
-                yield { codeLine: 11 };
+                yield { codeLine: 11, log: `Đã duyệt ${u}, bỏ qua` };
                 continue;
             }
 
@@ -73,19 +83,20 @@ void BFS(Graph* G, int s) {
                 colorVertex: [u, 'red'],
                 colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
                 codeLine: 13,
-                updateVariable: ['visited', visited, 'local']
+                log: `mark[${u}] = true`
             };
 
             yield {
                 codeLine: 15,
-                addVariable: ['v', 1, 'local']
+                log: `v = 1`
             };
             for (let v = 1; v <= g.vertexCount; v++)
             {
                 yield {
                     codeLine: 16, 
                     highlightVertex: [v, true],
-                    highlightEdge: [u, v, true] 
+                    highlightEdge: [u, v, true],
+                    log: `G->A[${u}][${v}] = ${g.matrix[u][v]}, mark[${v}] = ${visited[v]}`
                 };
 
                 if (g.matrix[u][v] && !visited[v])
@@ -105,23 +116,23 @@ void BFS(Graph* G, int s) {
                     yield { 
                         codeLine: 17,
                         colorVertex: [v, 'orange'],
-                        updateVariable: ['Q', queue.toArray(), 'local'],
-                        ...colorEdge
+                        ...colorEdge,
+                        log: `Q = {${queue.toArray().join(', ')}}`
                     };
                 }
-                yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], updateVariable: ['v', v + 1, 'local'] };
+                yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], log: `v = ${v + 1}` };
             }
 
             yield { 
                 codeLine: 18, 
                 highlightVertex: [u, false],
                 colorVertex: [u, 'purple'],
-                removeVariable: [['v', 'local']]
+                log: `Kết thúc duyệt ${u}`
             };
 
-            yield { codeLine: 8, removeVariable: ['u', 'local'] };
+            yield { codeLine: 8, log: `Q = {${queue.toArray().join(', ')}}` };
         }
 
-        yield { codeLine: 19, popStackTrace: true };
+        yield { codeLine: 19, log: 'Kết thúc' };
     }
 }

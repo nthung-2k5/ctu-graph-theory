@@ -31,7 +31,7 @@ export default class GraphAnimator extends SubAnimator
 
     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
+        this._cy?.$id(vertex.toString()).style({ 'background-color': color }).attr('marked', color);
         return this;
     }
 

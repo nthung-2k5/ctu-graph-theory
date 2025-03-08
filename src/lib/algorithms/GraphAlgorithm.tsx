@@ -3,7 +3,6 @@ import { UnweightedGraph } from './UnweightedGraph';
 import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice'
 import { KEYWORD } from 'color-convert/conversions';
-import { ArrayType, Primitive, SequenceType, Variable } from '../../tabs/Debugger';
 
 // undefined: không quan trọng
 // true: phải có
@@ -18,6 +17,8 @@ export interface AlgorithmRequirements
 export abstract class GraphAlgorithm<Config = object>
 {
     public abstract get name(): string;
+    public abstract defaultConfig(): Config;
+
     public get code(): string | string[]
     {
         return '';
@@ -84,25 +85,19 @@ export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
 export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD];
 export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
-export type AddVariableAnimation = [name: string, value: Primitive | { type: SequenceType, value: ArrayType }, scope: 'local' | 'global'];
-export type RemoveVariableAnimation = [name: string, scope: 'local' | 'global'];
-export type UpdateVariableAnimation = [name: string, value: Variable, scope: 'local' | 'global'];
 type ArrayOrSingle<T> = T | T[];
 
 export interface AlgorithmStep
 {
-    description?: string | [string | undefined, string];
+    log: string;
+    
     colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
     colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
+
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
-    codeLine?: number;
 
-    addVariable?: ArrayOrSingle<AddVariableAnimation>;
-    removeVariable?: ArrayOrSingle<RemoveVariableAnimation>;
-    updateVariable?: ArrayOrSingle<UpdateVariableAnimation>;
-    pushStackTrace?: string;
-    popStackTrace?: boolean;
+    codeLine?: number;
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

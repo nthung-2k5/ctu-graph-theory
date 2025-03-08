@@ -3,7 +3,6 @@ import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Checkbox, Form, InputNumber } from 'antd';
 import { UnweightedGraph } from '../UnweightedGraph';
 import store from '../../context/store';
-import { SequenceType } from '../../../tabs/Debugger';
 
 export interface TraversalConfig
 {
@@ -15,12 +14,20 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
 {
     protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>;
 
+    public override defaultConfig(): TraversalConfig
+    {
+        return {
+            startVertex: 1,
+            traverseAll: false,
+        };
+    }
+
     protected *_run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
         const parent: number[] = Array(g.vertexCount + 1).fill(-1);
 
-        yield { codeLine: 1, addVariable: ['mark', { type: SequenceType.Array, value: visited }, 'global'] };
+        yield { codeLine: 1, log: `mark[${g.vertexCount + 1}] = {${visited.join(', ')}}` };
 
         yield* this._traverse(g, config.startVertex, visited, parent);
 
@@ -41,24 +48,7 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
         const vertexCount = store.getState().graph.vertexCount;
         return (
             <>
-                {/* <div className="flex items-center space-x-4 gap-8">
-                    <Form.Item<TraversalConfig>
-                        style={{ marginBottom: '5px'}}
-                        name="startVertex"
-                        initialValue={1}
-                        label="Đỉnh bắt đầu"
-                    >
-                        <InputNumber min={1} max={vertexCount} />
-                    </Form.Item>
-                    <Form.Item<TraversalConfig> 
-                        name="traverseAll"
-                        valuePropName="checked"
-                        style={{ marginBottom: '5px' }}
-                    >
-                        <Checkbox>Duyệt tất cả các đỉnh</Checkbox>
-                    </Form.Item>
-                </div> */}
-                <Form.Item<TraversalConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                <Form.Item<TraversalConfig> label="Đỉnh bắt đầu" name="startVertex">
                     <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
                 <Form.Item<TraversalConfig> name="traverseAll" valuePropName="checked">

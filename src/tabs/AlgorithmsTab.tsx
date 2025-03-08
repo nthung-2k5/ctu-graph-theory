@@ -2,7 +2,7 @@ import { ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { PropsWithChildren, useEffect } from 'react';
 import Title from 'antd/es/typography/Title';
-import PseudoCode from './PseudoCode';
+import CodeBlock from './CodeBlock';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
 
@@ -10,8 +10,6 @@ const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
     'Duyệt theo chiều sâu (DFS) bằng đệ quy',
     'Duyệt theo chiều sâu (DFS) bằng ngăn xếp',
-    'Kiểm tra đồ thị vô hướng liên thông',
-    'Kiểm tra đồ thị chứa chu trình',
     'Kiểm tra đồ thị phân đôi',
     'Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)',
     'Tìm đường đi ngắn nhất (Thuật toán Moore-Dijkstra)',
@@ -38,7 +36,7 @@ const InvalidMessage = (props: PropsWithChildren) =>
 
 export default function AlgorithmsTab() 
 {
-    const { playing, algorithm, setAlgorithm, config, predicateError } = useGraphTheory();
+    const { algorithm, setAlgorithm, setConfig, predicateError } = useGraphTheory();
     const [form] = Form.useForm();
 
     const items = AvailableAlgorithms.map((algo, index) => ({
@@ -53,8 +51,8 @@ export default function AlgorithmsTab()
 
     useEffect(() => 
     {
-        config.current = form.getFieldsValue();
-    }, [predicateError, config, algorithm, form]);
+        setConfig(form.getFieldsValue());
+    }, [predicateError, setConfig, algorithm, form]);
 
     const tabs: TabsProps['items'] = [
         {
@@ -65,7 +63,6 @@ export default function AlgorithmsTab()
                     <div>
                         <Dropdown
                             trigger={['click']}
-                            disabled={playing}
                             menu={{ items }}
                         >
                             <a onClick={(e) => e.preventDefault()}>
@@ -78,9 +75,9 @@ export default function AlgorithmsTab()
                     </div>
                     <Form
                         layout="horizontal"
-                        disabled={playing}
                         form={form}
-                        onValuesChange={(_, values) => config.current = values}
+                        initialValues={algorithm.defaultConfig()}
+                        onValuesChange={(_, values) => setConfig(values)}
                         className="w-full flex flex-col justify-start"
                     >
                         <Title level={5}>{algorithm.name}</Title>
@@ -96,7 +93,7 @@ export default function AlgorithmsTab()
                             </div>
                         </ConfigProvider>
                     </Form>
-                    <PseudoCode />
+                    <CodeBlock />
                 </div>
             ),
         },

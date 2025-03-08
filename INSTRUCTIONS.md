@@ -18,6 +18,8 @@ Mỗi `class` thuật toán gồm 4 trường dữ liệu có thể `override` t
 export abstract class GraphAlgorithm<Config = object>
 {
     public abstract get name(): string; // Tên của thuật toán
+    public abstract defaultConfig(): Config;
+
     public get code(): string
     {
         return ''; // mã C dùng để tham khảo
@@ -40,8 +42,11 @@ export abstract class GraphAlgorithm<Config = object>
 ## `public abstract get name(): string`
 - Trả về: tên thuật toán.
 
+## `public abstract defaultConfig(): Config`
+- Trả về: cấu hình mặc định khi mới chọn thuật toán
+
 ## `public get code(): string`
-- Trả về: đoạn code C để tham khảo bước chạy.
+- Trả về: đoạn code C (hoặc mã giả) để tham khảo bước chạy.
 
 Để có thể ghi nhiều dòng thì làm như sau
 ```ts
@@ -128,15 +133,6 @@ export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 // Nếu không tô đậm thì highlight = false
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
 
-// Thêm một biến có tên {name} và giá trị khởi tạo {value} với {scope} cục bộ (local - trong hàm) hoặc toàn cục (global - ngoài hàm)
-export type AddVariableAnimation = [name: string, value: Primitive | { type: SequenceType, value: ArrayType }, scope: 'local' | 'global'];
-
-// Xóa biến tên {name} trong {scope}
-export type RemoveVariableAnimation = [name: string, scope: 'local' | 'global'];
-
-// Cập nhật biến tên {name} trong {scope} thành giá trị {value}
-export type UpdateVariableAnimation = [name: string, value: Variable, scope: 'local' | 'global'];
-
 // Giá trị nhập vào có thể là một phần tử đó hoặc một mảng chứa phần tử đó
 type ArrayOrSingle<T> = T | T[];
 
@@ -146,13 +142,10 @@ export interface AlgorithmStep
     colorEdge?: ArrayOrSingle<ColorEdgeAnimation>; // tô màu cạnh
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>; // tô đậm đỉnh
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>; // tô đậm cạnh
-    codeLine?: number; // tô đậm dòng mã giả nào (bắt đầu từ số 0)
 
-    addVariable?: ArrayOrSingle<AddVariableAnimation>; // thêm biến
-    removeVariable?: ArrayOrSingle<RemoveVariableAnimation>; // xóa biến
-    updateVariable?: ArrayOrSingle<UpdateVariableAnimation>; // cập nhật biến
-    pushStackTrace?: string; // thêm 1 lần gọi hàm
-    popStackTrace?: boolean; // bỏ 1 lần gọi hàm
+    codeLine?: number; // tô đậm dòng mã giả nào (bắt đầu từ số 1)
+
+    log: string; // ghi phần log cho từng bước (chỉ 1 dòng, và luôn bắt buộc)
 }
 ```
 
@@ -161,19 +154,28 @@ Ví dụ để thông não (thuật toán BFS):
 // Nhớ phải có dấu *
 *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
 {
-    yield { codeLine: 3, pushStackTrace: `BFS(G, ${startVertex})` }; // gọi hàm BFS
+    yield {
+        codeLine: 3,
+        log: `BFS(G, ${startVertex})`
+    };
     const queue: Queue<number> = new Queue<number>();
-    yield { codeLine: 4, addVariable: ['Q', { type: SequenceType.Queue, value: [] }, 'local'] }; // khai báo biến cục bộ Q là hàng đợi
+    yield {
+        codeLine: 4,
+        log: `Q = {}`
+    };
     
     queue.push(startVertex);
     yield { 
         codeLine: 6,
         highlightVertex: [startVertex, true],
         colorVertex: [startVertex, 'orange'],
-        updateVariable: ['Q', queue.toArray(), 'local']
-    }; // tô đậm đỉnh bắt đầu, tô màu cam cho đỉnh bắt đầu, cập nhật biến Q
+        log: `Q = {${startVertex}}`
+    };
     
-    yield { codeLine: 8 };
+    yield {
+        codeLine: 8,
+        log: `Q = {${startVertex}} => Bắt đầu duyệt`
+    };
     while (!queue.isEmpty())
     {
         const u = queue.shift()!;
@@ -181,15 +183,17 @@ Ví dụ để thông não (thuật toán BFS):
         yield { 
             codeLine: 9,
             highlightVertex: [u, true],
-            colorVertex: [u, 'yellow'],
-            addVariable: ['u', u, 'local'],
-            updateVariable: ['Q', queue.toArray(), 'local']    
+            colorVertex: [u, 'yellow'], 
+            log: `u = ${u}, Q = {${queue.toArray().join(', ')}}`
         };
 
-        yield { codeLine: 10 };
+        yield {
+            codeLine: 10,
+            log: `mark[${u}] = ${visited[u]}`
+        };
         if (visited[u])
         {
-            yield { codeLine: 11 };
+            yield { codeLine: 11, log: `Đã duyệt ${u}, bỏ qua` };
             continue;
         }
 
@@ -198,19 +202,20 @@ Ví dụ để thông não (thuật toán BFS):
             colorVertex: [u, 'red'],
             colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
             codeLine: 13,
-            updateVariable: ['visited', visited, 'local']
+            log: `mark[${u}] = true`
         };
 
         yield {
             codeLine: 15,
-            addVariable: ['v', 1, 'local']
+            log: `v = 1`
         };
         for (let v = 1; v <= g.vertexCount; v++)
         {
             yield {
                 codeLine: 16, 
                 highlightVertex: [v, true],
-                highlightEdge: [u, v, true] 
+                highlightEdge: [u, v, true],
+                log: `G->A[${u}][${v}] = ${g.matrix[u][v]}, mark[${v}] = ${visited[v]}`
             };
 
             if (g.matrix[u][v] && !visited[v])
@@ -230,24 +235,24 @@ Ví dụ để thông não (thuật toán BFS):
                 yield { 
                     codeLine: 17,
                     colorVertex: [v, 'orange'],
-                    updateVariable: ['Q', queue.toArray(), 'local'],
-                    ...colorEdge
+                    ...colorEdge,
+                    log: `Q = {${queue.toArray().join(', ')}}`
                 };
             }
-            yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], updateVariable: ['v', v + 1, 'local'] };
+            yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], log: `v = ${v + 1}` };
         }
 
         yield { 
             codeLine: 18, 
             highlightVertex: [u, false],
             colorVertex: [u, 'purple'],
-            removeVariable: [['v', 'local']]
+            log: `Kết thúc duyệt ${u}`
         };
 
-        yield { codeLine: 8, removeVariable: ['u', 'local'] };
+        yield { codeLine: 8, log: `Q = {${queue.toArray().join(', ')}}` };
     }
 
-    yield { codeLine: 19, popStackTrace: true };
+    yield { codeLine: 19, log: 'Kết thúc' };
 }
 ```
 

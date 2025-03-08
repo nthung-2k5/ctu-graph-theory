@@ -1,21 +1,16 @@
-import React, { PropsWithChildren, useMemo, useRef, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { GraphAlgorithm } from '../algorithms/GraphAlgorithm';
 import { GraphTheoryContext } from './GraphTheoryContext';
 import Bipartite from '../algorithms/connectivity/Bipartite';
-import Cycle from '../algorithms/connectivity/Cycle';
 import BFS from '../algorithms/traversal/BFS';
 import RecursionDFS from '../algorithms/traversal/RecursionDFS';
 import StackDFS from '../algorithms/traversal/StackDFS';
-import UndirectedConnected from '../algorithms/connectivity/UndirectedConnected';
-import Animator, { AnimationState } from '../animation/Animator';
 import { useAppSelector } from './hooks';
 
 export const AvailableAlgorithms = [
     new BFS(),
     new RecursionDFS(),
     new StackDFS(),
-    new UndirectedConnected(),
-    new Cycle(),
     new Bipartite(),
 ];
 
@@ -23,18 +18,7 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
 {
     const graphState = useAppSelector(state => state.graph);
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(AvailableAlgorithms[0]);
-    const animator = useRef(new Animator());
-    const [speed, setSpeed] = useState(1);
-    const config = useRef({});
-    const [progress, setProgress] = useState(0);
-
-    animator.current.setOnAnimationStateChanged(() =>
-    {
-        setPlaying(animator.current.playing);
-        setPaused(animator.current.paused);
-    });
-
-    animator.current.setOnAnimationStep((val) => setProgress(val));
+    const [config, setConfig] = useState({});
     
     const error = useMemo(() => 
     {
@@ -65,50 +49,13 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
             
     }, [algorithm, graphState.directed, graphState.vertexCount, graphState.weighted]);
 
-    const [playing, setPlaying] = useState(false);
-    const [paused, setPaused] = useState(false);
+    useEffect(() => 
+    {
+        setConfig(algorithm.defaultConfig());
+    }, [algorithm]);
 
     return (
-        <GraphTheoryContext.Provider value={{
-            algorithm,
-            setAlgorithm,
-            animator: animator.current,
-            speed,
-            progress,
-            setSpeed: (value) =>
-            {
-                animator.current.setSpeed(value);
-                setSpeed(value);
-            },
-            config,
-            predicateError: error,
-            playing,
-            paused,
-            play: () =>
-            {
-                const state = animator.current.state;
-                switch (state)
-                {
-                    case AnimationState.PAUSED:
-                        animator.current.resume();
-                        break;
-                    case AnimationState.STOPPED:
-                        animator.current.play(() => algorithm.run(graphState, config.current));
-                        break;
-                }
-            },
-            pause: () => animator.current.pause(),
-            stop: () => animator.current.stop(),
-            fastForward: () => animator.current.fastForward(),
-            forward: () => 
-            {
-                animator.current.forward();
-            },
-            rewind: () =>
-            {
-                animator.current.rewind();
-            }
-        }}>
+        <GraphTheoryContext.Provider value={{algorithm, setAlgorithm, config, setConfig, predicateError: error}}>
             {children}
         </GraphTheoryContext.Provider>
     );
