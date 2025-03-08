@@ -10,6 +10,7 @@ export const GraphTheoryContext = createContext<{
     config: MutableRefObject<object>,
     playing: boolean,
     paused: boolean,
+    progress: number,
 
     predicateError: string | null,
 
@@ -20,6 +21,7 @@ export const GraphTheoryContext = createContext<{
     pause: () => void,
     stop: () => void,
     fastForward: () => void,
+    forward: () => void,
     rewind: () => void,
 }>(null!);
 

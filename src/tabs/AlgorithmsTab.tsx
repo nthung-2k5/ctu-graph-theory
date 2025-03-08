@@ -55,19 +55,6 @@ export default function AlgorithmsTab()
     {
         config.current = form.getFieldsValue();
     }, [predicateError, config, algorithm, form]);
-    
-    // const runProps: ButtonProps = {
-    //     htmlType: 'submit',
-    //     disabled: !vertexCount || !error.valid,
-    //     children: 'Chạy',
-    // };
-
-    // const stopProps: ButtonProps = {
-    //     htmlType: 'submit',
-    //     danger: true,
-    //     disabled: false,
-    //     children: 'Dừng',
-    // };
 
     const tabs: TabsProps['items'] = [
         {
@@ -106,12 +93,6 @@ export default function AlgorithmsTab()
                         }}>
                             <div className="flex flex-col">
                                 {predicateError ? (<InvalidMessage>{predicateError}</InvalidMessage>) : (algorithm.configNode())}
-                                {/* <Button
-                                block
-                                type="primary"
-                                {...(animating ? stopProps : runProps)}
-                                style={{ height: '40px', width: '80px' }}
-                            /> */}
                             </div>
                         </ConfigProvider>
                     </Form>

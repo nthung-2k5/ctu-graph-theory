@@ -49,7 +49,6 @@ export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
     private *_dfs(g: UnweightedGraph, u: number, ctx: CycleContext): IterableIterator<AlgorithmStep>
     {
         ctx.color[u] = Color.Gray;
-        yield { animate: (animator) => animator.colorVertex(u, 'gray') };
         
         for (const v of g.neighbors(u))
         {
@@ -58,29 +57,30 @@ export default class Cycle extends NeutralGraphAlgorithm<CycleConfig>
             if (ctx.color[v] === Color.White)
             {
                 ctx.parent[v] = u;
-                yield { animate: (animator) => animator.colorEdge(u, v, 'gray', g.directed) };
+                yield { colorEdge : [u, v, 'gray'], colorVertex: [v, 'gray'] };
                 yield* this._dfs(g, v, ctx);
                 if (ctx.hasCycle)
                 {
-                    yield { animate: (animator) => animator.colorVertex(v, 'red').colorEdge(u, v, 'red', g.directed) };
+                    yield { colorVertex: [v, 'red'], colorEdge: [u, v, 'red'] };
                     return;
                 }
             }
             else if (ctx.color[v] === Color.Gray)
             {
-                yield { animate: (animator) => animator.colorVertex(v, 'red').colorEdge(u, v, 'red', g.directed) };
+                yield { colorVertex: [v, 'red'], colorEdge: [u, v, 'red'] };
                 ctx.hasCycle = true;
                 return;
             }
         }
 
         ctx.color[u] = Color.Black;
-        yield { animate: (animator) => animator.colorVertex(u, 'black') };
+        yield { colorVertex: [u, 'black'] };
     }
 
     protected *_run(g: UnweightedGraph, config: CycleConfig): IterableIterator<AlgorithmStep>
     {
         const ctx = new CycleContext(g);
+        yield  { colorVertex: [config.startVertex, 'gray'] };
         yield* this._dfs(g, config.startVertex, ctx);
 
         if (!ctx.hasCycle)

@@ -24,6 +24,11 @@ export default class PseudocodeAnimator extends SubAnimator
         this.handle?.highlightLine(line);
     }
 
+    public set description(value: string | [string | undefined, string])
+    {
+        this.handle?.description(value);
+    }
+
     public next(by: number = 1)
     {
         this.currentLine = this.currentLine ?? 0 + by;
@@ -36,6 +41,7 @@ export default class PseudocodeAnimator extends SubAnimator
 }
 
 export type PseudoCodeHandle = {
+    description: (line: string | [string | undefined, string]) => void;
     currentLine: () => number | null;
     highlightLine: (line: number) => void;
     reset: () => void;

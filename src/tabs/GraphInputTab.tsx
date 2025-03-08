@@ -1,7 +1,7 @@
 import { Button, Segmented, Switch, Tabs } from "antd";
 import { Editor } from "prism-react-editor";
 import { BasicSetup } from "prism-react-editor/setups";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
@@ -13,12 +13,13 @@ import ListDisplay, { ListDisplayHandle } from '../components/data_structures/Li
 import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
 import { setDirected, setGraph } from '../lib/context/graphSlice';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
+import Debugger from './Debugger';
 
 export default function GraphInputTab() 
 {
     const inputRef = useRef('');
     const state = useAppSelector(state => state.graph);
-    const { playing } = useGraphTheory();
+    const { playing, animator } = useGraphTheory();
 
     const dispatch = useAppDispatch();
 
@@ -30,6 +31,7 @@ export default function GraphInputTab()
     {
         inputRef.current = input;
         dispatch(setGraph({ input, weighted }));
+        animator.stop();
     }
 
     return (
@@ -44,7 +46,11 @@ export default function GraphInputTab()
                                 <Segmented
                                     disabled={playing}
                                     options={["Vô hướng", "Có hướng"]}
-                                    onChange={(type) => dispatch(setDirected(type === "Có hướng"))}
+                                    onChange={(type) => 
+                                    {
+                                        dispatch(setDirected(type === "Có hướng"));
+                                        animator.stop();
+                                    }}
                                     className="mb-2 w-full"
                                     block
                                     defaultValue="Vô hướng"
@@ -80,19 +86,21 @@ export default function GraphInputTab()
                 },
                 {
                     key: '2',
-                    label: 'Cấu trúc dữ liệu',
+                    label: 'Gỡ lỗi (Debug)',
                     children: (
-                        <div>
-                            <p>Stack</p>
+                        <div className='h-full'>
+                            <Debugger />
+                            {/* <p>Stack</p>
                             <StackDisplay ref={stackRef}/>
                             <p>Queue</p>
                             <QueueDisplay ref={queueRef}/>
                             <p>List</p>
                             <ListDisplay length={100} ref={listRef}/>
                             <Button type='primary' onClick={() => { queueRef.current.push(Math.round(Math.random() * 10)); listRef.current.pushBack(Math.round(Math.random() * 10)); stackRef.current.push(Math.round(Math.random() * 10)); }}>Test</Button>
-                            <Button type='primary' onClick={() => { queueRef.current.pop(); listRef.current.popBack(); stackRef.current.pop(); }}>Out</Button>
+                            <Button type='primary' onClick={() => { queueRef.current.pop(); listRef.current.popBack(); stackRef.current.pop(); }}>Out</Button> */}
                         </div>
-                    )
+                    ),
+                    forceRender: true
                 }
             ]}
             className="expanded-tabs"

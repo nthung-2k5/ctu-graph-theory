@@ -3,6 +3,7 @@ import { AlgorithmStep, NeutralGraphAlgorithm } from '../GraphAlgorithm';
 import { Checkbox, Form, InputNumber } from 'antd';
 import { UnweightedGraph } from '../UnweightedGraph';
 import store from '../../context/store';
+import { SequenceType } from '../../../tabs/Debugger';
 
 export interface TraversalConfig
 {
@@ -18,6 +19,8 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
         const parent: number[] = Array(g.vertexCount + 1).fill(-1);
+
+        yield { codeLine: 1, addVariable: ['mark', { type: SequenceType.Array, value: visited }, 'global'] };
 
         yield* this._traverse(g, config.startVertex, visited, parent);
 

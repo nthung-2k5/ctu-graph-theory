@@ -15,7 +15,7 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
     public override get pseudocode(): PseudocodeLine[] 
     {
         return [
-
+            
         ];
     }
 
@@ -32,13 +32,13 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
     private *_dfs(g: UnweightedGraph, u: number, visited: boolean[]): IterableIterator<AlgorithmStep>
     {
         visited[u] = true;
-        yield { animate: (animator) => animator.colorVertex(u, 'green') };
+        yield { colorVertex: [u, 'green'] };
 
         for (const v of g.neighbors(u))
         {
             if (!visited[v])
             {
-                yield { animate: (animator) => animator.colorEdge(u, v, 'green', false) };
+                yield { colorEdge: [u, v, 'green'] };
                 yield* this._dfs(g, v, visited);
             }
         }
@@ -53,7 +53,7 @@ export default class UndirectedConnected extends NeutralGraphAlgorithm<Undirecte
         {
             if (!visited[u])
             {
-                yield { animate: (animator) => animator.colorVertex(u, 'red') };
+                yield { colorVertex: [u, 'red'] };
             }
         }
     }

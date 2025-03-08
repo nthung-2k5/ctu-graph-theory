@@ -1,10 +1,11 @@
 import { AlgorithmStep } from '../algorithms/GraphAlgorithm';
+import DebuggerAnimator from './DebuggerAnimator';
 import GraphAnimator from './GraphAnimator';
 import PseudocodeAnimator from './PseudocodeAnimator';
 import SubAnimator from './SubAnimator';
 
 const PAUSE_INTERVAL = 100;
-const INTERVAL_MULTIPLIER = 2;
+const INTERVAL_MULTIPLIER = 4;
 
 export enum AnimationState
 {
@@ -33,13 +34,23 @@ export default class Animator extends SubAnimator
 
     private onAnimationStateChanged: (() => void) | null = null;
 
+    private onAnimationStep: ((progress: number) => void) | null = null;
+
+    private _animationLength: number = 0;
+
     private _currentSteps: IterableIterator<AlgorithmStep> | null = null;
+
+    private _stepHistory: AlgorithmStep[] = [];
+
+    private _step: number = 0;
 
     public graph: GraphAnimator = new GraphAnimator();
 
     public pseudocode: PseudocodeAnimator = new PseudocodeAnimator();
 
-    private get interval(): number
+    public debugger: DebuggerAnimator = new DebuggerAnimator();
+
+    public get interval(): number
     {
         return 420 * INTERVAL_MULTIPLIER / this._speed;
     }
@@ -67,13 +78,20 @@ export default class Animator extends SubAnimator
 
     public override reset()
     {
+        this.onAnimationStep?.(0);
         this.graph.reset();
         this.pseudocode.reset();
+        this.debugger.reset();
     }
 
     public setOnAnimationStateChanged(callback: () => void)
     {
         this.onAnimationStateChanged = callback;
+    }
+
+    public setOnAnimationStep(callback: (progress: number) => void)
+    {
+        this.onAnimationStep = callback;
     }
 
     private animate(step: AlgorithmStep)
@@ -106,13 +124,42 @@ export default class Animator extends SubAnimator
         {
             this.pseudocode.currentLine = step.codeLine;
         }
-        else
+        
+        // if (step.description !== undefined)
+        // {
+        //     this.pseudocode.description = step.description;
+        // }
+
+        if (step.addVariable)
         {
-            this.pseudocode.reset();
+            const variables = singleToArray(step.addVariable);
+            variables.forEach(([name, value, scope]) => this.debugger.addVariable(name, value, scope));
+        }
+
+        if (step.removeVariable)
+        {
+            const variables = singleToArray(step.removeVariable);
+            variables.forEach(([name, scope]) => this.debugger.removeVariable(name, scope));
+        }
+
+        if (step.updateVariable)
+        {
+            const variables = singleToArray(step.updateVariable);
+            variables.forEach(([name, value, scope]) => this.debugger.updateVariable(name, value, scope));
+        }
+
+        if (step.pushStackTrace)
+        {
+            this.debugger.pushStackFrame(step.pushStackTrace);
+        }
+
+        if (step.popStackTrace)
+        {
+            this.debugger.popStackFrame();
         }
     }
 
-    public play(steps: IterableIterator<AlgorithmStep>)
+    public play(steps: () => IterableIterator<AlgorithmStep>)
     {
         if (this._currentTimeout !== null)
         {
@@ -122,8 +169,10 @@ export default class Animator extends SubAnimator
         this.reset();
         this.state = AnimationState.PLAYING;
 
-        this._currentSteps = steps;
-        let step = this._currentSteps.next();
+        this._currentSteps = steps();
+        this._stepHistory = [];
+        this._animationLength = Array.from(steps()).length;
+        this._step = 0;
 
         const runStep = () => 
         {
@@ -132,16 +181,18 @@ export default class Animator extends SubAnimator
                 this._currentTimeout = window.setTimeout(runStep, PAUSE_INTERVAL);
                 return;
             }
-            
+
+            const step = this._currentSteps!.next();
             if (step.done)
             {
                 this.stop(false);
             }
             else
             {
-                const s = step.value;
-                this.animate(s);
-                step = this._currentSteps!.next();
+                this.animate(step.value);
+                this._step++;
+                this._stepHistory.push(step.value);
+                this.onAnimationStep?.(this._step / this._animationLength);
 
                 this._currentTimeout = window.setTimeout(runStep, this.interval);
             }
@@ -160,28 +211,53 @@ export default class Animator extends SubAnimator
         this.state = AnimationState.PLAYING;
     }
 
-    public fastForward()
+    public rewind()
     {
-        if (this.state === AnimationState.STOPPED)
+        this.reset();
+        for (let i = 0; i < this._step - 1; i++)
+        {
+            this.animate(this._stepHistory[i]);
+        }
+
+        this._step--;
+        this.onAnimationStep?.(this._step / this._animationLength);
+    }
+
+    public forward()
+    {
+        const step = this._currentSteps!.next();
+        if (step?.done)
         {
             return;
         }
 
-        if (this._currentTimeout !== null)
-        {
-            window.clearTimeout(this._currentTimeout);
-            this._currentTimeout = null;
-        }
+        this.animate(step.value);
+        this._step++;
+        this._stepHistory.push(step.value);
+        this.onAnimationStep?.(this._step / this._animationLength);
+    }
 
-        let step = this._currentSteps!.next();
-        while (!step.done)
-        {
-            const s = step.value;
-            this.animate(s);
-            step = this._currentSteps!.next();
-        }
+    public fastForward()
+    {
+        // if (this.state === AnimationState.STOPPED)
+        // {
+        //     return;
+        // }
 
-        this.stop(false);
+        // if (this._currentTimeout !== null)
+        // {
+        //     window.clearTimeout(this._currentTimeout);
+        //     this._currentTimeout = null;
+        // }
+
+        // while (this._step < this._currentSteps.length)
+        // {
+        //     this.animate(this._currentSteps[this._step]);
+        //     this._step++;
+        // }
+
+        // this.onAnimationStep?.(1);
+        // this.stop(false);
     }
 
     public stop(reset: boolean = true)
@@ -194,6 +270,9 @@ export default class Animator extends SubAnimator
         }
 
         this._currentSteps = null;
+        this._stepHistory = [];
+        this._animationLength = 0;
+        this._step = 0;
 
         if (this._currentTimeout !== null)
         {

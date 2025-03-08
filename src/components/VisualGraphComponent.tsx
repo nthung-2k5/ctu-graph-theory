@@ -118,10 +118,13 @@ export default function VisualGraphComponent()
                 elements={elements}
                 stylesheet={DefaultGraphStyle}
                 cy={assignCytoscape}
-                autoungrabify
                 boxSelectionEnabled={false}
             />
-            <ControlBar onDownloadClicked={downloadPNG}/>
+            <ControlBar onDownloadClicked={downloadPNG} onRefreshClicked={() => cy.current.layout({
+                name: "cola",
+                // @ts-expect-error Config in cola layout
+                edgeLength: edgeLength,
+            }).run()} />
         </div>
     );
 }

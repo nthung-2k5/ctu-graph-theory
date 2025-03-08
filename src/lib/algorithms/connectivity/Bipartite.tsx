@@ -47,24 +47,24 @@ export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig>
     private *_colorize(g: UnweightedGraph, u: number, color: Color, ctx: BipartiteContext): IterableIterator<AlgorithmStep>
     {
         ctx.color[u] = color;
-        yield { animate: (animator) => animator.colorVertex(u, color === Color.Blue ? 'blue' : 'red') };
+        yield { colorVertex: [u, color === Color.Blue ? 'blue' : 'red'] };
 
         for (const v of g.neighbors(u))
         {
             if (ctx.color[v] === Color.White)
             {
-                yield { animate: (animator) => animator.colorEdge(u, v, "black", g.directed) };
+                yield { colorEdge: [u, v, "black"] };
                 yield* this._colorize(g, v, -color, ctx);
                 if (!ctx.isBipartite)
                 {
-                    yield { animate: (animator) => animator.colorVertex(v, 'red').colorEdge(u, v, 'red', g.directed) };
+                    yield { colorVertex: [v, 'red'], colorEdge: [u, v, 'red'] };
                     return;
                 }
             }
             else if (ctx.color[v] === ctx.color[u])
             {
                 ctx.isBipartite = false;
-                yield { animate: (animator) => animator.colorVertex(v, 'red').colorEdge(u, v, 'red', g.directed) };
+                yield { colorVertex: [v, 'red'], colorEdge: [u, v, 'red'] };
                 return;
             }
         }

@@ -1,24 +1,32 @@
 import { Queue } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
-import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 import { UnweightedGraph } from '../UnweightedGraph';
+import { SequenceType } from '../../../tabs/Debugger';
 
 export default class BFS extends TraversalAlgorithm
 {
-    public override get pseudocode(): PseudocodeLine[] 
+    public override get code(): string
     {
-        return [
-            { text: 'while (queue != ∅)', tab: 0 },
-            { text: 'u <- queue;', tab: 1 },
-            { text: 'if (duyet[u] == true)', tab: 1 },
-            { text: 'continue;', tab: 2 },
-            { text: '// Duyệt u;', tab: 1, comment: true },
-            { text: 'duyet[u] = true;', tab: 1 },
-            { text: 'for (đỉnh v kề với u)', tab: 1 },
-            { text: 'if (duyet[v] != true)', tab: 2 },
-            { text: 'queue <- v;', tab: 3 },
-        ]
+        return `int mark[MAX_N];
+
+void BFS(Graph* G, int s) {
+    Queue Q; makeNullQueue(&Q);
+
+    enqueue(Q, s);
+
+    while (!empty(Q)) {
+        int u = front(Q); dequeue(&Q);
+        if (mark[u])
+            continue;
+
+        mark[u] = 1;
+
+        for (int v = 1; v <= n; v++)
+            if (adjacent(G, u, v))
+                enqueue(Q, v);
+    }
+}`;
     }
 
     public get name()
@@ -28,57 +36,92 @@ export default class BFS extends TraversalAlgorithm
 
     *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
     {
+        yield { codeLine: 3, pushStackTrace: `BFS(G, ${startVertex})` };
         const queue: Queue<number> = new Queue<number>();
-
-        queue.push(startVertex);
+        yield { codeLine: 4, addVariable: ['Q', { type: SequenceType.Queue, value: [] }, 'local'] };
         
-        yield { codeLine: 0 };
+        queue.push(startVertex);
+        yield { 
+            codeLine: 6,
+            highlightVertex: [startVertex, true],
+            colorVertex: [startVertex, 'orange'],
+            updateVariable: ['Q', queue.toArray(), 'local']
+        };
+        
+        yield { codeLine: 8 };
         while (!queue.isEmpty())
         {
             const u = queue.shift()!;
-            yield { codeLine: 1, highlightVertex: [u, true] };
 
-            yield { codeLine: 2 };
+            yield { 
+                codeLine: 9,
+                highlightVertex: [u, true],
+                colorVertex: [u, 'yellow'],
+                addVariable: ['u', u, 'local'],
+                updateVariable: ['Q', queue.toArray(), 'local']    
+            };
+
+            yield { codeLine: 10 };
             if (visited[u])
             {
-                yield { codeLine: 3 };
-                yield { codeLine: 0 };
+                yield { codeLine: 11 };
                 continue;
             }
 
+            visited[u] = true;
             yield {
                 colorVertex: [u, 'red'],
                 colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
-                codeLine: 4
+                codeLine: 13,
+                updateVariable: ['visited', visited, 'local']
             };
 
-            visited[u] = true;
-            yield { codeLine: 5 };
-
-            const neighbors = g.neighbors(u);
-
-            yield { codeLine: 6 };
-            for (const v of neighbors)
+            yield {
+                codeLine: 15,
+                addVariable: ['v', 1, 'local']
+            };
+            for (let v = 1; v <= g.vertexCount; v++)
             {
-                yield { codeLine: 7, highlightVertex: [v, true] };
-                if (!visited[v])
+                yield {
+                    codeLine: 16, 
+                    highlightVertex: [v, true],
+                    highlightEdge: [u, v, true] 
+                };
+
+                if (g.matrix[u][v] && !visited[v])
                 {
                     queue.push(v);
-                    yield {
-                        colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
-                        colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
-                        codeLine: 8
-                    };
+
+                    let colorEdge = {};
 
                     if (parent[v] === -1)
                     {
                         parent[v] = u;
+                        colorEdge = {
+                            colorEdge: [u, v, 'blue'],
+                        };
                     }
+
+                    yield { 
+                        codeLine: 17,
+                        colorVertex: [v, 'orange'],
+                        updateVariable: ['Q', queue.toArray(), 'local'],
+                        ...colorEdge
+                    };
                 }
-                yield { codeLine: 6, highlightVertex: [v, false] };
+                yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], updateVariable: ['v', v + 1, 'local'] };
             }
 
-            yield { codeLine: 0, highlightVertex: [u, false] };
+            yield { 
+                codeLine: 18, 
+                highlightVertex: [u, false],
+                colorVertex: [u, 'purple'],
+                removeVariable: [['v', 'local']]
+            };
+
+            yield { codeLine: 8, removeVariable: ['u', 'local'] };
         }
+
+        yield { codeLine: 19, popStackTrace: true };
     }
 }

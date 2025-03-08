@@ -1,5 +1,5 @@
 import { ConfigProvider, Progress, Slider, Tooltip } from 'antd';
-import { FaBackwardStep, FaDownload, FaForwardStep, FaPause, FaPlay, FaStop } from 'react-icons/fa6';
+import { FaArrowRotateLeft, FaBackwardStep, FaDownload, FaForwardStep, FaPause, FaPlay, FaStop } from 'react-icons/fa6';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 const IconButton = (props: { icon: JSX.Element, disabled?: boolean, onClick?: () => void }) =>
@@ -13,16 +13,16 @@ const IconButton = (props: { icon: JSX.Element, disabled?: boolean, onClick?: ()
     );
 }
 
-export default function ControlBar(props: { onDownloadClicked?: () => void }) 
+export default function ControlBar(props: { onDownloadClicked?: () => void, onRefreshClicked?: () => void }) 
 {
-    const { playing, paused, speed, setSpeed, play, pause, stop, rewind, fastForward } = useGraphTheory();
+    const { playing, paused, speed, setSpeed, play, pause, stop, rewind, forward, progress } = useGraphTheory();
 
     return (
         <div className='flex flex-col px-3 bg-[#0D47A1]'>
             <div className='h-6 flex items-center'>
-                <Progress strokeColor="#00afef" showInfo={false} className='w-full' />
+                <Progress strokeColor="#00afef" percent={progress * 100} showInfo={false}  className='w-full' />
             </div>
-            <div className="h-12 py-5 flex justify-between items-center">
+            <div className="h-12 py-5 flex justify-between items-center gap-x-4">
                 <div className="control-bar__play flex items-center justify-around">
                     {playing && !paused ?
                         <IconButton onClick={pause} icon={<FaPause />}/> :
@@ -31,11 +31,11 @@ export default function ControlBar(props: { onDownloadClicked?: () => void })
                     <div className='ml-4 flex flex-grow gap-x-3'>
                         <IconButton disabled={playing} onClick={stop} icon={<FaStop />}/>
                         <IconButton disabled={playing} onClick={rewind} icon={<FaBackwardStep />}/>
-                        <IconButton disabled={playing} onClick={fastForward} icon={<FaForwardStep />}/>
+                        <IconButton disabled={playing} onClick={forward} icon={<FaForwardStep />}/>
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center flex-grow mx-4">
+                <div className="flex justify-between items-center flex-grow">
                     <ConfigProvider theme={{
                         components: {
                             Slider: {
@@ -48,6 +48,10 @@ export default function ControlBar(props: { onDownloadClicked?: () => void })
                     </ConfigProvider>
                     <p className="text-lg text-white font-semibold ml-2 hidden lg:block">{speed}X</p>
                 </div>
+
+                <Tooltip title="Đặt lại đồ thị" placement="top">
+                    <FaArrowRotateLeft className="control-bar-icon" onClick={props.onRefreshClicked} />
+                </Tooltip>
 
                 <Tooltip title="Tải xuống hình ảnh đồ thị" placement="top">
                     <FaDownload className="control-bar-icon" onClick={props.onDownloadClicked} />

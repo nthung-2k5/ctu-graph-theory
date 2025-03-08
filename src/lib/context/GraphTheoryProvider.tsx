@@ -26,12 +26,15 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
     const animator = useRef(new Animator());
     const [speed, setSpeed] = useState(1);
     const config = useRef({});
+    const [progress, setProgress] = useState(0);
 
     animator.current.setOnAnimationStateChanged(() =>
     {
         setPlaying(animator.current.playing);
         setPaused(animator.current.paused);
     });
+
+    animator.current.setOnAnimationStep((val) => setProgress(val));
     
     const error = useMemo(() => 
     {
@@ -71,6 +74,7 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
             setAlgorithm,
             animator: animator.current,
             speed,
+            progress,
             setSpeed: (value) =>
             {
                 animator.current.setSpeed(value);
@@ -89,17 +93,20 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
                         animator.current.resume();
                         break;
                     case AnimationState.STOPPED:
-                        animator.current.play(algorithm.run(graphState, config.current));
+                        animator.current.play(() => algorithm.run(graphState, config.current));
                         break;
                 }
             },
             pause: () => animator.current.pause(),
             stop: () => animator.current.stop(),
             fastForward: () => animator.current.fastForward(),
+            forward: () => 
+            {
+                animator.current.forward();
+            },
             rewind: () =>
             {
-                animator.current.stop();
-                animator.current.play(algorithm.run(graphState, config.current));
+                animator.current.rewind();
             }
         }}>
             {children}

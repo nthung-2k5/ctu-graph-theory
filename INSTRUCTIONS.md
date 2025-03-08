@@ -18,9 +18,9 @@ Mỗi `class` thuật toán gồm 4 trường dữ liệu có thể `override` t
 export abstract class GraphAlgorithm<Config = object>
 {
     public abstract get name(): string; // Tên của thuật toán
-    public get pseudocode(): PseudocodeLine[]
+    public get code(): string
     {
-        return []; // Mã giả
+        return ''; // mã C dùng để tham khảo
     }
 
     public get predicate(): AlgorithmRequirements
@@ -40,16 +40,15 @@ export abstract class GraphAlgorithm<Config = object>
 ## `public abstract get name(): string`
 - Trả về: tên thuật toán.
 
-## `public get pseudocode(): PseudocodeLine[]`
-- Trả về: mảng các dòng mã giả.
+## `public get code(): string`
+- Trả về: đoạn code C để tham khảo bước chạy.
 
-Mỗi dòng mã giả có cấu trúc sau:
+Để có thể ghi nhiều dòng thì làm như sau
 ```ts
-export interface PseudocodeLine
+public get code(): string
 {
-    text: string; // Dòng mã giả
-    tab: number; // Số lần thụt lề tab
-    comment?: boolean; // Dòng này là comment (có thể để trống, ngầm định là không phải)
+    return `Dòng 1
+Dòng 2`;
 }
 ```
 
@@ -129,6 +128,15 @@ export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 // Nếu không tô đậm thì highlight = false
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
 
+// Thêm một biến có tên {name} và giá trị khởi tạo {value} với {scope} cục bộ (local - trong hàm) hoặc toàn cục (global - ngoài hàm)
+export type AddVariableAnimation = [name: string, value: Primitive | { type: SequenceType, value: ArrayType }, scope: 'local' | 'global'];
+
+// Xóa biến tên {name} trong {scope}
+export type RemoveVariableAnimation = [name: string, scope: 'local' | 'global'];
+
+// Cập nhật biến tên {name} trong {scope} thành giá trị {value}
+export type UpdateVariableAnimation = [name: string, value: Variable, scope: 'local' | 'global'];
+
 // Giá trị nhập vào có thể là một phần tử đó hoặc một mảng chứa phần tử đó
 type ArrayOrSingle<T> = T | T[];
 
@@ -139,6 +147,12 @@ export interface AlgorithmStep
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>; // tô đậm đỉnh
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>; // tô đậm cạnh
     codeLine?: number; // tô đậm dòng mã giả nào (bắt đầu từ số 0)
+
+    addVariable?: ArrayOrSingle<AddVariableAnimation>; // thêm biến
+    removeVariable?: ArrayOrSingle<RemoveVariableAnimation>; // xóa biến
+    updateVariable?: ArrayOrSingle<UpdateVariableAnimation>; // cập nhật biến
+    pushStackTrace?: string; // thêm 1 lần gọi hàm
+    popStackTrace?: boolean; // bỏ 1 lần gọi hàm
 }
 ```
 
@@ -147,61 +161,94 @@ Ví dụ để thông não (thuật toán BFS):
 // Nhớ phải có dấu *
 *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
 {
+    yield { codeLine: 3, pushStackTrace: `BFS(G, ${startVertex})` }; // gọi hàm BFS
     const queue: Queue<number> = new Queue<number>();
-
-    queue.push(startVertex);
+    yield { codeLine: 4, addVariable: ['Q', { type: SequenceType.Queue, value: [] }, 'local'] }; // khai báo biến cục bộ Q là hàng đợi
     
-    yield { codeLine: 0 }; // Tô đậm dòng đầu của mã giả
+    queue.push(startVertex);
+    yield { 
+        codeLine: 6,
+        highlightVertex: [startVertex, true],
+        colorVertex: [startVertex, 'orange'],
+        updateVariable: ['Q', queue.toArray(), 'local']
+    }; // tô đậm đỉnh bắt đầu, tô màu cam cho đỉnh bắt đầu, cập nhật biến Q
+    
+    yield { codeLine: 8 };
     while (!queue.isEmpty())
     {
         const u = queue.shift()!;
-        yield { codeLine: 1, highlightVertex: [u, true] }; // Tô đậm dòng 2 của mã giả và tô đậm đỉnh u
 
-        yield { codeLine: 2 }; // Tô đậm dòng 3 của mã giả
+        yield { 
+            codeLine: 9,
+            highlightVertex: [u, true],
+            colorVertex: [u, 'yellow'],
+            addVariable: ['u', u, 'local'],
+            updateVariable: ['Q', queue.toArray(), 'local']    
+        };
+
+        yield { codeLine: 10 };
         if (visited[u])
         {
-            yield { codeLine: 3 }; // Tô đậm dòng 4 của mã giả
-            yield { codeLine: 0 }; // Tô đậm dòng đầu của mã giả (ám chỉ thực hiện lại vòng lặp)
+            yield { codeLine: 11 };
             continue;
         }
 
+        visited[u] = true;
         yield {
             colorVertex: [u, 'red'],
             colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
-            codeLine: 4
-        }; // Tô màu đỏ cho đỉnh u, tô màu cạnh nối giữa cha của u với u (nếu tồn tại cha), tô đậm dòng 5 của mã giả
+            codeLine: 13,
+            updateVariable: ['visited', visited, 'local']
+        };
 
-        visited[u] = true;
-        yield { codeLine: 5 }; // Tô đậm dòng 6 của mã giả
-
-        const neighbors = g.neighbors(u);
-
-        yield { codeLine: 6 }; // Tô đậm dòng 7 của mã giả
-        for (const v of neighbors)
+        yield {
+            codeLine: 15,
+            addVariable: ['v', 1, 'local']
+        };
+        for (let v = 1; v <= g.vertexCount; v++)
         {
-            yield { highlightVertex: [v, true], codeLine: 7 }; // Tô đậm đỉnh v, Tô đậm dòng 8 của mã giả
-            if (!visited[v])
+            yield {
+                codeLine: 16, 
+                highlightVertex: [v, true],
+                highlightEdge: [u, v, true] 
+            };
+
+            if (g.matrix[u][v] && !visited[v])
             {
                 queue.push(v);
-                yield {
-                    colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
-                    colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
-                    codeLine: 8
-                };
-                // Tô màu xanh cho đỉnh v nếu chưa vào hàng đợi lần nào.
-                // Tô màu cạnh nối từ u đến v nếu v chưa vào hàng đợi lần nào.
-                // Tô màu dòng 9 của mã giả
+
+                let colorEdge = {};
 
                 if (parent[v] === -1)
                 {
                     parent[v] = u;
+                    colorEdge = {
+                        colorEdge: [u, v, 'blue'],
+                    };
                 }
+
+                yield { 
+                    codeLine: 17,
+                    colorVertex: [v, 'orange'],
+                    updateVariable: ['Q', queue.toArray(), 'local'],
+                    ...colorEdge
+                };
             }
-            yield { codeLine: 6, highlightVertex: [v, false] }; // Tô màu dòng 7 của mã giả, hủy tô đậm đỉnh v.
+            yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], updateVariable: ['v', v + 1, 'local'] };
         }
 
-        yield { codeLine: 0, highlightVertex: [u, false] }; // Tô màu dòng đầu của mã giả (lặp lần tiếp theo), hủy tô đậm đỉnh u.
+        yield { 
+            codeLine: 18, 
+            highlightVertex: [u, false],
+            colorVertex: [u, 'purple'],
+            removeVariable: [['v', 'local']]
+        };
+
+        yield { codeLine: 8, removeVariable: ['u', 'local'] };
     }
+
+    yield { codeLine: 19, popStackTrace: true };
+}
 ```
 
 # Bước 4: Khai báo thuật toán

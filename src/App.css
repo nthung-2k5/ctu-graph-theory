@@ -18,3 +18,7 @@
 .element-box {
   @apply border border-gray-400 min-w-10 max-w-10 h-10 flex overflow-hidden;
 }
+
+.code-highlight {
+  @apply bg-[yellow];
+}
