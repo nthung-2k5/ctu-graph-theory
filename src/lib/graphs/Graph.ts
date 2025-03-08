@@ -18,7 +18,12 @@ export default interface Graph
     get edgeCount(): number;
 }
 
-export function toGraph<G extends Graph>(graph: new(n: number, directed: boolean) => G, edges: InputGraph, vertexCount: number, directed: boolean, weighted: boolean): G
+export function toGraph<G extends Graph>(
+    graph: new(n: number, directed: boolean) => G,
+    edges: InputGraph,
+    vertexCount: number,
+    directed: boolean,
+    weighted: boolean): G
 {
     const g = new graph(vertexCount, directed);
 

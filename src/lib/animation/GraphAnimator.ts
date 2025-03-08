@@ -29,11 +29,6 @@ export default class GraphAnimator extends SubAnimator
         return this;
     }
 
-    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
-    {
-        this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
-        return this;
-    }
 
     private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
@@ -73,6 +68,12 @@ export default class GraphAnimator extends SubAnimator
     public unhighlightEdge(u: number, v: number): GraphAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
+    }
+
+     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
+        return this;
     }
 
     public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator

@@ -1,83 +1,83 @@
-import { ReactNode } from 'react';
-import { UnweightedGraph } from './UnweightedGraph';
-import { WeightedGraph } from './WeightedGraph';
-import { GraphState } from '../context/graphSlice';
-import { PseudocodeLine } from '../pseudocode/Pseudocode';
-import { KEYWORD } from 'color-convert/conversions';
+import { ReactNode } from "react";
+import { UnweightedGraph } from "./UnweightedGraph";
+import { WeightedGraph } from "./WeightedGraph";
+import { GraphState } from "../context/graphSlice";
+import { PseudocodeLine } from "../pseudocode/Pseudocode";
+import { KEYWORD } from "color-convert/conversions";
 
 // undefined: không quan trọng
 // true: phải có
 // false: không được có
-export interface AlgorithmRequirements
-{
-    directed?: boolean;
-    weighted?: boolean; // nếu không cần trọng số thì thuật toán cũng sẽ thực hiện được với đồ thị có trọng số
-    acyclic?: boolean;
+export interface AlgorithmRequirements {
+  directed?: boolean;
+  weighted?: boolean; // nếu không cần trọng số thì thuật toán cũng sẽ thực hiện được với đồ thị có trọng số
+  acyclic?: boolean;
 }
 
-export abstract class GraphAlgorithm<Config = object>
-{
-    public abstract get name(): string;
-    public get pseudocode(): PseudocodeLine[]
-    {
-        return [];
-    }
+export abstract class GraphAlgorithm<Config = object> {
+  public abstract get name(): string;
+  public get pseudocode(): PseudocodeLine[] {
+    return [];
+  }
 
-    public get predicate(): AlgorithmRequirements
-    {
-        return { };
-    }
+  public get predicate(): AlgorithmRequirements {
+    return {};
+  }
 
-    public configNode(): ReactNode
-    {
-        return (<></>);
-    }
-    
-    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>;
-};
+  public configNode(): ReactNode {
+    return <></>;
+  }
 
-export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
-{
-    protected abstract _run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>;
-
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
-    {
-        const graph = new UnweightedGraph(g.vertexCount, g.directed);
-
-        for (const edge of g.edges)
-        {
-            graph.addEdge(edge);
-        }
-
-        return this._run(graph, config);
-    }
+  public abstract run(
+    g: GraphState,
+    config: Config
+  ): IterableIterator<AlgorithmStep>;
 }
 
-export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
-{
-    public override get predicate(): AlgorithmRequirements 
-    {
-        return { weighted: true };
+export abstract class NeutralGraphAlgorithm<
+  Config = object
+> extends GraphAlgorithm<Config> {
+  protected abstract _run(
+    g: UnweightedGraph,
+    config: Config
+  ): IterableIterator<AlgorithmStep>;
+
+  public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep> {
+    const graph = new UnweightedGraph(g.vertexCount, g.directed);
+
+    for (const edge of g.edges) {
+      graph.addEdge(edge);
     }
 
-    protected abstract _run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+    return this._run(graph, config);
+  }
+}
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
-    {
-        const graph = new WeightedGraph(g.vertexCount, g.directed);
+export abstract class WeightedGraphAlgorithm<
+  Config = object
+> extends GraphAlgorithm<Config> {
+  public override get predicate(): AlgorithmRequirements {
+    return { weighted: true };
+  }
 
-        if (!g.weighted)
-        {
-            throw new Error();
-        }
+  protected abstract _run(
+    g: WeightedGraph,
+    config: Config
+  ): IterableIterator<AlgorithmStep>;
 
-        for (const edge of g.edges)
-        {
-            graph.addEdge(edge);
-        }
+  public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep> {
+    const graph = new WeightedGraph(g.vertexCount, g.directed);
 
-        return this._run(graph, config);
+    if (!g.weighted) {
+      throw new Error();
     }
+
+    for (const edge of g.edges) {
+      graph.addEdge(edge);
+    }
+
+    return this._run(graph, config);
+  }
 }
 
 export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
@@ -86,16 +86,15 @@ export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
 type ArrayOrSingle<T> = T | T[];
 
-export interface AlgorithmStep
-{
-    colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
-    colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
-    highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
-    highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
-    codeLine?: number;
+export interface AlgorithmStep {
+  colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
+  colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
+  highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
+  highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
+  codeLine?: number;
 }
 
-export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';
-export const MustBeDirectedError = 'Đồ thị phải là đồ thị có hướng';
-export const MustBeDAGError = 'Đồ thị phải là đồ thị không chu trình có hướng';
-export const MustBeWeightedError = 'Đồ thị phải là đồ thị có trọng số';
+export const MustBeUndirectedError = "Đồ thị phải là đồ thị vô hướng";
+export const MustBeDirectedError = "Đồ thị phải là đồ thị có hướng";
+export const MustBeDAGError = "Đồ thị phải là đồ thị không chu trình có hướng";
+export const MustBeWeightedError = "Đồ thị phải là đồ thị có trọng số";
