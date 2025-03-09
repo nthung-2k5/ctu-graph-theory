@@ -10,6 +10,8 @@ import UndirectedConnected from "../algorithms/connectivity/UndirectedConnected"
 import Dijkstra from "../algorithms/shortest-path/Dijkstra";
 import Animator, { AnimationState } from "../animation/Animator";
 import { useAppSelector } from "./hooks";
+import Bellman from "../algorithms/shortest-path/Bellman";
+import Floyd from "../algorithms/shortest-path/Floyd";
 
 export const AvailableAlgorithms = [
   new BFS(),
@@ -19,6 +21,8 @@ export const AvailableAlgorithms = [
   new Cycle(),
   new Bipartite(),
   new Dijkstra(),
+  new Bellman(),
+  new Floyd(),
 ];
 
 export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({

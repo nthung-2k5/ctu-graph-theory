@@ -7,16 +7,18 @@ import { KEYWORD } from "color-convert/conversions";
 import { PseudocodeLine } from "../../pseudocode/Pseudocode";
 interface DijkstraConfig {
   startVertex: number;
+  endVertex: number;
 }
 
 export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig> {
   public get name(): string {
     return "Thuật toán Dijkstra";
   }
+
   public override get pseudocode(): PseudocodeLine[] {
     return [
       { text: "khởi tạo ", tab: 0 },
-      { text: "pi[u]=oo với mội u != s;", tab: 1 },
+      { text: "pi[u]=oo với mọi u != s;", tab: 1 },
       { text: "mark[k]=false với mọi u", tab: 1 },
       { text: "pi[s]=0", tab: 1 },
       { text: "Lặp (n-1) lần ", tab: 0 },
@@ -37,6 +39,7 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig> {
     const mark = Array(g.vertexCount + 1).fill(false);
 
     const s = config.startVertex;
+    const f = config.endVertex;
 
     pi[s] = 0;
     yield { codeLine: 0 };
@@ -97,6 +100,16 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig> {
 
       yield { codeLine: 10, colorVertex: [u, "gray"] }; // danh dau dinh u da duyet
     }
+
+    const edges: Array<[number, number, KEYWORD]> = [];
+    const vertices: Array<[number, KEYWORD]> = [];
+    for (let u = 1; u <= g.vertexCount; u++) {
+      if (u != s) edges.push([p[u], u, "blue"]);
+      if (u != s && u != f) vertices.push([u, "green"]);
+    }
+    vertices.push([s, "red"]);
+    vertices.push([f, "red"]);
+    yield { colorEdge: edges, colorVertex: vertices };
   }
 
   public override configNode(): ReactNode {
@@ -106,6 +119,13 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig> {
         <Form.Item<DijkstraConfig>
           label="Đỉnh bắt đầu"
           name="startVertex"
+          initialValue={1}
+        >
+          <InputNumber min={1} max={vertexCount} />
+        </Form.Item>
+        <Form.Item<DijkstraConfig>
+          label="Đỉnh kết thúc"
+          name="endVertex"
           initialValue={1}
         >
           <InputNumber min={1} max={vertexCount} />
