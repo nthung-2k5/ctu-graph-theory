@@ -10,6 +10,7 @@ import UndirectedConnected from '../algorithms/connectivity/UndirectedConnected'
 import Animator, { AnimationState } from '../animation/Animator';
 import { useAppSelector } from './hooks';
 import TopoOrderingBFS from '../algorithms/topological/TopoOrderingBFS';
+import RankingGraph from '../algorithms/topological/RankingGraph';
 
 export const AvailableAlgorithms = [
     new BFS(),
@@ -18,7 +19,8 @@ export const AvailableAlgorithms = [
     new UndirectedConnected(),
     new Cycle(),
     new Bipartite(),
-    new TopoOrderingBFS()
+    new TopoOrderingBFS(),
+    new RankingGraph()
 ];
 
 export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =>
