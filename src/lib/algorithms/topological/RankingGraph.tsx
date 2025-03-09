@@ -28,7 +28,6 @@ export default class RankingGraph extends NeutralGraphAlgorithm<RankingGraphConf
          { text: 'enqueue(Q, v); ', tab: 4 }, // Thêm v vào hàng đợi
       ];
    }
-   
 
    public override get predicate(): AlgorithmRequirements {
       return { 
