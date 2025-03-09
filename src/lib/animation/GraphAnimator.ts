@@ -79,4 +79,10 @@ export default class GraphAnimator extends SubAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
     }
+
+    public customAction(action: (cy: cytoscape.Core) => void): GraphAnimator
+    {
+        action(this._cy!);
+        return this;
+    }
 }

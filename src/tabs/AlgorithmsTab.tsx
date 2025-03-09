@@ -1,4 +1,4 @@
-import { ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
+import { Button, ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { PropsWithChildren, useEffect } from 'react';
 import Title from 'antd/es/typography/Title';
@@ -51,6 +51,19 @@ export default function AlgorithmsTab()
 
     useEffect(() => 
     {
+        if (predicateError !== null) 
+        {
+            form.resetFields();
+            return;
+        }
+        
+        form.setFieldsValue(algorithm.defaultConfig());
+    }, [predicateError, algorithm, form]);
+
+    useEffect(() => 
+    {
+        if (predicateError !== null) return;
+        
         setConfig(form.getFieldsValue());
     }, [predicateError, setConfig, algorithm, form]);
 
@@ -76,7 +89,6 @@ export default function AlgorithmsTab()
                     <Form
                         layout="horizontal"
                         form={form}
-                        initialValues={algorithm.defaultConfig()}
                         onValuesChange={(_, values) => setConfig(values)}
                         className="w-full flex flex-col justify-start"
                     >
@@ -94,6 +106,7 @@ export default function AlgorithmsTab()
                         </ConfigProvider>
                     </Form>
                     <CodeBlock />
+                    <Button block type='primary' disabled={predicateError !== null} className='mt-2'>Kết quả thuật toán</Button>
                 </div>
             ),
         },

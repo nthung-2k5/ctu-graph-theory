@@ -3,6 +3,7 @@ import { UnweightedGraph } from './UnweightedGraph';
 import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice'
 import { KEYWORD } from 'color-convert/conversions';
+import cytoscape from 'cytoscape';
 
 // undefined: không quan trọng
 // true: phải có
@@ -96,6 +97,8 @@ export interface AlgorithmStep
 
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
+
+    customGraph?: (core: cytoscape.Core) => void;
 
     codeLine?: number;
 }

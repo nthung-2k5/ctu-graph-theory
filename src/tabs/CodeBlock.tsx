@@ -55,8 +55,8 @@ const CodeBlock = () =>
     useEffect(() => setHighlightedLine(null), [lines]);
 
     return (
-        <div className="border rounded-lg p-4 font-mono font-semibold flex-grow flex flex-col overflow-hidden">
-            <Editor defaultLanguage='c' options={{ readOnly: true, domReadOnly: true, fontFamily: 'Jetbrains Mono', fontSize: 12, minimap: { enabled: false } }} value={typeof lines === 'string' ? lines : lines.join('\n')} theme='vs-light' className='px-1 py-1 overflow-auto rounded-sm flex-grow scrollbar-thin' onMount={handleEditorMount} />
+        <div className="border rounded-lg font-mono font-semibold flex-grow flex flex-col overflow-hidden">
+            <Editor defaultLanguage='c' options={{ readOnly: true, domReadOnly: true, fontFamily: 'Jetbrains Mono', fontSize: 12, minimap: { enabled: false } }} value={typeof lines === 'string' ? lines : lines.join('\n')} theme='vs-light' className='overflow-auto rounded-sm flex-grow scrollbar-thin' onMount={handleEditorMount} />
         </div>
     );
 };

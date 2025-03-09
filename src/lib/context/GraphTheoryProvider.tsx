@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useMemo, useState } from 'react';
 import { GraphAlgorithm } from '../algorithms/GraphAlgorithm';
 import { GraphTheoryContext } from './GraphTheoryContext';
 import Bipartite from '../algorithms/connectivity/Bipartite';
@@ -6,12 +6,14 @@ import BFS from '../algorithms/traversal/BFS';
 import RecursionDFS from '../algorithms/traversal/RecursionDFS';
 import StackDFS from '../algorithms/traversal/StackDFS';
 import { useAppSelector } from './hooks';
+import TarjanAlgorithm from '../algorithms/connectivity/Tarjan';
 
 export const AvailableAlgorithms = [
     new BFS(),
     new RecursionDFS(),
     new StackDFS(),
     new Bipartite(),
+    new TarjanAlgorithm()
 ];
 
 export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =>
@@ -45,14 +47,9 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
         //     return { valid: false, error: `Đồ thị không được có chu trình` };
         // }
     
-        return null;
-            
-    }, [algorithm, graphState.directed, graphState.vertexCount, graphState.weighted]);
-
-    useEffect(() => 
-    {
         setConfig(algorithm.defaultConfig());
-    }, [algorithm]);
+        return null;
+    }, [algorithm, graphState.directed, graphState.vertexCount, graphState.weighted]);
 
     return (
         <GraphTheoryContext.Provider value={{algorithm, setAlgorithm, config, setConfig, predicateError: error}}>

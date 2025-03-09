@@ -111,6 +111,11 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
         {
             animator.current.log.addLog(step.log);
         }
+
+        if (step.customGraph)
+        {
+            animator.current.graph.customAction(step.customGraph);
+        }
     }
 
     const reset = () =>
