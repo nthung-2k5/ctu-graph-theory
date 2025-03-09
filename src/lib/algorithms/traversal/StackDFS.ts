@@ -33,7 +33,7 @@ export default class StackDFS extends TraversalAlgorithm
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
     
-    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
     {
         yield {
             codeLine: 3,
@@ -79,6 +79,7 @@ export default class StackDFS extends TraversalAlgorithm
             }
     
             visited[u] = true;
+            traverseOrder.push(u);
             yield {
                 colorVertex: [u, 'red'],
                 colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,

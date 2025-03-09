@@ -22,11 +22,12 @@ void DFS(Graph* G, int u) {
         return 'Duyệt theo chiều sâu (DFS) bằng đệ quy';
     }
     
-    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
     {
         yield { codeLine: 3, log: `DFS(G, ${startVertex})` };
 
         visited[startVertex] = true;
+        traverseOrder.push(startVertex);
 
         yield {
             colorVertex: [startVertex, 'red'],
@@ -50,7 +51,7 @@ void DFS(Graph* G, int u) {
                 };
 
                 parent[v] = startVertex;
-                yield* this._traverse(g, v, visited, parent);
+                yield* this._traverse(g, v, visited, parent, traverseOrder);
             }
 
             yield { codeLine: 6, log: `v = ${v + 1}` };

@@ -1,7 +1,7 @@
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Editor, useMonaco } from '@monaco-editor/react';
-import { editor } from 'monaco-editor';
+import { Editor } from '@monaco-editor/react';
+import { editor, Range } from 'monaco-editor';
 import { useAnimation } from '../lib/context/AnimationContext';
 
 const CodeBlock = () => 
@@ -12,16 +12,11 @@ const CodeBlock = () =>
     const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
     const editorRef = useRef<editor.IStandaloneCodeEditor>();
     const decoration = useRef<editor.IEditorDecorationsCollection>();
-    const monaco = useMonaco()!;
     const { code: codeAnimator } = useAnimation();
 
     codeAnimator.setHandle({
         currentLine: () => highlightedLine,
-        highlightLine: (line: number) => 
-        {
-            setHighlightedLine(line);
-            editorRef.current?.revealLineNearTop(line);
-        },
+        highlightLine: setHighlightedLine,
         reset: () => setHighlightedLine(null)
     });
 
@@ -31,18 +26,22 @@ const CodeBlock = () =>
         decoration.current = editor.createDecorationsCollection();
     };
 
+    useEffect(() => setHighlightedLine(null), [lines]);
+
     useEffect(() => 
     {
         if (highlightedLine === null)
         {
             decoration.current?.clear();
+            editorRef.current?.revealLineNearTop(1);
             return;
         }
         else
         {
+            editorRef.current?.revealLineInCenterIfOutsideViewport(highlightedLine);
             decoration.current?.set([
                 {
-                    range: new monaco.Range(highlightedLine, 1, highlightedLine, 1),
+                    range: new Range(highlightedLine, 1, highlightedLine, 1),
                     options: {
                         isWholeLine: true,
                         className: 'code-highlight'
@@ -50,9 +49,7 @@ const CodeBlock = () =>
                 }
             ])
         }
-    }, [highlightedLine, monaco]);
-
-    useEffect(() => setHighlightedLine(null), [lines]);
+    }, [highlightedLine]);
 
     return (
         <div className="border rounded-lg font-mono font-semibold flex-grow flex flex-col overflow-hidden">

@@ -1,14 +1,17 @@
 import { createContext, useContext } from 'react';
-import { GraphAlgorithm } from '../algorithms/GraphAlgorithm';
+import { AlgorithmStep, GraphAlgorithm } from '../algorithms/GraphAlgorithm';
 
 export const GraphTheoryContext = createContext<{
     algorithm: GraphAlgorithm,
     setAlgorithm: (algo: GraphAlgorithm) => void,
 
-    config: object,
+    config: object | null,
     setConfig: (config: object) => void,
 
     predicateError: string | null,
+
+    animationSteps: AlgorithmStep[],
+    result: unknown | null,
 }>(null!);
 
 export const useGraphTheory = () =>

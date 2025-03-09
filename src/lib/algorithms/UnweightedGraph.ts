@@ -51,12 +51,14 @@ export class UnweightedGraph
     {
         this._assertVertex(e.u);
         this._assertVertex(e.v);
+
+        if (e.u === e.v) return;
         
         this._edges.push(e);
-        this._matrix[e.u][e.v]++;
+        this._matrix[e.u][e.v] = 1;
         if (!this._directed)
         {
-            this._matrix[e.v][e.u]++;
+            this._matrix[e.v][e.u] = 1;
         }
     }
     

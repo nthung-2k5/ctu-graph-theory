@@ -32,8 +32,27 @@ class TarjanContext
     }
 }
 
-export default class TarjanAlgorithm extends NeutralGraphAlgorithm<TarjanConfig>
+export default class TarjanAlgorithm extends NeutralGraphAlgorithm<TarjanConfig, number[][]>
 {
+    protected override _initResult(): number[][] 
+    {
+        return [];
+    }
+
+    protected override _result(result: number[][]): ReactNode 
+    {
+        return (
+            <>
+                <p>Các bộ phận liên thông mạnh:</p>
+                <ul>
+                    {result.map((scc, i) => (
+                        <li key={i}>SCC {i + 1}: {scc.join(', ')}</li>
+                    ))}
+                </ul>
+            </>
+        );
+    }
+
     public override defaultConfig(): TarjanConfig 
     {
         return {
@@ -88,7 +107,7 @@ void SCC(Graph* G, int u) {
         return 'Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)';
     }
 
-    private *_scc(g: UnweightedGraph, u: number, ctx: TarjanContext): IterableIterator<AlgorithmStep>
+    private *_scc(g: UnweightedGraph, u: number, ctx: TarjanContext, result: number[][]): IterableIterator<AlgorithmStep>
     {
         yield { codeLine: 8, log: `SCC(G, ${u})` };
 
@@ -111,7 +130,7 @@ void SCC(Graph* G, int u) {
                 if (ctx.index[v] === 0)
                 {
                     yield { codeLine: 16, log: 'Đệ quy gọi SCC(G, v)' };
-                    yield* this._scc(g, v, ctx);
+                    yield* this._scc(g, v, ctx, result);
                     yield { codeLine: 17, log: `minNum[${u}] = min(minNum[${u}], minNum[${v}]) = min(${ctx.minIndex[u]}, ${ctx.minIndex[v]}) = ${Math.min(ctx.minIndex[u], ctx.minIndex[v])}` };
                     ctx.minIndex[u] = Math.min(ctx.minIndex[u], ctx.minIndex[v]);
                     continue;
@@ -132,10 +151,12 @@ void SCC(Graph* G, int u) {
         if (ctx.minIndex[u] === ctx.index[u])
         {
             yield { codeLine: 25, log: `v = -1` };
+            result.push([]);
             let v: number;
             do
             {
                 v = ctx.sccStack.pop()!;
+                result[result.length - 1].push(v);
                 yield { codeLine: 27, log: `v = ${v}, S = {${ctx.sccStack.toArray().join(', ')}}` };
                 ctx.onStack[v] = false;
                 yield { codeLine: 28, log: `onStack[${v}] = false` };
@@ -145,7 +166,7 @@ void SCC(Graph* G, int u) {
         }
     }
 
-    protected *_run(g: UnweightedGraph, config: TarjanConfig): IterableIterator<AlgorithmStep>
+    protected *_run(g: UnweightedGraph, config: TarjanConfig, result: number[][]): IterableIterator<AlgorithmStep>
     {
         const ctx = new TarjanContext(g);
         yield { codeLine: 1, log: `num = {${ctx.index.join(', ')}}` };
@@ -155,14 +176,14 @@ void SCC(Graph* G, int u) {
         yield { codeLine: 5, log: `S = {}` };
         yield { codeLine: 6, log: `onStack = {${ctx.onStack.join(', ')}}` };
 
-        yield* this._scc(g, config.startVertex, ctx);
+        yield* this._scc(g, config.startVertex, ctx, result);
         if (config.traverseAll)
         {
             for (let u = 1; u <= g.vertexCount; u++)
             {
                 if (ctx.index[u] === 0)
                 {
-                    yield* this._scc(g, u, ctx);
+                    yield* this._scc(g, u, ctx, result);
                 }
             }
         }
@@ -173,7 +194,7 @@ void SCC(Graph* G, int u) {
         const vertexCount = store.getState().graph.vertexCount;
         return (
             <>
-                <Form.Item<TarjanConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                <Form.Item<TarjanConfig> label="Đỉnh bắt đầu" name="startVertex">
                     <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
                 <Form.Item<TarjanConfig> name="traverseAll" valuePropName="checked">

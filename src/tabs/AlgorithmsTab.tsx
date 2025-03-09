@@ -1,6 +1,6 @@
-import { Button, ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
+import { Button, ConfigProvider, Dropdown, Form, Modal, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import Title from 'antd/es/typography/Title';
 import CodeBlock from './CodeBlock';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
@@ -36,8 +36,9 @@ const InvalidMessage = (props: PropsWithChildren) =>
 
 export default function AlgorithmsTab() 
 {
-    const { algorithm, setAlgorithm, setConfig, predicateError } = useGraphTheory();
+    const { algorithm, setAlgorithm, setConfig, predicateError, result } = useGraphTheory();
     const [form] = Form.useForm();
+    const [openDialog, setOpenDialog] = useState(false);
 
     const items = AvailableAlgorithms.map((algo, index) => ({
         key: index,
@@ -56,7 +57,7 @@ export default function AlgorithmsTab()
             form.resetFields();
             return;
         }
-        
+
         form.setFieldsValue(algorithm.defaultConfig());
     }, [predicateError, algorithm, form]);
 
@@ -106,7 +107,16 @@ export default function AlgorithmsTab()
                         </ConfigProvider>
                     </Form>
                     <CodeBlock />
-                    <Button block type='primary' disabled={predicateError !== null} className='mt-2'>Kết quả thuật toán</Button>
+                    <Button block type='primary' disabled={predicateError !== null} onClick={() => setOpenDialog(true)} className='mt-2'>Kết quả thuật toán</Button>
+                    <Modal
+                        title="Kết quả thuật toán"
+                        open={openDialog}
+                        centered
+                        onCancel={() => setOpenDialog(false)}
+                        footer={<Button type='primary' onClick={() => setOpenDialog(false)}>Xong</Button>}
+                    >
+                        {<algorithm.Result result={result} />}
+                    </Modal>
                 </div>
             ),
         },

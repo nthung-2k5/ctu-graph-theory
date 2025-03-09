@@ -33,7 +33,7 @@ void BFS(Graph* G, int s) {
         return 'Duyệt theo chiều rộng (BFS)';
     }
 
-    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
     {
         yield {
             codeLine: 3,
@@ -79,6 +79,8 @@ void BFS(Graph* G, int s) {
             }
 
             visited[u] = true;
+            traverseOrder.push(u);
+            
             yield {
                 colorVertex: [u, 'red'],
                 colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,

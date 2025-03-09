@@ -4,21 +4,28 @@ Hướng dẫn thêm thuật toán:
 
 Khai báo thuật toán trong folder `lib/algorithms` bằng 1 file gồm 2 `class` sau:
 1. `class` cấu hình những tham số như đỉnh bắt đầu.
+2. `interface` chứa những kết quả định trả về.
 2. `class` thuật toán chính cần `extends` 1 trong 2 `class` sau đây:
-    - `NeutralGraphAlgorithm<T>`: thuật toán này có thể dùng cho cả đồ thị không trọng số và có trọng số.
-    - `WeightedGraphAlgorithm<T>`: thuật toán này chỉ áp dụng được với đồ thị có trọng số.
+    - `NeutralGraphAlgorithm<T, R>`: thuật toán này có thể dùng cho cả đồ thị không trọng số và có trọng số.
+    - `WeightedGraphAlgorithm<T, R>`: thuật toán này chỉ áp dụng được với đồ thị có trọng số.
 
-**(`T` là class cấu hình ở trên.)**
+**(`T` là class cấu hình ở trên, R là interface kết quả ở trên.)**
 
 # Bước 2: Thiết lập các dữ liệu liên quan
 
 Mỗi `class` thuật toán gồm 4 trường dữ liệu có thể `override` tùy theo thuật toán:
 
 ```ts
-export abstract class GraphAlgorithm<Config = object>
+export abstract class GraphAlgorithm<Config = object, R = any>
 {
     public abstract get name(): string; // Tên của thuật toán
     public abstract defaultConfig(): Config;
+    protected abstract _result(result: R): ReactNode; // Component React dùng để hiển thị kết quả
+
+    public get Result(): React.FC<{ result: R }> // Không quan trọng, bỏ qua
+    {
+        return memo((props: { result: R }) => this._result(props.result));
+    }
 
     public get code(): string
     {
@@ -35,7 +42,7 @@ export abstract class GraphAlgorithm<Config = object>
         return (<></>); // Component React dùng để nhập tham số cấu hình
     }
     
-    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>; // Hàm chạy thuật toán, nói sau
+    public abstract run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]; // Hàm chạy thuật toán, nói sau
 };
 ```
 
@@ -43,7 +50,10 @@ export abstract class GraphAlgorithm<Config = object>
 - Trả về: tên thuật toán.
 
 ## `public abstract defaultConfig(): Config`
-- Trả về: cấu hình mặc định khi mới chọn thuật toán
+- Trả về: cấu hình mặc định khi mới chọn thuật toán.
+
+## `protected abstract _result(result: R): ReactNode`
+- Trả về: một component React dùng để hiện thị kết quả từ `result` bên trên.
 
 ## `public get code(): string`
 - Trả về: đoạn code C (hoặc mã giả) để tham khảo bước chạy.
@@ -107,14 +117,15 @@ public override configNode(): ReactNode
 
 Hàm chạy thuật toán sẽ được định nghĩa trong hàm `_run` (để ý dấu `_`) với cấu trúc như sau:
     
-1. Nếu là `NeutralGraphAlgorithm<Config>`: `protected override *_run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>`
-2. Nếu là `WeightedGraphAlgorithm<Config>`: `protected override *_run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>`
+1. Nếu là `NeutralGraphAlgorithm<Config, R>`: `protected override *_run(g: UnweightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>`
+2. Nếu là `WeightedGraphAlgorithm<Config, R>`: `protected override *_run(g: WeightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>`
 
 Giải thích các tham số:
     
 - `g: UnweightedGraph`: đồ thị không trọng số.
 - `g: WeightedGraph`: đồ thị có trọng số.
 - `config: Config`: cấu hình với kiểu là class cấu hình bên trên.
+-  `result: R`: kết quả trả về thuật toán. Trong lúc chạy phải nạp kết quả vào đây để có thể hiển thị ra.
 - `AlgorithmStep`: là một bước chạy của thuật toán, dùng để biểu diễn ra cho người dùng thấy, với cấu trúc sau:
 ```ts
 // Tô màu {color} cho đỉnh {vertex} 
@@ -152,7 +163,7 @@ export interface AlgorithmStep
 Ví dụ để thông não (thuật toán BFS):
 ```ts
 // Nhớ phải có dấu *
-*_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
+*_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
 {
     yield {
         codeLine: 3,
@@ -198,6 +209,8 @@ Ví dụ để thông não (thuật toán BFS):
         }
 
         visited[u] = true;
+        traverseOrder.push(u);
+        
         yield {
             colorVertex: [u, 'red'],
             colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,

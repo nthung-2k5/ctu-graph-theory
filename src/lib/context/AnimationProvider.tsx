@@ -1,7 +1,6 @@
-import { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { AnimationContext } from './AnimationContext';
 import { useGraphTheory } from './GraphTheoryContext';
-import { useAppSelector } from './hooks';
 import { AlgorithmStep } from '../algorithms/GraphAlgorithm';
 import GraphAnimator from '../animation/GraphAnimator';
 import PseudocodeAnimator from '../animation/PseudocodeAnimator';
@@ -48,27 +47,13 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
         }
     }
 
-    const { algorithm, config, predicateError } = useGraphTheory();
-    const graphState = useAppSelector(state => state.graph);
+    const { animationSteps: steps } = useGraphTheory();
     const timeout = useRef<number | null>(null);
     const animator = useRef({
         graph: new GraphAnimator(),
         pseudocode: new PseudocodeAnimator(),
         log: new LogAnimator()
-    })
-
-    const steps = useMemo(() => 
-    {
-        if (predicateError === null && config !== null)
-        {
-            return Array.from(algorithm.run(graphState, config));
-        }
-        else
-        {
-            return [];
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [predicateError, graphState, config]);
+    });
 
     useEffect(() =>
     {

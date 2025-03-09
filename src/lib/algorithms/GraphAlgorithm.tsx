@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { memo, ReactNode } from 'react';
 import { UnweightedGraph } from './UnweightedGraph';
 import { WeightedGraph } from './WeightedGraph';
 import { GraphState } from '../context/graphSlice'
@@ -15,10 +15,17 @@ export interface AlgorithmRequirements
     acyclic?: boolean;
 }
 
-export abstract class GraphAlgorithm<Config = object>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class GraphAlgorithm<Config = object, R = any>
 {
     public abstract get name(): string;
     public abstract defaultConfig(): Config;
+    protected abstract _result(result: R): ReactNode;
+
+    public get Result(): React.FC<{ result: R }>
+    {
+        return memo((props: { result: R }) => this._result(props.result));
+    }
 
     public get code(): string | string[]
     {
@@ -35,14 +42,16 @@ export abstract class GraphAlgorithm<Config = object>
         return (<></>);
     }
     
-    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>;
+    public abstract run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R];
 };
 
-export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
+export abstract class NeutralGraphAlgorithm<Config, R> extends GraphAlgorithm<Config, R>
 {
-    protected abstract _run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+    protected abstract _run(g: UnweightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
+    protected abstract _initResult(): R;
+
+    public run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]
     {
         const graph = new UnweightedGraph(g.vertexCount, g.directed);
 
@@ -50,21 +59,24 @@ export abstract class NeutralGraphAlgorithm<Config = object> extends GraphAlgori
         {
             graph.addEdge(edge);
         }
-
-        return this._run(graph, config);
+        
+        const result = this._initResult();
+        return [this._run(graph, config, result), result];
     }
 }
 
-export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgorithm<Config>
+export abstract class WeightedGraphAlgorithm<Config, R> extends GraphAlgorithm<Config, R>
 {
     public override get predicate(): AlgorithmRequirements 
     {
         return { weighted: true };
     }
 
-    protected abstract _run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>;
+    protected abstract _initResult(): R;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>
+    protected abstract _run(g: WeightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>;
+
+    public run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]
     {
         const graph = new WeightedGraph(g.vertexCount, g.directed);
 
@@ -78,7 +90,8 @@ export abstract class WeightedGraphAlgorithm<Config = object> extends GraphAlgor
             graph.addEdge(edge);
         }
 
-        return this._run(graph, config);
+        const result = this._initResult();
+        return [this._run(graph, config, result), result];
     }
 }
 

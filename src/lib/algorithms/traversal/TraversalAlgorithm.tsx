@@ -10,9 +10,25 @@ export interface TraversalConfig
     traverseAll: boolean;
 }
 
-export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<TraversalConfig>
+
+export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<TraversalConfig, number[]>
 {
-    protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>;
+    protected override _initResult(): number[] 
+    {
+        return [];
+    }
+    
+    public override _result(result: number[]): ReactNode
+    {
+        const visitOrder = result.join(' -> ');
+        return (
+            <>
+                <p>Thứ tự duyệt: {visitOrder}</p>
+            </>
+        );
+    };
+
+    protected abstract _traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>;
 
     public override defaultConfig(): TraversalConfig
     {
@@ -22,14 +38,14 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
         };
     }
 
-    protected *_run(g: UnweightedGraph, config: TraversalConfig): IterableIterator<AlgorithmStep>
+    protected *_run(g: UnweightedGraph, config: TraversalConfig, result: number[]): IterableIterator<AlgorithmStep>
     {
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
         const parent: number[] = Array(g.vertexCount + 1).fill(-1);
 
         yield { codeLine: 1, log: `mark[${g.vertexCount + 1}] = {${visited.join(', ')}}` };
 
-        yield* this._traverse(g, config.startVertex, visited, parent);
+        yield* this._traverse(g, config.startVertex, visited, parent, result);
 
         if (config.traverseAll)
         {
@@ -37,7 +53,7 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
             {
                 if (!visited[u])
                 {
-                    yield* this._traverse(g, u, visited, parent);
+                    yield* this._traverse(g, u, visited, parent, result);
                 }
             }
         }

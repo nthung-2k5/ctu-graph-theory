@@ -22,6 +22,13 @@ class BipartiteContext
     }
 }
 
+interface BipartiteResult
+{
+    isBipartite: boolean;
+    blueVertices: number[];
+    redVertices: number[];
+}
+
 enum Color
 {
     Blue = -1,
@@ -29,8 +36,32 @@ enum Color
     Red = 1
 }
 
-export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig>
+export default class Bipartite extends NeutralGraphAlgorithm<BipartiteConfig, BipartiteResult>
 {
+    protected override _initResult(): BipartiteResult 
+    {
+        return {
+            isBipartite: true,
+            blueVertices: [],
+            redVertices: []
+        };
+    }
+
+    protected override _result(result: BipartiteResult): ReactNode
+    {
+        return (
+            <>
+                <p>Đồ thị phân đôi: {result.isBipartite ? 'Có' : 'Không'}</p>
+                {result.isBipartite && (
+                    <>
+                        <p>Đỉnh màu <span className='text-[blue]'>xanh</span>: {result.blueVertices.join(', ')}</p>
+                        <p>Đỉnh màu <span className='text-[red]'>đỏ</span>: {result.redVertices.join(', ')}</p>
+                    </>
+                )}
+            </>
+        );
+    }
+
     public override defaultConfig(): BipartiteConfig 
     {
         return {
@@ -97,7 +128,7 @@ void colorize(Graph* G, int u, int clr) {
                 yield { codeLine: 13, log: `color[${v}] = ${this._getColorName(ctx.color[v])}` };
                 if (ctx.color[v] === Color.White)
                 {
-                    yield { codeLine: 14, log: `Gọi đệ quy colorize(G, ${v}, ${this._getColorName(-color)}` };
+                    yield { codeLine: 14, log: `Gọi đệ quy colorize(G, ${v}, ${this._getColorName(-color)})` };
                     yield* this._colorize(g, v, -color, ctx);
                     yield { codeLine: 15, log: `conflict = ${ctx.isBipartite}` };
                     if (!ctx.isBipartite)
@@ -124,13 +155,17 @@ void colorize(Graph* G, int u, int clr) {
         }
     }
 
-    protected override *_run(g: UnweightedGraph, config: BipartiteConfig): IterableIterator<AlgorithmStep>
+    protected override *_run(g: UnweightedGraph, config: BipartiteConfig, result: BipartiteResult): IterableIterator<AlgorithmStep>
     {
         const ctx = new BipartiteContext(g);
         yield { codeLine: 5, log: `color = {${Array(g.vertexCount + 1).fill("NO_COLOR").join(", ")}}` };
         yield { codeLine: 6, log: `conflict = false` };
 
         yield* this._colorize(g, config.startVertex, config.startColor, ctx);
+
+        result.isBipartite = ctx.isBipartite;
+        result.blueVertices = ctx.color.map((c, i) => c === Color.Blue ? i : -1).filter(v => v !== -1);
+        result.redVertices = ctx.color.map((c, i) => c === Color.Red ? i : -1).filter(v => v !== -1);
     }
 
     public override configNode(): ReactNode
