@@ -1,9 +1,6 @@
 import { ReactNode } from "react";
 import { PseudocodeLine } from "../../pseudocode/Pseudocode";
-import { CycleConfig } from "../connectivity/Cycle";
 import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from "../GraphAlgorithm";
-import { Form, InputNumber, Select, Space } from "antd";
-import store from "../../context/store";
 import { UnweightedGraph } from "../UnweightedGraph";
 import Animator from "../../animation/Animator";
 
@@ -11,9 +8,9 @@ export interface TopoOrderingBFSConfig {
    startVertex: number;
 }
 
-class TopoOrderingBFSContext {
+// class TopoOrderingBFSContext {
 
-}
+// }
 
 export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingBFSConfig> {
    public get name(): string {
@@ -85,52 +82,54 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
       let queue: number[] = [];
       let topoOrder: number[] = [];
 
+      // 1. Tính bậc vào cho mỗi tỉnh
       for (let vertex = 1; vertex <= g.vertexCount; vertex++) {
          yield { 
-            // colorVertex: [vertex, 'green'],
-            // backgroundColorVertex: [vertex, 'green'],
-            // highlightVertex: [vertex, true],
-            // colorVertex: [vertex, 'blue'],
+            backgroundColorVertex: [vertex, 'green'],
             codeLine: 0 
-         }; // Tính bậc cho mỗi đỉnh
-         animator.graph.backgroundColorVertex(vertex, 'green');
+         };
          inDegree.set(vertex, 0);
       }
       
       for (const edge of g.edges) {
          inDegree.set(edge.v, (inDegree.get(edge.v) || 0) + 1);
       }
+      // Kết thúc 1
 
+      // 2. Đưa các đỉnh có bậc bằng 0 vào hàng 
       for (let [vertex, degree] of inDegree.entries()) {
          if (degree === 0) { 
             yield { 
-               // colorVertex: [vertex, 'deeppink'],
-               // backgroundColorVertex: [vertex, 'deeppink'],
-               // highlightVertex: [vertex, true],
+               backgroundColorVertex: [vertex, 'deeppink'],
                codeLine: 1
-            }; // Bỏ vertex vào Hàng đợi 
-            animator.graph.backgroundColorVertex(vertex, 'deeppink');
+            };
             queue.push(vertex);
          }
       }
+      // Kết thúc 2
 
       yield {};
       animator.graph.reset(); // Reset lại đồ thị
       queue.forEach(vertex => {
+         // Chạy animation đánh dấu các đỉnh có bậc bằng 0 trước khi chạy thuật
          animator.graph.backgroundColorVertex(vertex, 'deeppink');
       });
       
-  
+      
       yield { codeLine: 2 }
       while (queue.length > 0) {
-         let u = queue.shift()!; // Lấy đỉnh đầu hàng đợi
+         let u = queue.shift()!;
          yield { 
             codeLine: 3,
             colorVertex: [u, 'blue']
          }
+
          topoOrder.push(u); // Thêm vào thứ tự topo
+
          yield {
             codeLine: 4,
+            colorVertex: [u, 'black'],
+            backgroundColorVertex: [u, 'deepskyblue'],
             highlightVertex: [u, true]
          }
          yield {
@@ -143,15 +142,17 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
                   codeLine: 5,
                   colorEdge: [u, edge.v, 'blue']
                }
+               // Giảm đỉnh v kề u
                inDegree.set(edge.v, inDegree.get(edge.v)! - 1);
                yield {
                   codeLine: 6,
                   colorVertex: [edge.v, 'red']
                }
                yield {
-                  codeLine: 7,
-                  highlightVertex: [edge.v, true]
+                  codeLine: 7
                }
+
+               // Đưa đỉnh v có bậc 0 vào quêu
                if (inDegree.get(edge.v) === 0) {
                   queue.push(edge.v);
                   yield {
@@ -164,9 +165,5 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
             }
          }
       }
-
-      // if (topoOrder.length < g.vertexCount) {
-      //    alert('Đồ thị có chu trình');
-      // }
    }
 }
