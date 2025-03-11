@@ -1,26 +1,17 @@
-import { createContext, MutableRefObject, useContext } from 'react';
-import { GraphAlgorithm } from '../algorithms/GraphAlgorithm';
-import Animator from '../animation/Animator';
+import { createContext, useContext } from 'react';
+import { AlgorithmStep, GraphAlgorithm } from '../algorithms/GraphAlgorithm';
 
 export const GraphTheoryContext = createContext<{
     algorithm: GraphAlgorithm,
     setAlgorithm: (algo: GraphAlgorithm) => void,
 
-    animator: Animator,
-    config: MutableRefObject<object>,
-    playing: boolean,
-    paused: boolean,
+    config: object | null,
+    setConfig: (config: object) => void,
 
     predicateError: string | null,
 
-    speed: number,
-    setSpeed: (value: number) => void,
-    
-    play: () => void,
-    pause: () => void,
-    stop: () => void,
-    fastForward: () => void,
-    rewind: () => void,
+    animationSteps: AlgorithmStep[],
+    result: unknown | null,
 }>(null!);
 
 export const useGraphTheory = () =>

@@ -1,8 +1,8 @@
-import { ConfigProvider, Dropdown, Form, Space, Tabs, TabsProps } from 'antd';
+import { Button, ConfigProvider, Dropdown, Form, Modal, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import Title from 'antd/es/typography/Title';
-import PseudoCode from './PseudoCode';
+import CodeBlock from './CodeBlock';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
 
@@ -10,8 +10,6 @@ const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
     'Duyệt theo chiều sâu (DFS) bằng đệ quy',
     'Duyệt theo chiều sâu (DFS) bằng ngăn xếp',
-    'Kiểm tra đồ thị vô hướng liên thông',
-    'Kiểm tra đồ thị chứa chu trình',
     'Kiểm tra đồ thị phân đôi',
     'Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)',
     'Tìm đường đi ngắn nhất (Thuật toán Moore-Dijkstra)',
@@ -38,8 +36,9 @@ const InvalidMessage = (props: PropsWithChildren) =>
 
 export default function AlgorithmsTab() 
 {
-    const { playing, algorithm, setAlgorithm, config, predicateError } = useGraphTheory();
+    const { algorithm, setAlgorithm, setConfig, predicateError, result } = useGraphTheory();
     const [form] = Form.useForm();
+    const [openDialog, setOpenDialog] = useState(false);
 
     const items = AvailableAlgorithms.map((algo, index) => ({
         key: index,
@@ -53,21 +52,21 @@ export default function AlgorithmsTab()
 
     useEffect(() => 
     {
-        config.current = form.getFieldsValue();
-    }, [predicateError, config, algorithm, form]);
-    
-    // const runProps: ButtonProps = {
-    //     htmlType: 'submit',
-    //     disabled: !vertexCount || !error.valid,
-    //     children: 'Chạy',
-    // };
+        if (predicateError !== null) 
+        {
+            form.resetFields();
+            return;
+        }
 
-    // const stopProps: ButtonProps = {
-    //     htmlType: 'submit',
-    //     danger: true,
-    //     disabled: false,
-    //     children: 'Dừng',
-    // };
+        form.setFieldsValue(algorithm.defaultConfig());
+    }, [predicateError, algorithm, form]);
+
+    useEffect(() => 
+    {
+        if (predicateError !== null) return;
+        
+        setConfig(form.getFieldsValue());
+    }, [predicateError, setConfig, algorithm, form]);
 
     const tabs: TabsProps['items'] = [
         {
@@ -78,7 +77,6 @@ export default function AlgorithmsTab()
                     <div>
                         <Dropdown
                             trigger={['click']}
-                            disabled={playing}
                             menu={{ items }}
                         >
                             <a onClick={(e) => e.preventDefault()}>
@@ -91,9 +89,8 @@ export default function AlgorithmsTab()
                     </div>
                     <Form
                         layout="horizontal"
-                        disabled={playing}
                         form={form}
-                        onValuesChange={(_, values) => config.current = values}
+                        onValuesChange={(_, values) => setConfig(values)}
                         className="w-full flex flex-col justify-start"
                     >
                         <Title level={5}>{algorithm.name}</Title>
@@ -106,16 +103,20 @@ export default function AlgorithmsTab()
                         }}>
                             <div className="flex flex-col">
                                 {predicateError ? (<InvalidMessage>{predicateError}</InvalidMessage>) : (algorithm.configNode())}
-                                {/* <Button
-                                block
-                                type="primary"
-                                {...(animating ? stopProps : runProps)}
-                                style={{ height: '40px', width: '80px' }}
-                            /> */}
                             </div>
                         </ConfigProvider>
                     </Form>
-                    <PseudoCode />
+                    <CodeBlock />
+                    <Button block type='primary' disabled={predicateError !== null} onClick={() => setOpenDialog(true)} className='mt-2'>Kết quả thuật toán</Button>
+                    <Modal
+                        title="Kết quả thuật toán"
+                        open={openDialog}
+                        centered
+                        onCancel={() => setOpenDialog(false)}
+                        footer={<Button type='primary' onClick={() => setOpenDialog(false)}>Xong</Button>}
+                    >
+                        {<algorithm.Result result={result} />}
+                    </Modal>
                 </div>
             ),
         },

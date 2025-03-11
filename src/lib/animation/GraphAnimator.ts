@@ -31,7 +31,19 @@ export default class GraphAnimator extends SubAnimator
 
     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
+        this._cy?.$id(vertex.toString()).style({ 'background-color': color }).attr('marked', color);
+        return this;
+    }
+
+    public borderColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._cy?.$id(vertex.toString()).style({ 'border-color': color });
+        return this;
+    }
+
+    public contentColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._cy?.$id(vertex.toString()).style({ 'color': color });
         return this;
     }
 
@@ -82,7 +94,12 @@ export default class GraphAnimator extends SubAnimator
 
     public backgroundColorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ 'background-color': color });
+        return this._setVertexStyle(vertex, { 'background-color': color });
+    }
+
+    public customAction(action: (cy: cytoscape.Core) => void): GraphAnimator
+    {
+        action(this._cy!);
         return this;
     }
 }

@@ -1,7 +1,6 @@
 import { Stack } from 'data-structure-typed';
 import { AlgorithmStep } from '../GraphAlgorithm';
 import TraversalAlgorithm from './TraversalAlgorithm';
-import { PseudocodeLine } from '../../pseudocode/Pseudocode';
 import { UnweightedGraph } from '../UnweightedGraph';
 
 export const stackDfsPseudoCode = [
@@ -10,79 +9,135 @@ export const stackDfsPseudoCode = [
 
 export default class StackDFS extends TraversalAlgorithm
 {
-    public override get pseudocode(): PseudocodeLine[] 
+    public override get code(): string
     {
-        return [
-            { text: 'while (stack != ∅)', tab: 0 },
-            { text: 'u <- stack;', tab: 1 },
-            { text: 'if (duyet[u] == true)', tab: 1 },
-            { text: 'continue;', tab: 2 },
-            { text: '// Duyệt u;', tab: 1, comment: true },
-            { text: 'stack[u] = true;', tab: 1 },
-            { text: 'for (đỉnh v kề với u)', tab: 1 },
-            { text: 'if (stack[v] != true)', tab: 2 },
-            { text: 'queue <- v;', tab: 3 },
-        ]
+        return `int mark[MAX_N];
+    
+    void DFS(Graph* G, int s) {
+        Stack Q; makeNullStack&Q);
+    
+        push(&Q, s);
+    
+        while (!empty(Q)) {
+            int u = top(Q); pop(&Q);
+            if (mark[u])
+                continue;
+    
+            mark[u] = 1;
+    
+            for (int v = 1; v <= n; v++)
+                if (adjacent(G, u, v) && !mark[v])
+                    push(Q, v);
+        }
+    }`;
     }
-
+    
     public get name()
     {
         return 'Duyệt theo chiều sâu (DFS) bằng ngăn xếp';
     }
-
-    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
-    {
-        const stack: Stack<number> = new Stack<number>();
     
-        stack.push(startVertex);
+    *_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
+    {
+        yield {
+            codeLine: 3,
+            log: `DFS(G, ${startVertex})`
+        };
+        const stack: Stack<number> = new Stack<number>();
+        yield {
+            codeLine: 4,
+            log: `Q = {}`
+        };
             
-        yield { codeLine: 0 };
+        stack.push(startVertex);
+        yield { 
+            codeLine: 6,
+            highlightVertex: [startVertex, true],
+            colorVertex: [startVertex, 'orange'],
+            log: `Q = {${startVertex}}`
+        };
+            
+        yield {
+            codeLine: 8,
+            log: `Q = {${startVertex}} => Bắt đầu duyệt`
+        };
         while (!stack.isEmpty())
         {
             const u = stack.pop()!;
-            yield { codeLine: 1 };
     
-            yield { codeLine: 2 };
+            yield { 
+                codeLine: 9,
+                highlightVertex: [u, true],
+                colorVertex: [u, 'yellow'], 
+                log: `u = ${u}, Q = {${stack.toArray().join(', ')}}`
+            };
+    
+            yield {
+                codeLine: 10,
+                log: `mark[${u}] = ${visited[u]}`
+            };
             if (visited[u])
             {
-                yield { codeLine: 3 };
-                yield { codeLine: 0 };
+                yield { codeLine: 11, log: `Đã duyệt ${u}, bỏ qua` };
                 continue;
             }
     
+            visited[u] = true;
+            traverseOrder.push(u);
             yield {
                 colorVertex: [u, 'red'],
                 colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
-                codeLine: 4
+                codeLine: 13,
+                log: `mark[${u}] = true`
             };
     
-            visited[u] = true;
-            yield { codeLine: 5 };
-    
-            const neighbors = g.neighbors(u);
-    
-            yield { codeLine: 6 };
-            for (const v of neighbors)
+            yield {
+                codeLine: 15,
+                log: `v = 1`
+            };
+            for (let v = 1; v <= g.vertexCount; v++)
             {
-                yield { codeLine: 7 };
-                if (!visited[v])
+                yield {
+                    codeLine: 16, 
+                    highlightVertex: [v, true],
+                    highlightEdge: [u, v, true],
+                    log: `G->A[${u}][${v}] = ${g.matrix[u][v]}, mark[${v}] = ${visited[v]}`
+                };
+    
+                if (g.matrix[u][v] && !visited[v])
                 {
                     stack.push(v);
-                    yield {
-                        colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
-                        colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
-                        codeLine: 8
-                    };
-
+    
+                    let colorEdge = {};
+    
                     if (parent[v] === -1)
                     {
                         parent[v] = u;
+                        colorEdge = {
+                            colorEdge: [u, v, 'blue'],
+                        };
                     }
+    
+                    yield { 
+                        codeLine: 17,
+                        colorVertex: [v, 'orange'],
+                        ...colorEdge,
+                        log: `Q = {${stack.toArray().join(', ')}}`
+                    };
                 }
-                yield { codeLine: 6 };
+                yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], log: `v = ${v + 1}` };
             }
-
-            yield { codeLine: 0 };
+    
+            yield { 
+                codeLine: 18, 
+                highlightVertex: [u, false],
+                colorVertex: [u, 'purple'],
+                log: `Kết thúc duyệt ${u}`
+            };
+    
+            yield { codeLine: 8, log: `Q = {${stack.toArray().join(', ')}}` };
         }
+    
+        yield { codeLine: 19, log: 'Kết thúc' };
     }
 }

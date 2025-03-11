@@ -1,6 +1,7 @@
 import { ConfigProvider, Progress, Slider, Tooltip } from 'antd';
-import { FaBackwardStep, FaDownload, FaForwardStep, FaPause, FaPlay, FaStop } from 'react-icons/fa6';
+import { FaArrowRotateLeft, FaBackwardStep, FaDownload, FaForwardStep, FaPause, FaPlay } from 'react-icons/fa6';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
+import { useAnimation } from '../lib/context/AnimationContext';
 
 const IconButton = (props: { icon: JSX.Element, disabled?: boolean, onClick?: () => void }) =>
 {
@@ -13,29 +14,28 @@ const IconButton = (props: { icon: JSX.Element, disabled?: boolean, onClick?: ()
     );
 }
 
-export default function ControlBar(props: { onDownloadClicked?: () => void }) 
+export default function ControlBar(props: { onDownloadClicked?: () => void, onRefreshClicked?: () => void }) 
 {
-    const { playing, paused, speed, setSpeed, play, pause, stop, rewind, fastForward } = useGraphTheory();
+    const anim = useAnimation();
 
     return (
         <div className='flex flex-col px-3 bg-[#0D47A1]'>
             <div className='h-6 flex items-center'>
-                <Progress strokeColor="#00afef" showInfo={false} className='w-full' />
+                <Progress strokeColor="#00afef" percent={anim.cursor / anim.steps * 100} showInfo={false}  className='w-full' />
             </div>
-            <div className="h-12 py-5 flex justify-between items-center">
+            <div className="h-12 py-5 flex justify-between items-center gap-x-4">
                 <div className="control-bar__play flex items-center justify-around">
-                    {playing && !paused ?
-                        <IconButton onClick={pause} icon={<FaPause />}/> :
-                        <IconButton onClick={play} icon={<FaPlay />}/>
+                    {anim.playing ?
+                        <IconButton onClick={anim.pause} icon={<FaPause />}/> :
+                        <IconButton onClick={anim.resume} icon={<FaPlay />}/>
                     }
                     <div className='ml-4 flex flex-grow gap-x-3'>
-                        <IconButton disabled={playing} onClick={stop} icon={<FaStop />}/>
-                        <IconButton disabled={playing} onClick={rewind} icon={<FaBackwardStep />}/>
-                        <IconButton disabled={playing} onClick={fastForward} icon={<FaForwardStep />}/>
+                        <IconButton disabled={anim.playing} onClick={anim.rewind} icon={<FaBackwardStep />}/>
+                        <IconButton disabled={anim.playing} onClick={anim.forward} icon={<FaForwardStep />}/>
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center flex-grow mx-4">
+                <div className="flex justify-between items-center flex-grow">
                     <ConfigProvider theme={{
                         components: {
                             Slider: {
@@ -44,10 +44,14 @@ export default function ControlBar(props: { onDownloadClicked?: () => void })
                             }
                         }
                     }}>
-                        <Slider min={1} max={7} value={speed} onChange={(value) => setSpeed(value)} className='w-full' tooltip={{formatter: (val) => `Tốc độ x${val}`}} />
+                        <Slider min={0} max={4} step={.5} value={anim.speed} onChange={(value) => anim.setSpeed(value)} className='w-full' tooltip={{formatter: (val) => `Tốc độ x${(val ?? 0.5) * 2}`}} />
                     </ConfigProvider>
-                    <p className="text-lg text-white font-semibold ml-2 hidden lg:block">{speed}X</p>
+                    <p className="text-lg text-white font-semibold ml-2 hidden lg:block">{anim.speed * 2}X</p>
                 </div>
+
+                <Tooltip title="Đặt lại đồ thị" placement="top">
+                    <FaArrowRotateLeft className="control-bar-icon" onClick={props.onRefreshClicked} />
+                </Tooltip>
 
                 <Tooltip title="Tải xuống hình ảnh đồ thị" placement="top">
                     <FaDownload className="control-bar-icon" onClick={props.onDownloadClicked} />
