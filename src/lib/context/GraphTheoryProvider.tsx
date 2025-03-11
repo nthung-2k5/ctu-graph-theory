@@ -16,7 +16,7 @@ export const AvailableAlgorithms = [
     new StackDFS(),
     new Bipartite(),
     new TopoOrderingBFS(),
-    // new RankingGraph(),
+    new RankingGraph(),
     new TarjanAlgorithm()
 ];
 

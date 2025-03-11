@@ -1,32 +1,102 @@
 import { ReactNode } from "react";
-import { PseudocodeLine } from "../../pseudocode/Pseudocode";
 import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from "../GraphAlgorithm";
 import { UnweightedGraph } from "../UnweightedGraph";
-import Animator from "../../animation/Animator";
+import { Queue } from "data-structure-typed";
 
 export interface RankingGraphConfig {
-   
+   // startVertex: number;
+   traverseAll: boolean;
 }
 
-export default class RankingGraph extends NeutralGraphAlgorithm<RankingGraphConfig> {
-   public get name(): string {
-      return 'Xếp hạng đồ thị';
+interface RankingGraphResult
+{
+   ranking: number[];
+}
+
+class RankingGraphContext {
+   inDegree: number[]; 
+   queue: Queue<number>;
+   ranking: number[];
+
+   constructor(vertexCount: number) {
+      this.inDegree = Array(vertexCount + 1).fill(0);
+      this.queue = new Queue<number>();
+      this.ranking = [];
+   }
+}
+
+export default class RankingGraph extends NeutralGraphAlgorithm<RankingGraphConfig, RankingGraphResult> {
+   protected override _initResult(): RankingGraphResult 
+   {
+      return {
+         ranking: [],
+      };
    }
 
-   public override get pseudocode(): PseudocodeLine[] {
-      return [
-         { text: 'Tính bậc vào của mỗi đỉnh', tab: 0 },
-         { text: 'Khởi tạo hàng đợi Q chứa các đỉnh có bậc vào = 0', tab: 0 },
-         { text: 'int k = 0', tab: 0 },
-         { text: 'while (Q != ∅)', tab: 0 },
-         { text: 'for (i = 0; i < Q.size; i++)', tab: 1 },
-         { text: 'u <- dequeue(Q);', tab: 2 }, // Lấy và loại bỏ đỉnh đầu tiên
-         { text: 'ranking[u] = k++;', tab: 2 }, // Xếp hạng cho đỉnh u
-         { text: 'for (đỉnh v kề với u)', tab: 2 },
-         { text: 'Giảm bậc vào của v đi 1', tab: 3 },
-         { text: 'if (bậc vào của v == 0)', tab: 3 },
-         { text: 'enqueue(Q, v); ', tab: 4 }, // Thêm v vào hàng đợi
-      ];
+   protected override _result(result: RankingGraphResult): ReactNode
+   {
+      return (
+         <>
+            <p>Thứ hạng các đỉnh: </p>
+            {result.ranking.map((item: number, index: number) => {
+               return (
+                  <p>Ranking {index}: {item}</p>
+               );
+            })}
+         </>
+      );
+   }
+
+   public override defaultConfig(): RankingGraphConfig 
+   {
+      return { 
+         traverseAll: false
+      };
+   }
+
+   public override get code(): string
+   {
+      return `int rank[MAX_VERTICES];
+int d[MAX_VERTICES];
+void ranking(Graph graph) {
+   // Khởi tạo bậc và ranking cho các đỉnh 
+	for (int u = 1; u <= graph.n; u++) {
+		rank[u] = 0; d[u] = 0;
+	}
+	
+   // Tính bậc bán vào của các đỉnh
+	for (int u = 1; u <= graph.n; u++) 
+		for (int v = 1; v <= graph.n; v++) 
+			if (graph.A[v][u] > 0)
+				d[v]++;
+	
+	Queue q; makenullQueue(&q);
+   // Đưa các đỉnh có bậc vào bằng 0 vào hàng đợi
+	for (int u = 1; u <= graph.n; u++)
+		if (d[u] == 0) 
+         enQueue(&q, u);
+	
+	int k = 0;
+	while (!isEmptyQueue(q)) {
+		for (int i = 0; i < q.size; i++) {
+			int u = frontQueue(q);
+         deQueue(&q);
+			for (int v = 1; v <= graph.n; v++)
+				if (graph.A[u][v] > 0) {
+					d[v]--;
+					if (d[v] == 0) {
+						enQueue(&q, v);
+						rank[v] = k + 1;
+					}
+				}
+		}
+		k++;
+	}
+}`
+   }
+   
+   public get name(): string {
+      return 'Xếp hạng đồ thị';
    }
 
    public override get predicate(): AlgorithmRequirements {
@@ -43,91 +113,190 @@ export default class RankingGraph extends NeutralGraphAlgorithm<RankingGraphConf
       );
    }
 
-   protected override *_run(g: UnweightedGraph, config: RankingGraphConfig, animator: Animator): IterableIterator<AlgorithmStep> {
-      const inDegree = new Map<number, number>(); // Bậc vào của mỗi đỉnh
-      const ranking = new Map<number, number>(); // Xếp hạng của mỗi đỉnh
-      const queue: number[] = []; // Hàng đợi chứa các đỉnh có bậc vào = 0
-   
+   private *_ranking(g: UnweightedGraph, ctx: RankingGraphContext, result: number[]): IterableIterator<AlgorithmStep>
+   {
       // 1. Tính bậc vào của mỗi đỉnh
-      for (let vertex = 1; vertex <= g.vertexCount; vertex++) {
+      for (let i = 1; i <= g.vertexCount; i++) {
+         ctx.ranking[i] = 0;
+         ctx.inDegree[i] = 0;
+         result[i] = 0;
+         yield { codeLine: 5, log: `` }
          yield { 
-            backgroundColorVertex: [vertex, 'green'],
-            codeLine: 0 
+            codeLine: 6,
+            borderColorVertex: [i, 'deeppink'],
+            contentColorVertex: [i, 'whitesmoke'],
+            backgroundColorVertex: [i, 'mediumpurple'],
+            log: `rank[${i}] = d[${i}] = 0`
          };
-         inDegree.set(vertex, 0);
       }
+
+      yield { log: `` }
+      yield { reset: true, log: `` }
    
-      for (const edge of g.edges) {
-         inDegree.set(edge.v, (inDegree.get(edge.v) || 0) + 1);
+      for (let i = 1; i <= g.vertexCount; i++) {
+         yield { 
+            codeLine: 10, 
+            borderColorVertex: [i, 'deeppink'],
+            contentColorVertex: [i, 'whitesmoke'],
+            backgroundColorVertex: [i, 'mediumpurple'],
+            log: `Tính bán bậc vào đỉnh ${i}` 
+         }
+         for (let j = 1; j <= g.vertexCount; j++) {
+            yield { codeLine: 11, log: `` }
+            yield { 
+               codeLine: 12,
+               log: `graph.A[${j}][${i}] == ${g.matrix[j][i]} > 0 (${g.matrix[j][i] > 0})`
+            }
+            if (g.matrix[j][i] > 0) {
+               ctx.inDegree[i]++;
+               yield {
+                  codeLine: 13,
+                  borderColorVertex: [i, 'limegreen'],
+                  highlightVertex: [i, true],
+                  log: `d[${i}]++ = ${ctx.inDegree[i]}`
+               }
+               // Trả về
+               yield {
+                  borderColorVertex: [i, 'deeppink'],
+                  highlightVertex: [i, false],
+                  log: ``
+               }
+            }
+         }
       }
       // Kết thúc bước 1
+
+      yield { reset: true, log: `` } // Reset để nhảy vào ranking
    
       // 2. Đưa các đỉnh có bậc vào = 0 vào hàng đợi
-      for (let vertex = 1; vertex <= g.vertexCount; vertex++) {
-         if (inDegree.get(vertex) === 0) {
-            yield { 
-               backgroundColorVertex: [vertex, 'deeppink'],
-               codeLine: 1
-            };
-            queue.push(vertex);
+      for (let i = 1; i <= g.vertexCount; i++) {
+         yield { 
+            codeLine: 17, 
+            borderColorVertex: [i, 'deeppink'],
+            contentColorVertex: [i, 'whitesmoke'],
+            backgroundColorVertex: [i, 'mediumpurple'],
+            log: `Xét đỉnh ${i}` 
+         }
+         yield { 
+            codeLine: 18,
+            borderColorVertex: [i, 'purple'],
+            highlightVertex: [i, true],
+            log: `   d[${i}] == ${ctx.inDegree[i]} (${ctx.inDegree[i] == 0})`
+         }
+         if (ctx.inDegree[i] == 0) {
+            ctx.queue.push(i);
+            yield {
+               codeLine: 19,
+               borderColorVertex: [i, 'black'],
+               highlightVertex: [i, false],
+               backgroundColorVertex: [i, 'deeppink'], 
+               log: `      Đưa ${i} vào Q = {${ctx.queue.join(', ')}}`
+            }
+         }
+         else { // Nếu điều kiện sai thì tạm thời bỏ hightlight
+            yield {
+               highlightVertex: [i, false],
+               log: ``
+            }
          }
       }
       // Kết thúc bước 2
 
-      yield {};
-      animator.graph.reset(); // Reset lại đồ thị
-      queue.forEach(vertex => {
-         // Chạy animation đánh dấu các đỉnh có bậc bằng 0 trước khi chạy thuật
-         animator.graph.backgroundColorVertex(vertex, 'deeppink');
-      });
+      yield { reset: true, log: `` } // Reset để nhảy vào ranking
    
       let k = 0;
-      yield { codeLine: 2 }
-
-      yield { codeLine: 3 }
-      while (queue.length > 0) {
-         const size = queue.length;
+      yield { codeLine: 21, log: `k = 0` }
+      while (ctx.queue.length > 0) {
+         yield { 
+            codeLine: 22, 
+            log: `Hàng đợi Q = {${ctx.queue.join(', ')}} != ∅ (${!ctx.queue.isEmpty})` 
+         }
+         const size = ctx.queue.length;
          for (let i = 0; i < size; i++) {
-            yield { codeLine: 4 }
-            const u = queue.shift()!; // Lấy và loại bỏ phần tử đầu tiên của queue
-            yield { 
-               codeLine: 5,
-               colorVertex: [u, 'blue']
-            }
-
-            ranking.set(u, k++); // Xếp hạng cho đỉnh
+            yield { codeLine: 23, log: `` }
+            const u = ctx.queue.shift()!;
             yield {
-               codeLine: 6,
-               colorVertex: [u, 'black'],
-               backgroundColorVertex: [u, 'deepskyblue'],
-               highlightVertex: [u, true]
+               codeLine: 24,
+               borderColorVertex: [u, 'black'],
+               contentColorVertex: [u, 'black'],
+               backgroundColorVertex: [u, 'lightgray'],
+               log: `   Lấy đỉnh u = ${u} ra khỏi hàng đợi Q`
             }
-   
-            for (const v of g.neighbors(u)) {
+            yield {
+               codeLine: 25,
+               log: `   Xóa u = ${u} khỏi Q = {${ctx.queue.join(', ')}}`
+            }
+            for (let j = 1; j <= g.vertexCount; j++) {
+               yield { codeLine: 26, log: `` }
                yield {
-                  codeLine: 7,
-                  colorEdge: [u, v, 'blue']
+                  codeLine: 27,
+                  log: `      graph->A[${u}][${j}] == ${g.matrix[u][j]} > 0 (${g.matrix[u][j] > 0})`
                }
-               inDegree.set(v, inDegree.get(v)! - 1); // Giảm bậc
-               yield {
-                  codeLine: 8,
-                  colorVertex: [v, 'red']
-               }
-               yield {
-                  codeLine: 9
-               }
-               if (inDegree.get(v) === 0) {
-                  queue.push(v);
+               if (g.matrix[u][j] > 0) {
+                  ctx.inDegree[j]--;
+                  // Duyệt kề để giảm bậc 
                   yield {
-                     codeLine: 10,
-                     colorVertex: [v, 'black'],
-                     highlightVertex: [v, false],
-                     backgroundColorVertex: [v, 'deepskyblue']
+                     colorEdge: [u, j, 'dodgerblue'],
+                     log: ``
+                  }
+                  // Giảm bậc
+                  yield {
+                     codeLine: 28,
+                     borderColorVertex: [j, 'red'],
+                     highlightVertex: [j, true],
+                     log: `         d[${j}]-- = ${ctx.inDegree[j]}`
+                  }
+                  // Trả về lúc ban đầu
+                  // yield {
+                  //    borderColorVertex: [j, 'black'],
+                  //    highlightVertex: [j, false],
+                  //    log: ``
+                  // }
+                  // Xét điều kiện
+                  yield {
+                     codeLine: 29,
+                     highlightVertex: [j, true],
+                     borderColorVertex: [j, 'purple'],
+                     log: `      d[${j}] == ${ctx.inDegree[j]} == 0 (${ctx.inDegree[j] == 0})`
+                  }
+                  if (ctx.inDegree[j] == 0) {
+                     ctx.queue.push(j);
+                     yield {
+                        codeLine: 30,
+                        borderColorVertex: [j, 'black'],
+                        highlightVertex: [j, false],
+                        backgroundColorVertex: [j, 'deeppink'], 
+                        log: `         Đưa ${j} vào Q = {${ctx.queue.join(', ')}}`
+                     }
+                     ctx.ranking[j] = k + 1;
+                     result[j] = k + 1;
+                     // Xếp hạng cho đỉnh j
+                     yield {
+                        codeLine: 31,
+                        borderColorVertex: [j, 'black'],
+                        backgroundColorVertex: [j, 'darkorange'],
+                        contentColorVertex: [j, 'whitesmoke'],
+                        log: `         Xếp hạng cho ${j}, ranking[${j}] = ${ctx.ranking[j]}`
+                     }
+                  }
+                  else {
+                     yield {
+                        borderColorVertex: [j, 'black'],
+                        highlightVertex: [j, false],
+                        log: ``
+                     }
                   }
                }
             }
          }
+         k++;
       }
+   }
+
+   protected override *_run(g: UnweightedGraph, config: RankingGraphConfig, result: RankingGraphResult): IterableIterator<AlgorithmStep> 
+   {
+      const ctx = new RankingGraphContext(g.vertexCount);
+      yield* this._ranking(g, ctx, result.ranking);
    }   
    
 }

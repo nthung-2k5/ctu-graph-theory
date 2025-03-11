@@ -23,9 +23,9 @@ class TopoSortContext {
    topoOrder: number[];
 
    constructor(vertexCount: number) {
-       this.inDegree = Array(vertexCount + 1).fill(0);
-       this.queue = new Queue<number>();
-       this.topoOrder = [];
+      this.inDegree = Array(vertexCount + 1).fill(0);
+      this.queue = new Queue<number>();
+      this.topoOrder = [];
    }
 }
 
@@ -42,7 +42,7 @@ export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingB
       return (
          <>
             <p>Thứ tự Topo nhận được: </p>
-            {result.topoOrder.map((item, index) => {
+            {result.topoOrder.map((item: number, index: number) => {
                if (index + 1 === result.topoOrder.length) return <span>{item}</span>
                else return (
                   <span>{item + ' -> '}</span>
@@ -113,7 +113,6 @@ void topoSort(Graph *graph, List *list) {
 
    private *_topoSort(g: UnweightedGraph, ctx: TopoSortContext, result: number[]): IterableIterator<AlgorithmStep>
    {
-      let queue: number[] = [];
       yield { codeLine: 13, log: 'Khởi tạo hàng đợi Q = {}' };
       for (let u = 1; u <= g.vertexCount; u++) {
          yield { codeLine: 14, log: `` }; 
@@ -131,29 +130,31 @@ void topoSort(Graph *graph, List *list) {
             highlightVertex: [u, true],
             log: `d[${u}] == ${ctx.inDegree[u]} == 0 (${ctx.inDegree[u] == 0})` 
          }
-         yield {
-            highlightVertex: [u, false],
-            log: ``
-         }
          if (ctx.inDegree[u] == 0) {
-            queue.push(u);
+            ctx.queue.push(u);
             // Đưa u vào queue
             yield { 
                codeLine: 16, 
                borderColorVertex: [u, 'black'],
                backgroundColorVertex: [u, 'deeppink'], 
-               log: `   Đưa ${u} vào Q` 
+               log: `   Đưa ${u} vào Q = {${ctx.queue.join(', ')}` 
             };
+         }
+         else { // Nếu điều kiện sai thì tạm thời bỏ hightlight
+            yield {
+               highlightVertex: [u, false],
+               log: ``
+            }
          }
       }
       
       yield { codeLine: 18, log: 'Khởi tạo danh sách L = {}' };
-      while (queue.length > 0) {
+      while (ctx.queue.length > 0) {
          yield {
             codeLine: 19,
             log: ``
          }
-         let u = queue.shift()!;
+         let u = ctx.queue.shift()!;
          // Xóa bỏ khỏi queue
          yield {
             codeLine: 20,
@@ -164,7 +165,7 @@ void topoSort(Graph *graph, List *list) {
          }
          yield {
             codeLine: 21,
-            log: `Xóa u = ${u} khỏi Q = {${queue.join(', ')}}`
+            log: `Xóa u = ${u} khỏi Q = {${ctx.queue.join(', ')}}`
          }
          result.push(u);
          yield {
@@ -216,14 +217,14 @@ void topoSort(Graph *graph, List *list) {
                   log: ``
                }
                if (ctx.inDegree[v] == 0) {
-                  queue.push(v);
-                  // Thêm vào queue
+                  ctx.queue.push(v);
+                  // Thêm vào ctx.queue
                   yield {
                      codeLine: 27,
                      highlightVertex: [v, false],
                      borderColorVertex: [v, 'black'],
                      backgroundColorVertex: [v, 'deeppink'],
-                     log: `Đưa v = ${v} vào Q = {${queue.join(', ')}}`
+                     log: `Đưa v = ${v} vào Q = {${ctx.queue.join(', ')}}`
                   }
                }
             }
