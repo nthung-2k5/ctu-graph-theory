@@ -37,7 +37,8 @@ void BFS(Graph* G, int s) {
     {
         yield {
             codeLine: 3,
-            log: `BFS(G, ${startVertex})`
+            log: `BFS(G, ${startVertex})`,
+            labelEdge: [1, 2, '2/5']
         };
         const queue: Queue<number> = new Queue<number>();
         yield {

@@ -104,6 +104,12 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
             const highlightVertices = singleToArray(step.highlightVertex);
             highlightVertices.forEach(([vertex, highlight]) => (highlight ? animator.current.graph.highlightVertex : animator.current.graph.unhighlightVertex).apply(animator.current.graph, [vertex]));
         }
+
+        if (step.labelEdge)
+        {
+            const labelEdges = singleToArray(step.labelEdge);
+            labelEdges.forEach(([u, v, label]) => animator.current.graph.labelEdge(u, v, label));
+        }
     
         if (step.codeLine !== undefined)
         {

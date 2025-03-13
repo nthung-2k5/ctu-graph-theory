@@ -156,6 +156,8 @@ export interface AlgorithmStep
 
     codeLine?: number | [number, number]; // tô đậm dòng mã giả / phạm vi mã giả [start, end] (bắt đầu từ số 1)
 
+    labelEdge?: ArrayOrSingle<[u: number, v: number, label: string]>; // chỉnh nhãn của cạnh
+
     log: string; // ghi phần log cho từng bước (chỉ 1 dòng, và luôn bắt buộc)
 }
 ```

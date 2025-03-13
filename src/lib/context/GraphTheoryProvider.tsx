@@ -148,7 +148,7 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
         }
     
         // TODO: Check for acyclic graph
-        if (predicate.acyclic === true && !isDAG(graphState) && isConnectedGraph(graphState)) 
+        if (predicate.acyclic === true && !isDAG(graphState) && !isConnectedGraph(graphState)) 
         {
             setConfig(null);
             return `Đồ thị phải là đồ thị có hướng không chu trình và liên thông`;

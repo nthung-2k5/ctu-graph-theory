@@ -1,28 +1,26 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useRef } from "react"
 import CytoscapeComponent from "react-cytoscapejs";
-import cytoscape, { ElementDefinition, Stylesheet } from "cytoscape";
+import cytoscape, { EdgeSingular, Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
 import cola from "cytoscape-cola";
+// @ts-expect-error Made for Javascript version so no type
+import dagre from 'cytoscape-dagre';
 
 import ControlBar from "./ControlBar";
 import { useAppSelector } from '../lib/context/hooks';
-import { GraphState } from '../lib/context/graphSlice';
 import { useAnimation } from '../lib/context/AnimationContext';
+import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 cytoscape.use(cola);
+cytoscape.use(dagre);
 
 export default function VisualGraphComponent() 
 {
     const cy = useRef<cytoscape.Core>(null!);
     const { graph: animator } = useAnimation();
-    const { vertexCount, edges, directed, weighted }: GraphState = useAppSelector(state => state.graph);
+    const { algorithm } = useGraphTheory();
+    const { elements } = useAppSelector(state => state.graph);
     const { nodeColor, edgeColor, labelColor, nodeRadius, edgeLength } = useAppSelector((state) => state.config);
-
-    const assignCytoscape = (core: cytoscape.Core) =>
-    {
-        cy.current = core;
-        animator.setCytoscape(core);
-    };
 
     const downloadPNG = () => 
     {
@@ -57,30 +55,11 @@ export default function VisualGraphComponent()
         };
     };
 
-    const elements = useMemo(() =>
+    const assignCytoscape = (core: cytoscape.Core) =>
     {
-        const elements: ElementDefinition[] = [];
-            
-        for (let i = 1; i <= vertexCount; i++) 
-        {
-            elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
-        }
-
-        for (let i = 0; i < edges.length; i++)
-        {
-            const edge = edges[i];
-            const el: ElementDefinition = { group: 'edges', data: { source: edge.u.toString(), target: edge.v.toString() }, classes: directed ? 'directed' : '' };
-            
-            if (weighted)
-            {
-                el.data.label = edges[i].weight.toString();
-            }
-
-            elements.push(el);
-        }
-
-        return elements;
-    }, [vertexCount, edges, directed, weighted]);
+        cy.current = core;
+        animator.setCytoscape(core);
+    };
 
     useEffect(() =>
     {
@@ -102,14 +81,17 @@ export default function VisualGraphComponent()
         cy.current.style().selector('edge').style({ 'line-color': edgeColor }).update();
     }, [edgeColor]);
 
-    useEffect(() => 
+    const refreshGraph = () => 
     {
         cy.current.layout({
-            name: "cola",
+            name: algorithm.predicate.acyclic === true ? "dagre" : "cola",
             // @ts-expect-error Config in cola layout
             edgeLength: edgeLength,
+            rankDir: 'LR'
         }).run();
-    }, [elements, edgeLength]);
+    };
+
+    useEffect(refreshGraph, [elements, edgeLength, algorithm]);
 
     return (
         <div className='border-2 border-black rounded-lg flex flex-col h-full overflow-hidden'>
@@ -120,11 +102,7 @@ export default function VisualGraphComponent()
                 cy={assignCytoscape}
                 boxSelectionEnabled={false}
             />
-            <ControlBar onDownloadClicked={downloadPNG} onRefreshClicked={() => cy.current.layout({
-                name: "cola",
-                // @ts-expect-error Config in cola layout
-                edgeLength: edgeLength,
-            }).run()} />
+            <ControlBar onDownloadClicked={downloadPNG} onRefreshClicked={refreshGraph} />
         </div>
     );
 }
@@ -149,7 +127,10 @@ const DefaultGraphStyle: Stylesheet[] = [
             "line-color": '#000',
             width: '2rem',
             "curve-style": "bezier",
-            label: "data(label)",
+            label: (edge: EdgeSingular) => 
+            {
+                return edge.scratch('label') || edge.data('label');
+            },
             "text-background-color": "#fff",
             "text-background-opacity": 1,
         }
