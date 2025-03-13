@@ -75,7 +75,8 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
             colorVertices.forEach(([vertex, color]) => animator.current.graph.backgroundColorVertex(vertex, color));
         }
 
-        if (step.contentColorVertex) {
+        if (step.contentColorVertex) 
+        {
             const colorVertices = singleToArray(step.contentColorVertex);
             colorVertices.forEach(([vertex, color]) => animator.current.graph.contentColorVertex(vertex, color));
         }

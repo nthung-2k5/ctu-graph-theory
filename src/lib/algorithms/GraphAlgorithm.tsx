@@ -122,7 +122,7 @@ export interface AlgorithmStep
 
     customGraph?: (core: cytoscape.Core) => void;
 
-    codeLine?: number;
+    codeLine?: number | [number, number];
 }
 
 export const MustBeUndirectedError = 'Đồ thị phải là đồ thị vô hướng';

@@ -1,6 +1,6 @@
-import { Button, ConfigProvider, Dropdown, Form, Modal, Space, Tabs, TabsProps } from 'antd';
+import { Button, ConfigProvider, Dropdown, Form, MenuProps, Modal, Space, Tabs, TabsProps } from 'antd';
 import { CloseCircleOutlined, DownOutlined } from '@ant-design/icons';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import Title from 'antd/es/typography/Title';
 import CodeBlock from './CodeBlock';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
@@ -34,21 +34,22 @@ const InvalidMessage = (props: PropsWithChildren) =>
     );
 };
 
+
 export default function AlgorithmsTab() 
 {
     const { algorithm, setAlgorithm, setConfig, predicateError, result } = useGraphTheory();
     const [form] = Form.useForm();
     const [openDialog, setOpenDialog] = useState(false);
 
-    const items = AvailableAlgorithms.map((algo, index) => ({
+    const items: MenuProps['items'] = useMemo(() => AvailableAlgorithms.map((algo, index) => ({
         key: index,
-        label: (
-            <button
-                type="button"
-                onClick={() => setAlgorithm(algo)}
-            >{`${index + 1}. ${algo.name}`}</button>
-        ),
-    }));
+        label: `${index + 1}. ${algo.name}`,
+    })), []);
+    
+    const onClick: MenuProps['onClick'] = ({ key }: { key: string }) => 
+    {
+        setAlgorithm(AvailableAlgorithms[parseInt(key)]);
+    };
 
     useEffect(() => 
     {
@@ -77,7 +78,7 @@ export default function AlgorithmsTab()
                     <div>
                         <Dropdown
                             trigger={['click']}
-                            menu={{ items }}
+                            menu={{ items, onClick }}
                         >
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
