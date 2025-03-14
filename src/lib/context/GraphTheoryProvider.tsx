@@ -12,6 +12,7 @@ import TarjanAlgorithm from '../algorithms/connectivity/Tarjan';
 import { GraphState } from './graphSlice';
 import { UnweightedGraph } from '../algorithms/UnweightedGraph';
 import { Queue } from 'data-structure-typed';
+import Kruskal from '../algorithms/minimum_spanning_tree/kruskal';
 
 export const AvailableAlgorithms = [
     new BFS(),
@@ -21,6 +22,7 @@ export const AvailableAlgorithms = [
     new TarjanAlgorithm(),
     new TopoOrderingBFS(),
     new RankingGraph(),
+    new Kruskal(),
 ];
 
 
