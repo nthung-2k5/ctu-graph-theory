@@ -12,13 +12,22 @@ export interface KruskalConfig
 
 interface KruskalResult
 {
-    kruskal: Map<number, number>;
+    // Lưu cây khung bằng map vì map nó sắp xếp tăng dần theo key sẵn.
+    // Tụi mình đỡ sort
+    // Map<number1, [number2, number3]>
+    // number1: đỉnh u, number2: đỉnh v, number3: trọng số
+    kruskal: Map<number, [number, number]>;
     totalTree: number;
 }
 
 class KruskalContext 
 {
-    
+    parent: number[];
+
+    constructor(vertexCount: number) 
+    {
+        this.parent = Array(vertexCount + 1);
+    }
 }
 
 export default class Kruskal extends WeightedGraphAlgorithm<KruskalConfig, KruskalResult> 
@@ -27,7 +36,7 @@ export default class Kruskal extends WeightedGraphAlgorithm<KruskalConfig, Krusk
     protected override _initResult(): KruskalResult 
     {
         return {
-            kruskal: new Map<number, number>(),
+            kruskal: new Map<number, [number, number]>(),
             totalTree: 0
         };
     }
@@ -39,9 +48,9 @@ export default class Kruskal extends WeightedGraphAlgorithm<KruskalConfig, Krusk
             <>
                 <p>Danh sách cạnh của cây khung nhỏ nhất:</p>
                 {[...result.kruskal].map(([key, value]) => (
-                    <p>${key} ${value}</p>
+                    <p>{key} {value[0]} {value[1]}</p>
                 ))}
-                <p>${result.totalTree}</p>
+                <p>Tổng trọng số cây khung nhỏ nhất: {result.totalTree}</p>
             </>
         );
     }
@@ -111,7 +120,7 @@ int kruskal(Graph *G, Graph *tree) {
     }
 
     // xong
-    public override configNode(): ReactNode 
+    public override configNode(): ReactNode
     {
         const vertexCount = store.getState().graph.vertexCount;
         return (
@@ -123,13 +132,49 @@ int kruskal(Graph *G, Graph *tree) {
         )
     }
 
-    private *_kruskal(g: WeightedGraph, ctx: KruskalContext, result: number[]): IterableIterator<AlgorithmStep>
+    private findRoot(ctx: KruskalContext, u: number)
     {
+        while (u != ctx.parent[u]) {
+            u = ctx.parent[u];
+        }
+        return u;
+    } 
+    
+    private *_kruskal(g: WeightedGraph, ctx: KruskalContext, result: KruskalResult): IterableIterator<AlgorithmStep>
+    {
+        // Lấy danh sách cạnh, lưu vào edges rồi sort edges
+        const edges = g.edges;
+        const m = g.edgeCount
+        for (let i = 0; i < m; i++) {
+            for (let j = i + 1; j < m; j++) {
+                if (edges[i].weight > edges[j].weight) {
+                    // swap bằng desctructering
+                    [edges[i].weight, edges[j].weight] = [edges[j].weight, edges[i].weight];
+                }
+            }
+        }
 
+        for (let i = 1; i <= g.vertexCount; i++) ctx.parent[i] = i;
+
+        for (let i = 0; i < m; i++) {
+            let u = edges[i].u;
+            let v = edges[i].v;
+            let w = edges[i].weight;
+            let rootu = this.findRoot(ctx, u);
+            let rootv = this.findRoot(ctx, v);
+
+            if (rootu != rootv) {
+                result.kruskal.set(u, [v, w]);
+                result.totalTree += w;
+                ctx.parent[rootv] = rootu;
+            }
+        }
+        console.log(result.kruskal);
     }
-
+    
     protected override *_run(g: WeightedGraph, config: KruskalConfig, result: KruskalResult): IterableIterator<AlgorithmStep> 
     {
-        
-    } 
+        const ctx = new KruskalContext(g.vertexCount);
+        yield* this._kruskal(g, ctx, result);
+    }
 }
