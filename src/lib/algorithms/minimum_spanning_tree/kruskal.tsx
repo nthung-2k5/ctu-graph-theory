@@ -1,8 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { AlgorithmRequirements, AlgorithmStep, WeightedGraphAlgorithm } from "../GraphAlgorithm";
 import { WeightedGraph } from "../WeightedGraph";
 import { Form, InputNumber } from "antd";
 import store from "../../context/store";
+import cytoscape from "cytoscape";
+import { TreeMultiMap } from "data-structure-typed";
 
 export interface KruskalConfig
 {
@@ -12,11 +14,11 @@ export interface KruskalConfig
 
 interface KruskalResult
 {
-    // Lưu cây khung bằng map vì map nó sắp xếp tăng dần theo key sẵn.
+    // Lưu cây khung bằng TreeMap vì map nó sắp xếp tăng dần theo key sẵn.
     // Tụi mình đỡ sort
-    // Map<number1, [number2, number3]>
+    // TreeMultiMap<number1, [number2, number3]>
     // number1: đỉnh u, number2: đỉnh v, number3: trọng số
-    kruskal: Map<number, [number, number]>;
+    kruskal: TreeMultiMap<number, [number, number]>;
     totalTree: number;
 }
 
@@ -36,21 +38,104 @@ export default class Kruskal extends WeightedGraphAlgorithm<KruskalConfig, Krusk
     protected override _initResult(): KruskalResult 
     {
         return {
-            kruskal: new Map<number, [number, number]>(),
+            kruskal: new TreeMultiMap<number, [number, number]>(),
             totalTree: 0
         };
     }
 
     // xong
-    protected override _result(result: KruskalResult): ReactNode
-    {
+    protected override _result(result: KruskalResult): ReactNode {
+        const cyRef = useRef<HTMLDivElement>(null);
+
+        console.log(result.kruskal);
+    
+        useEffect(() => {
+            if (!cyRef.current) return;
+    
+            const kruskal: TreeMultiMap<number, [number, number]> = result.kruskal;
+            const elements: cytoscape.ElementDefinition[] = [];
+            const nodes = new Set<number>();
+    
+            for (const [source, values] of kruskal.entries()) {
+                if (!values) continue; // Kiểm tra nếu giá trị là undefined (tránh lỗi)
+                
+                for (const [target, weight] of values) {
+                    nodes.add(source);
+                    nodes.add(target);
+                    elements.push({
+                        data: { id: `${source}-${target}`, source: `${source}`, target: `${target}`, label: `${weight}` }
+                    });
+                }
+            }
+            
+    
+            nodes.forEach(node => {
+                elements.push({ data: { id: `${node}` } });
+            });
+    
+            const cy = cytoscape({
+                container: cyRef.current,
+                elements: elements,
+                style: [
+                    {
+                        selector: "node",
+                        style: {
+                            label: "data(id)",
+                            "background-color": "#ffffff",
+                            "text-valign": "center",
+                            "text-halign": "center",
+                            color: "#000000",
+                            "border-width": 2, 
+                            "border-color": "#000000" ,
+                            width: 40,
+                            height: 40,
+                            "font-size": "18px",
+                            // "font-weight": 600
+                        }
+                    },
+                    {
+                        selector: "edge",
+                        style: {
+                            label: "data(label)",
+                            "curve-style": "bezier",
+                            "target-arrow-shape": "none",
+                            "line-color": "#000000",
+                            "text-background-color": "#ffffff",
+                            "text-background-opacity": 1,
+                            "text-background-padding": "3px",
+                            "font-size": "18px",
+                            // "font-weight": 600,
+                            "width": 2
+                        }
+                    }
+                ],
+                layout: { name: "circle" }
+            });
+    
+            return () => cy.destroy(); // cleanup
+        }, [result.kruskal]); // Chỉ chạy lại khi có kết quả mới 
+    
         return (
             <>
-                <p>Danh sách cạnh của cây khung nhỏ nhất:</p>
-                {[...result.kruskal].map(([key, value]) => (
-                    <p>{key} {value[0]} {value[1]}</p>
+                {[...result.kruskal].map(([key, values]) => (
+                    <div key={key}>
+                        {(values || []).map((value, index) => (
+                            <p key={index}>{key} - {value[0]} (trọng số: {value[1]})</p>
+                        ))}
+                    </div>
                 ))}
                 <p>Tổng trọng số cây khung nhỏ nhất: {result.totalTree}</p>
+    
+                {/* div chứa cây khung */}
+                <div 
+                    ref={cyRef} 
+                    style={{
+                        width: "100%", 
+                        height: "300px", 
+                        border: "1px solid black",
+                        borderRadius: "10px"
+                    }} 
+                />
             </>
         );
     }
@@ -138,7 +223,7 @@ int kruskal(Graph *G, Graph *tree) {
             u = ctx.parent[u];
         }
         return u;
-    } 
+    }
     
     private *_kruskal(g: WeightedGraph, ctx: KruskalContext, result: KruskalResult): IterableIterator<AlgorithmStep>
     {
@@ -149,7 +234,7 @@ int kruskal(Graph *G, Graph *tree) {
             for (let j = i + 1; j < m; j++) {
                 if (edges[i].weight > edges[j].weight) {
                     // swap bằng desctructering
-                    [edges[i].weight, edges[j].weight] = [edges[j].weight, edges[i].weight];
+                    [edges[i], edges[j]] = [edges[j], edges[i]];
                 }
             }
         }
@@ -164,12 +249,13 @@ int kruskal(Graph *G, Graph *tree) {
             let rootv = this.findRoot(ctx, v);
 
             if (rootu != rootv) {
-                result.kruskal.set(u, [v, w]);
+                console.log(u, v, w);
+                result.kruskal.add(u, [v, w]);
                 result.totalTree += w;
                 ctx.parent[rootv] = rootu;
             }
         }
-        console.log(result.kruskal);
+        
     }
     
     protected override *_run(g: WeightedGraph, config: KruskalConfig, result: KruskalResult): IterableIterator<AlgorithmStep> 
