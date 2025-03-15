@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
     "@datastructures-js/priority-queue": "^6.3.2",
+    "@monaco-editor/react": "4.6.0",
     "@reduxjs/toolkit": "^2.5.1",
     "@types/color-convert": "^2.0.4",
     "@types/react-cytoscapejs": "^1.2.5",
@@ -23,6 +24,7 @@
     "cytoscape-popper": "^4.0.1",
     "data-structure-typed": "^2.0.0",
     "lodash.debounce": "^4.0.8",
+    "monaco-editor": "^0.52.2",
     "motion": "^12.4.1",
     "prism-react-editor": "^1.1.0",
     "rc-queue-anim": "^2.0.0",

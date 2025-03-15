@@ -4,23 +4,32 @@ Hướng dẫn thêm thuật toán:
 
 Khai báo thuật toán trong folder `lib/algorithms` bằng 1 file gồm 2 `class` sau:
 1. `class` cấu hình những tham số như đỉnh bắt đầu.
+2. `interface` chứa những kết quả định trả về.
 2. `class` thuật toán chính cần `extends` 1 trong 2 `class` sau đây:
-    - `NeutralGraphAlgorithm<T>`: thuật toán này có thể dùng cho cả đồ thị không trọng số và có trọng số.
-    - `WeightedGraphAlgorithm<T>`: thuật toán này chỉ áp dụng được với đồ thị có trọng số.
+    - `NeutralGraphAlgorithm<T, R>`: thuật toán này có thể dùng cho cả đồ thị không trọng số và có trọng số.
+    - `WeightedGraphAlgorithm<T, R>`: thuật toán này chỉ áp dụng được với đồ thị có trọng số.
 
-**(`T` là class cấu hình ở trên.)**
+**(`T` là class cấu hình ở trên, R là interface kết quả ở trên.)**
 
 # Bước 2: Thiết lập các dữ liệu liên quan
 
 Mỗi `class` thuật toán gồm 4 trường dữ liệu có thể `override` tùy theo thuật toán:
 
 ```ts
-export abstract class GraphAlgorithm<Config = object>
+export abstract class GraphAlgorithm<Config = object, R = any>
 {
     public abstract get name(): string; // Tên của thuật toán
-    public get pseudocode(): PseudocodeLine[]
+    public abstract defaultConfig(): Config;
+    protected abstract _result(result: R): ReactNode; // Component React dùng để hiển thị kết quả
+
+    public get Result(): React.FC<{ result: R }> // Không quan trọng, bỏ qua
     {
-        return []; // Mã giả
+        return memo((props: { result: R }) => this._result(props.result));
+    }
+
+    public get code(): string
+    {
+        return ''; // mã C dùng để tham khảo
     }
 
     public get predicate(): AlgorithmRequirements
@@ -33,23 +42,28 @@ export abstract class GraphAlgorithm<Config = object>
         return (<></>); // Component React dùng để nhập tham số cấu hình
     }
     
-    public abstract run(g: GraphState, config: Config): IterableIterator<AlgorithmStep>; // Hàm chạy thuật toán, nói sau
+    public abstract run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]; // Hàm chạy thuật toán, nói sau
 };
 ```
 
 ## `public abstract get name(): string`
 - Trả về: tên thuật toán.
 
-## `public get pseudocode(): PseudocodeLine[]`
-- Trả về: mảng các dòng mã giả.
+## `public abstract defaultConfig(): Config`
+- Trả về: cấu hình mặc định khi mới chọn thuật toán.
 
-Mỗi dòng mã giả có cấu trúc sau:
+## `protected abstract _result(result: R): ReactNode`
+- Trả về: một component React dùng để hiện thị kết quả từ `result` bên trên.
+
+## `public get code(): string`
+- Trả về: đoạn code C (hoặc mã giả) để tham khảo bước chạy.
+
+Để có thể ghi nhiều dòng thì làm như sau
 ```ts
-export interface PseudocodeLine
+public get code(): string
 {
-    text: string; // Dòng mã giả
-    tab: number; // Số lần thụt lề tab
-    comment?: boolean; // Dòng này là comment (có thể để trống, ngầm định là không phải)
+    return `Dòng 1
+Dòng 2`;
 }
 ```
 
@@ -103,14 +117,15 @@ public override configNode(): ReactNode
 
 Hàm chạy thuật toán sẽ được định nghĩa trong hàm `_run` (để ý dấu `_`) với cấu trúc như sau:
     
-1. Nếu là `NeutralGraphAlgorithm<Config>`: `protected override *_run(g: UnweightedGraph, config: Config): IterableIterator<AlgorithmStep>`
-2. Nếu là `WeightedGraphAlgorithm<Config>`: `protected override *_run(g: WeightedGraph, config: Config): IterableIterator<AlgorithmStep>`
+1. Nếu là `NeutralGraphAlgorithm<Config, R>`: `protected override *_run(g: UnweightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>`
+2. Nếu là `WeightedGraphAlgorithm<Config, R>`: `protected override *_run(g: WeightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>`
 
 Giải thích các tham số:
     
 - `g: UnweightedGraph`: đồ thị không trọng số.
 - `g: WeightedGraph`: đồ thị có trọng số.
 - `config: Config`: cấu hình với kiểu là class cấu hình bên trên.
+-  `result: R`: kết quả trả về thuật toán. Trong lúc chạy phải nạp kết quả vào đây để có thể hiển thị ra.
 - `AlgorithmStep`: là một bước chạy của thuật toán, dùng để biểu diễn ra cho người dùng thấy, với cấu trúc sau:
 ```ts
 // Tô màu {color} cho đỉnh {vertex} 
@@ -138,70 +153,120 @@ export interface AlgorithmStep
     colorEdge?: ArrayOrSingle<ColorEdgeAnimation>; // tô màu cạnh
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>; // tô đậm đỉnh
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>; // tô đậm cạnh
-    codeLine?: number; // tô đậm dòng mã giả nào (bắt đầu từ số 0)
+
+    codeLine?: number; // tô đậm dòng mã giả nào (bắt đầu từ số 1)
+
+    log: string; // ghi phần log cho từng bước (chỉ 1 dòng, và luôn bắt buộc)
 }
 ```
 
 Ví dụ để thông não (thuật toán BFS):
 ```ts
 // Nhớ phải có dấu *
-*_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[]): IterableIterator<AlgorithmStep>
+*_traverse(g: UnweightedGraph, startVertex: number, visited: boolean[], parent: number[], traverseOrder: number[]): IterableIterator<AlgorithmStep>
 {
+    yield {
+        codeLine: 3,
+        log: `BFS(G, ${startVertex})`
+    };
     const queue: Queue<number> = new Queue<number>();
-
-    queue.push(startVertex);
+    yield {
+        codeLine: 4,
+        log: `Q = {}`
+    };
     
-    yield { codeLine: 0 }; // Tô đậm dòng đầu của mã giả
+    queue.push(startVertex);
+    yield { 
+        codeLine: 6,
+        highlightVertex: [startVertex, true],
+        colorVertex: [startVertex, 'orange'],
+        log: `Q = {${startVertex}}`
+    };
+    
+    yield {
+        codeLine: 8,
+        log: `Q = {${startVertex}} => Bắt đầu duyệt`
+    };
     while (!queue.isEmpty())
     {
         const u = queue.shift()!;
-        yield { codeLine: 1, highlightVertex: [u, true] }; // Tô đậm dòng 2 của mã giả và tô đậm đỉnh u
 
-        yield { codeLine: 2 }; // Tô đậm dòng 3 của mã giả
+        yield { 
+            codeLine: 9,
+            highlightVertex: [u, true],
+            colorVertex: [u, 'yellow'], 
+            log: `u = ${u}, Q = {${queue.toArray().join(', ')}}`
+        };
+
+        yield {
+            codeLine: 10,
+            log: `mark[${u}] = ${visited[u]}`
+        };
         if (visited[u])
         {
-            yield { codeLine: 3 }; // Tô đậm dòng 4 của mã giả
-            yield { codeLine: 0 }; // Tô đậm dòng đầu của mã giả (ám chỉ thực hiện lại vòng lặp)
+            yield { codeLine: 11, log: `Đã duyệt ${u}, bỏ qua` };
             continue;
         }
 
+        visited[u] = true;
+        traverseOrder.push(u);
+        
         yield {
             colorVertex: [u, 'red'],
             colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
-            codeLine: 4
-        }; // Tô màu đỏ cho đỉnh u, tô màu cạnh nối giữa cha của u với u (nếu tồn tại cha), tô đậm dòng 5 của mã giả
+            codeLine: 13,
+            log: `mark[${u}] = true`
+        };
 
-        visited[u] = true;
-        yield { codeLine: 5 }; // Tô đậm dòng 6 của mã giả
-
-        const neighbors = g.neighbors(u);
-
-        yield { codeLine: 6 }; // Tô đậm dòng 7 của mã giả
-        for (const v of neighbors)
+        yield {
+            codeLine: 15,
+            log: `v = 1`
+        };
+        for (let v = 1; v <= g.vertexCount; v++)
         {
-            yield { highlightVertex: [v, true], codeLine: 7 }; // Tô đậm đỉnh v, Tô đậm dòng 8 của mã giả
-            if (!visited[v])
+            yield {
+                codeLine: 16, 
+                highlightVertex: [v, true],
+                highlightEdge: [u, v, true],
+                log: `G->A[${u}][${v}] = ${g.matrix[u][v]}, mark[${v}] = ${visited[v]}`
+            };
+
+            if (g.matrix[u][v] && !visited[v])
             {
                 queue.push(v);
-                yield {
-                    colorVertex: parent[v] === -1 ? [v, 'blue'] : undefined,
-                    colorEdge: parent[v] === -1 ? [u, v, 'blue'] : undefined,
-                    codeLine: 8
-                };
-                // Tô màu xanh cho đỉnh v nếu chưa vào hàng đợi lần nào.
-                // Tô màu cạnh nối từ u đến v nếu v chưa vào hàng đợi lần nào.
-                // Tô màu dòng 9 của mã giả
+
+                let colorEdge = {};
 
                 if (parent[v] === -1)
                 {
                     parent[v] = u;
+                    colorEdge = {
+                        colorEdge: [u, v, 'blue'],
+                    };
                 }
+
+                yield { 
+                    codeLine: 17,
+                    colorVertex: [v, 'orange'],
+                    ...colorEdge,
+                    log: `Q = {${queue.toArray().join(', ')}}`
+                };
             }
-            yield { codeLine: 6, highlightVertex: [v, false] }; // Tô màu dòng 7 của mã giả, hủy tô đậm đỉnh v.
+            yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], log: `v = ${v + 1}` };
         }
 
-        yield { codeLine: 0, highlightVertex: [u, false] }; // Tô màu dòng đầu của mã giả (lặp lần tiếp theo), hủy tô đậm đỉnh u.
+        yield { 
+            codeLine: 18, 
+            highlightVertex: [u, false],
+            colorVertex: [u, 'purple'],
+            log: `Kết thúc duyệt ${u}`
+        };
+
+        yield { codeLine: 8, log: `Q = {${queue.toArray().join(', ')}}` };
     }
+
+    yield { codeLine: 19, log: 'Kết thúc' };
+}
 ```
 
 # Bước 4: Khai báo thuật toán

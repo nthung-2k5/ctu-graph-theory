@@ -19,7 +19,7 @@ export default class GraphAnimator extends SubAnimator
         
         this._cy?.elements().style({ 
             'background-color': config.nodeColor,
-            'color': config.labelColor, 
+            'color': config.labelColor,
             'line-color': config.edgeColor, 
             'border-color': 'black', 
             'border-width': 2,
@@ -29,6 +29,15 @@ export default class GraphAnimator extends SubAnimator
         return this;
     }
 
+   
+
+    public borderColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._cy?.$id(vertex.toString()).style({ 'border-color': color });
+        return this;
+    }
+
+  
 
     private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
@@ -69,6 +78,7 @@ export default class GraphAnimator extends SubAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
     }
+    
 
      public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
@@ -79,5 +89,16 @@ export default class GraphAnimator extends SubAnimator
     public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
+    }
+
+    public backgroundColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        return this._setVertexStyle(vertex, { 'background-color': color });
+    }
+
+    public customAction(action: (cy: cytoscape.Core) => void): GraphAnimator
+    {
+        action(this._cy!);
+        return this;
     }
 }

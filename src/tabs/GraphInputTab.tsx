@@ -1,4 +1,4 @@
-import { Button, Segmented, Switch, Tabs } from "antd";
+import { Segmented, Switch, Tabs } from "antd";
 import { Editor } from "prism-react-editor";
 import { BasicSetup } from "prism-react-editor/setups";
 import { useRef } from "react";
@@ -7,24 +7,16 @@ import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
 import "prism-react-editor/search.css";
 import GraphOption from "./GraphOption";
-import QueueDisplay, { QueueDisplayHandle } from '../components/data_structures/QueueDisplay';
-import StackDisplay, { StackDisplayHandle } from '../components/data_structures/StackDisplay';
-import ListDisplay, { ListDisplayHandle } from '../components/data_structures/ListDisplay';
 import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
 import { setDirected, setGraph } from '../lib/context/graphSlice';
-import { useGraphTheory } from '../lib/context/GraphTheoryContext';
+import ConsoleLog from './ConsoleOutput';
 
 export default function GraphInputTab() 
 {
     const inputRef = useRef('');
     const state = useAppSelector(state => state.graph);
-    const { playing } = useGraphTheory();
 
     const dispatch = useAppDispatch();
-
-    const queueRef = useRef<QueueDisplayHandle>(null!);
-    const stackRef = useRef<StackDisplayHandle>(null!);
-    const listRef = useRef<ListDisplayHandle>(null!);
 
     const pushGraph = (input: string = inputRef.current, weighted: boolean = state.weighted) =>
     {
@@ -42,9 +34,11 @@ export default function GraphInputTab()
                         <div className="flex flex-col h-full">
                             <div className="flex">
                                 <Segmented
-                                    disabled={playing}
                                     options={["Vô hướng", "Có hướng"]}
-                                    onChange={(type) => dispatch(setDirected(type === "Có hướng"))}
+                                    onChange={(type) => 
+                                    {
+                                        dispatch(setDirected(type === "Có hướng"));
+                                    }}
                                     className="mb-2 w-full"
                                     block
                                     defaultValue="Vô hướng"
@@ -54,7 +48,6 @@ export default function GraphInputTab()
                             <div className="flex ms-auto mb-2">
                                 <span>{state.weighted ? "Có trọng số" : "Không có trọng số"}</span>
                                 <Switch
-                                    disabled={playing}
                                     className="ml-2"
                                     onClick={(value) => pushGraph(undefined, value)}
                                 />
@@ -62,7 +55,6 @@ export default function GraphInputTab()
 
                             <Editor
                                 value=''
-                                readOnly={playing}
                                 style={{
                                     borderWidth: "1px",
                                     flexGrow: "1",
@@ -80,19 +72,13 @@ export default function GraphInputTab()
                 },
                 {
                     key: '2',
-                    label: 'Cấu trúc dữ liệu',
+                    label: 'Log',
                     children: (
-                        <div>
-                            <p>Stack</p>
-                            <StackDisplay ref={stackRef}/>
-                            <p>Queue</p>
-                            <QueueDisplay ref={queueRef}/>
-                            <p>List</p>
-                            <ListDisplay length={100} ref={listRef}/>
-                            <Button type='primary' onClick={() => { queueRef.current.push(Math.round(Math.random() * 10)); listRef.current.pushBack(Math.round(Math.random() * 10)); stackRef.current.push(Math.round(Math.random() * 10)); }}>Test</Button>
-                            <Button type='primary' onClick={() => { queueRef.current.pop(); listRef.current.popBack(); stackRef.current.pop(); }}>Out</Button>
+                        <div className='h-full w-full overflow-auto'>
+                            <ConsoleLog />
                         </div>
-                    )
+                    ),
+                    forceRender: true
                 }
             ]}
             className="expanded-tabs"

@@ -110,6 +110,11 @@ export default class Animator extends SubAnimator
         {
             this.pseudocode.reset();
         }
+
+        if (step.backgroundColorVertex) {
+            const backgroundColorVertex = singleToArray(step.backgroundColorVertex);
+            backgroundColorVertex.forEach(([vertex, color]) => this.graph.backgroundColorVertex(vertex, color))
+        }
     }
 
     public play(steps: IterableIterator<AlgorithmStep>)

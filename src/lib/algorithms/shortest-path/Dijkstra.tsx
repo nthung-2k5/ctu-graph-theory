@@ -4,133 +4,215 @@ import { WeightedGraph } from "../WeightedGraph";
 import { Form, InputNumber } from "antd";
 import store from "../../context/store";
 import { KEYWORD } from "color-convert/conversions";
-import { PseudocodeLine } from "../../pseudocode/Pseudocode";
+
 interface DijkstraConfig {
-  startVertex: number;
-  endVertex: number;
+    startVertex: number;
 }
 
-export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig> {
-  public get name(): string {
-    return "Thuật toán Dijkstra";
-  }
+export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, number[]> {
+    override _initResult(): number[] {
+        return [];
+    }
 
-  public override get pseudocode(): PseudocodeLine[] {
-    return [
-      { text: "khởi tạo ", tab: 0 },
-      { text: "pi[u]=oo với mọi u != s;", tab: 1 },
-      { text: "mark[k]=false với mọi u", tab: 1 },
-      { text: "pi[s]=0", tab: 1 },
-      { text: "Lặp (n-1) lần ", tab: 0 },
-      { text: "(1)chọn u chưa đánh dấu, có pi[u] nhỏ nhất", tab: 1 },
-      { text: "(2)cập nhật pi[] các đỉnh kề của u", tab: 1, comment: true },
-      { text: "for (đỉnh v kề với u)", tab: 1 },
-      { text: "if (v chưa duyệt, pi[v] < w[u][v] + pi[u])", tab: 2 },
-      { text: "cập nhật \n pi[v]=w[u][v] + p[u], p[v]=u", tab: 3 },
-      { text: "(3)đánh dấu u đã duyệt", tab: 1 },
-    ];
-  }
-  protected *_run(
-    g: WeightedGraph,
-    config: DijkstraConfig
-  ): IterableIterator<AlgorithmStep> {
-    const pi = Array(g.vertexCount + 1).fill(Infinity);
-    const p = Array(g.vertexCount + 1).fill(-1);
-    const mark = Array(g.vertexCount + 1).fill(false);
+    public override _result(result: number[]): ReactNode {
+        const visitOrder = result.join(" -> ");
+        return <></>;
+    }
 
-    const s = config.startVertex;
-    const f = config.endVertex;
-
-    pi[s] = 0;
-    yield { codeLine: 0 };
-    yield { codeLine: 1 };
-    yield { codeLine: 2 };
-    yield { codeLine: 3 };
-    yield { codeLine: 4 };
-    for (let i = 1; i < g.vertexCount; i++) {
-      let u = -1;
-      let min_pi = Infinity;
-      for (let j = 1; j <= g.vertexCount; j++)
-        if (pi[j] < min_pi && !mark[j]) {
-          min_pi = pi[j];
-          u = j;
-        }
-
-      if (u === -1) break;
-
-      mark[u] = true;
-      yield {
-        codeLine: 5,
-        colorVertex: [u, "green"],
-        highlightVertex: [u, true],
-      }; // chon dinh u
-      yield { codeLine: 6 };
-
-      for (const { v, weight } of g.neighbors(u)) {
-        yield {
-          codeLine: 7,
-          colorVertex: [v, "orange"],
-          colorEdge: [u, v, "orange"],
+    public override defaultConfig(): DijkstraConfig {
+        return {
+            startVertex: 1,
         };
+    }
 
-        if (!mark[v] && pi[u] + weight < pi[v]) {
-          yield { codeLine: 8 };
-          yield {
-            codeLine: 9,
-            colorVertex: [v, "blue"],
-            colorEdge: [u, v, "blue"],
-          }; // danh dau cap nhat lai pi[v]
+    public get name(): string {
+        return "Thuật toán Dijkstra";
+    }
 
-          pi[v] = pi[u] + weight;
-          p[v] = u;
+    public override get code(): string {
+        return `    int mark[MAX_N];
+    int pi[MAX_N];
+    int p[MAX_N];
+    void MooreDijkstra(Graph* G, int s) {
+        int u, v, it;
+        //Khoi tao pi[], mark[]
+        for (u=1; u<=pG->n; u++)
+        {
+            pi[u] = oo;
+            mark[u] = 0;
+        }
+        // Khởi tạo pi[s], p[s]
+        pi[s] = 0;
+        p[s] = -1;
+        //Lặp n-1 lần
+        for (it = 1; it < pG->n; it++)
+        {
+            // tìm pi[u] min và u chưa được duyệt
+            int j, min_pi = oo;
+            for (j=1; j<=pG->n; j++)
+                if (mark[j] == 0 && pi[j] < min_pi)
+                {
+                    min_pi = pi[j];
+                    u = j;
+                }
+            // đánh đấu u đã duyệt
+            mark[u] = 1;
+            // duyệt qua các đỉnh kề v của u và cập nhật pi[v], p[v]
+            for (v=1; v<=pG->n; v++)
+                if (pG->W[u][v] != NO_EDGE && mark[v] == 0) 
+                {
+                    pi[v] = pi[u] + pG->W[u][v];
+                    p[v] = u;
+                }
         }
       }
-
-      const edges: Array<[number, number, KEYWORD]> = [];
-      const vertices: Array<[number, KEYWORD]> = [];
-      for (const { v, weight } of g.neighbors(u)) {
-        edges.push([u, v, "black"]);
-        vertices.push([v, "black"]);
-      }
-
-      yield {
-        colorEdge: edges,
-        colorVertex: vertices,
-      };
-
-      yield { codeLine: 10, colorVertex: [u, "gray"] }; // danh dau dinh u da duyet
+      `;
     }
 
-    const edges: Array<[number, number, KEYWORD]> = [];
-    const vertices: Array<[number, KEYWORD]> = [];
-    for (let u = 1; u <= g.vertexCount; u++) {
-      if (u != s) edges.push([p[u], u, "blue"]);
-      if (u != s && u != f) vertices.push([u, "green"]);
+    private trade(p: number[], start: number, end: number): Array<[number, number, KEYWORD]> {
+        const colorEdges: Array<[number, number, KEYWORD]> = [];
+        let v = end;
+        while (v !== start) {
+            if (p[v] === -1 || p[v] === end) {
+                return colorEdges;
+            }
+            colorEdges.push([p[v], v, "brown"]); // Tô màu cạnh trên đường đi mới
+            v = p[v];
+        }
+        return colorEdges;
     }
-    vertices.push([s, "red"]);
-    vertices.push([f, "red"]);
-    yield { colorEdge: edges, colorVertex: vertices };
-  }
 
-  public override configNode(): ReactNode {
-    const vertexCount = store.getState().graph.vertexCount;
-    return (
-      <>
-        <Form.Item<DijkstraConfig>
-          label="Đỉnh bắt đầu"
-          name="startVertex"
-          initialValue={1}
-        >
-          <InputNumber min={1} max={vertexCount} />
-        </Form.Item>
-        <Form.Item<DijkstraConfig>
-          label="Đỉnh kết thúc"
-          name="endVertex"
-          initialValue={1}
-        >
-          <InputNumber min={1} max={vertexCount} />
-        </Form.Item>
-      </>
-    );
-  }
+    protected *_run(g: WeightedGraph, config: DijkstraConfig, result: number[]): IterableIterator<AlgorithmStep> {
+        const pi = Array(g.vertexCount + 1).fill(Infinity);
+        const p = Array(g.vertexCount + 1).fill(-1);
+        const mark = Array(g.vertexCount + 1).fill(false);
+        // khai bao bien + khoi tao 3 mảng
+        yield { log: ``, codeLine: 5 };
+        yield { log: "", codeLine: 7 };
+        yield { log: "${pi}", codeLine: 9 };
+        yield { log: "${mark}", codeLine: 10 };
+        const s = config.startVertex;
+
+        // khoi tao cho dinh S
+        yield { log: `Khởi tạo: pi[${s}]=0, p[${s}]=-1 `, codeLine: 13 };
+        yield { log: "", codeLine: 14 };
+
+        pi[s] = 0;
+
+        yield { log: "", codeLine: 16 };
+        for (let i = 1; i < g.vertexCount; i++) {
+            yield { log: `Lần lặp: ${i}`, codeLine: 18 };
+            yield { log: "", codeLine: 19 };
+            yield { log: "", codeLine: 20 };
+            yield { log: "", codeLine: 21 };
+            yield { log: "", codeLine: 23 };
+            yield { log: "", codeLine: 24 };
+
+            let u = -1;
+            let min_pi = Infinity;
+            for (let j = 1; j <= g.vertexCount; j++) {
+                if (pi[j] < min_pi && !mark[j]) {
+                    min_pi = pi[j];
+                    u = j;
+                }
+            }
+            //trả về đỉnh u và pi[u]
+            yield { log: `u=${u}, pi[u]=${pi[u]}` };
+            if (u === -1) break;
+
+            mark[u] = true;
+            // đánh dấu u đã chọn
+            yield {
+                log: ` mark[${u}]=true`,
+                codeLine: 27,
+                colorVertex: [u, "green"],
+                highlightVertex: [u, true],
+            };
+
+            for (const { v, weight } of g.neighbors(u)) {
+                yield {
+                    log: `v=${v}`,
+                    codeLine: 29,
+                    colorVertex: [v, "orange"],
+                    colorEdge: [u, v, "orange"],
+                };
+
+                yield {
+                    log: `mark[v]=${mark[v]}, pi[${u}]=${pi[u]}, weight=${weight}, pi[${v}]=${pi[v]}`,
+                    codeLine: 29,
+                };
+                yield { log: `${pi[u]} + ${weight} < ${pi[v]} == ${pi[u] + weight < pi[v]}`, codeLine: 30 };
+                if (!mark[v] && pi[u] + weight < pi[v]) {
+                    pi[v] = pi[u] + weight;
+                    p[v] = u;
+                    yield {
+                        log: `pi[${v}]=${pi[u] + weight}`,
+                        codeLine: 32,
+                        colorVertex: [v, "blue"],
+                        colorEdge: [u, v, "blue"],
+                    }; // danh dau cap nhat lai pi[v]
+                    const colorEdges = this.trade(p, s, v);
+                    if (colorEdges.length > 0) {
+                        const colorEdgesCopy = colorEdges.map(([u, v, color]) => [u, v, color]);
+                        yield {
+                            log: ``,
+                            colorEdge: colorEdgesCopy as Array<[number, number, KEYWORD]>,
+                            colorVertex: [s, "red"],
+                        };
+
+                        // Xóa màu sau khi hiển thị đường đi
+                        for (let i = 0; i < colorEdges.length; i++)
+                            if (colorEdges[i][0] == u && colorEdges[i][1] == v) {
+                                colorEdges[i][2] = "orange";
+                            } else {
+                                colorEdges[i][2] = "black";
+                            }
+                        yield { log: ``, colorEdge: colorEdges, colorVertex: [s, "gray"] };
+                    }
+
+                    yield { log: `p[${v}]=${u}`, codeLine: 33 };
+                }
+            }
+
+            const edges: Array<[number, number, KEYWORD]> = [];
+            const vertices: Array<[number, KEYWORD]> = [];
+            for (const { v, weight } of g.neighbors(u)) {
+                edges.push([u, v, "black"]);
+                vertices.push([v, "black"]);
+            }
+            // tắt màu các đỉnh và các cạnh kề của u
+            if (vertices.length > 0) {
+                yield {
+                    log: "",
+                    colorEdge: edges,
+                    colorVertex: vertices,
+                };
+            }
+
+            yield { log: "", colorVertex: [u, "gray"] }; // danh dau dinh u da duyet
+        }
+
+        //  vẽ đường đi ngắn nhắn từ s đến các đỉnh còn lại
+        const edges: Array<[number, number, KEYWORD]> = [];
+        const vertexs: Array<[number, KEYWORD]> = [];
+        vertexs.push([s, "blue"]);
+        for (let u = 1; u <= g.vertexCount; u++)
+            if (u != s) {
+                edges.push([p[u], u, "red"]);
+                vertexs.push([u, "blue"]);
+            }
+
+        yield { log: ``, codeLine: 36, colorVertex: vertexs, colorEdge: edges };
+    }
+
+    public override configNode(): ReactNode {
+        const vertexCount = store.getState().graph.vertexCount;
+        return (
+            <>
+                <Form.Item<DijkstraConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
+                    <InputNumber min={1} max={vertexCount} />
+                </Form.Item>
+            </>
+        );
+    }
 }

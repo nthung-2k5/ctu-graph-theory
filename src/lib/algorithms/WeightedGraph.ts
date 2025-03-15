@@ -58,6 +58,8 @@ export class WeightedGraph
         this._assertVertex(e.u);
         this._assertVertex(e.v);
         
+        if (e.u === e.v) return;
+        
         this._edges.push(e);
         this._list[e.u].push({ v: e.v, weight: e.weight });
         if (!this._directed)

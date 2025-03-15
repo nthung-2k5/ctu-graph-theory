@@ -1,66 +1,100 @@
 import { Form, InputNumber } from "antd";
 import { ReactNode } from "react";
 import store from "../../context/store";
-import { PseudocodeLine } from "../../pseudocode/Pseudocode";
+// import { PseudocodeLine } from "../../pseudocode/Pseudocode";
 import { AlgorithmStep, WeightedGraphAlgorithm } from "../GraphAlgorithm";
 import { WeightedGraph } from "../WeightedGraph";
 import { KEYWORD } from "color-convert/conversions";
 interface FloydConfig {
     startVertex: number;
-    endVertex: number;
 }
 
-export default class Floyd extends WeightedGraphAlgorithm<FloydConfig> {
+export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]> {
+    protected override _initResult(): number[] {
+        return [];
+    }
+    public override defaultConfig(): FloydConfig {
+        return {
+            startVertex: 1,
+        };
+    }
+    protected override _result(result: number[]): ReactNode {
+        return <></>;
+    }
     public get name(): string {
         return "Thuật toán Floyd-Warshall";
     }
 
-    public override get pseudocode(): PseudocodeLine[] {
-        return [
-            { text: "Khởi tạo", tab: 0 },
-            { text: "pi[u][v]=oo với mọi u,v", tab: 1 },
-            { text: "pi[u][u]=0 với mọi u", tab: 1 },
-            { text: "pi[u][v]=w[u][v] với mọi cung (u,v) của đồ thị", tab: 1 },
-            { text: "next[u][v]=v với mọi cung (u,v) của đồ thị", tab: 1 },
+    public override get code(): string {
+        return `
+int pi[MAXN][MAXN];
+int next[MAXN][MAXN];
+
+void FloydWarshall(Graph *pG)
+{
+    //Khởi tạo pi[][], next[][]
+    int u, v, k;
+    for (u=1; u<=pG->n; u++)
+        for (v=1; v<=pG->n; v++)
+        { 
+            pi[u][v] = oo;
+            next[u][v] = -1;
+        }
+    //đường đi từ u->u = 0
+    for (u=1; u<=pG->n; u++)
+        pi[u][u] = 0;
+    //Khởi tạo các đường đi trực tiếp
+    for (u=1; u<=pG->n; u++)
+        for (v=1; v<=pG->n; v++)
+            if (pG->W[u][v] != NO_EDGE)
             {
-                text: "Thực hiện các bước lặp cập nhật pi[u][v]",
-                tab: 0,
-                comment: true,
-            },
-            { text: "for(k: 1 -> n)", tab: 1 },
-            { text: "for(u: 1 -> n)", tab: 2 },
-            { text: "for(v: 1 -> n)", tab: 3 },
-            {
-                text: "if( pi[u][v] > pi[u][k] + pi[k][v] && giữa u-k và k-v tồn tại đường đi)",
-                tab: 4,
-            },
-            { text: "cập nhật pi[u][v], next[u][v]", tab: 4, comment: true },
-            { text: "pi[u][v] = pi[u][k] + pi[k][v]", tab: 5 },
-            { text: "next[u][v] = next[u][k]", tab: 5 },
-            { text: "Kiểm tra chu trình âm", tab: 0, comment: true },
-            { text: "Tồn tại chu trình âm", tab: 1 },
-        ];
+                pi[u][v] = pG->W[u][v];//đi trực tiếp từ u->v
+                next[u][v] = v;
+            }
+    // nếu đường đi từ u->v thông qua k cho chi phí thấp hơn 
+    // và từ có đường đi từ u->k, k->v
+    // -> cập nhật lại đường đi
+    for (k=1; k<=pG->n; k++)
+        for (u=1; u<=pG->n; u++)
+            for (v=1; v<=pG->n; v++)
+                if (pi[u][k] + pi[k][v] < pi[u][v] && pi[u][k]!=oo && pi[k][v]!=oo)
+                {
+                    pi[u][k] = pi[u][k] + pi[k][v];
+                    next[u][v] = next[u][k];
+                }
+
+    //kiểm tra chu trình âm
+    int negative_cycle = 0;
+    for (u=1; u<=pG->n; u++)
+        if (pi[u][u] < 0)
+        {
+            negative_cycle = 1;
+            break;
+        }
+}
+        `;
     }
 
-    private trade(next: number[][], u: number, v: number, k: number): Array<[number, number, KEYWORD]> {
+    private trade(next: number[][], u: number, v: number, k: number, color: KEYWORD): Array<[number, number, KEYWORD]> {
         const edges: Array<[number, number, KEYWORD]> = [];
-        do {
-            if (next[u][v] == 0) {
-                next[u][v] = k;
-            }
-            edges.push([u, next[u][v], "red"]);
+        while (u != k && u != 0) {
+            edges.push([u, next[u][k], color]);
+            u = next[u][k];
+        }
+
+        while (u != v && u != 0) {
+            edges.push([u, next[u][v], color]);
             u = next[u][v];
-        } while (u != v && u != 0);
+        }
 
         return edges;
     }
 
-    protected *_run(g: WeightedGraph, config: FloydConfig): IterableIterator<AlgorithmStep> {
+    protected *_run(g: WeightedGraph, config: FloydConfig, result: number[]): IterableIterator<AlgorithmStep> {
         const n = g.vertexCount;
 
         const pi: number[][] = [];
         const next: number[][] = [];
-
         for (let i = 0; i < n + 1; i++) {
             pi[i] = new Array(n + 1).fill(Infinity);
             next[i] = new Array(n + 1).fill(0);
@@ -74,50 +108,73 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig> {
             pi[e.u][e.v] = e.weight;
             next[e.u][e.v] = e.v;
         }
+        //khoi tao
+        yield { log: ``, codeLine: 9 };
+        yield { log: ``, codeLine: 10 };
+        yield { log: `${pi}`, codeLine: 12 }; //
+        yield { log: `${next}`, codeLine: 13 }; //
+        yield { log: ``, codeLine: 16 };
+        yield { log: `${pi}`, codeLine: 17 }; //
+        yield { log: ``, codeLine: 19 };
+        yield { log: ``, codeLine: 20 };
+        yield { log: ``, codeLine: 21 };
+        yield { log: `${pi}`, codeLine: 23 }; //
+        yield { log: `${next}`, codeLine: 24 }; //
 
-        yield { codeLine: 0 };
-        yield { codeLine: 1 };
-        yield { codeLine: 2 };
-        yield { codeLine: 3 };
-        yield { codeLine: 4 };
-        yield { codeLine: 5 };
         var color: KEYWORD;
         var checkNegativeCycle = false;
         for (let k = 1; k <= n && !checkNegativeCycle; k++) {
+            //tô màu đỉnh k
             yield {
-                codeLine: 6,
+                log: `k = ${k}`,
+                codeLine: 29,
                 colorVertex: [k, "green"],
                 highlightVertex: [k, true],
             };
+
             for (let u = 1; u <= n && !checkNegativeCycle; u++) {
+                //tô màu đỉnh u
                 yield {
-                    codeLine: 7,
+                    log: `u=${u}`,
+                    codeLine: 30,
                     colorVertex: [u, "blue"],
                     highlightVertex: [u, true],
                 };
                 for (let v = 1; v <= n && !checkNegativeCycle; v++) {
+                    //tô màu đỉnh v
                     yield {
-                        codeLine: 8,
+                        log: `k=${k}, u=${u}, v=${v}`,
+                        codeLine: 31,
                         colorVertex: [v, "orange"],
                         highlightVertex: [v, true],
                     };
-                    yield { codeLine: 9 };
-                    if (pi[u][v] > pi[u][k] + pi[k][v] && pi[u][k] != Infinity && pi[k][v] != Infinity) {
-                        yield { codeLine: 10 };
-                        pi[u][v] = pi[u][k] + pi[k][v];
-                        yield { codeLine: 11 };
-                        next[u][v] = next[u][k];
-                        yield { codeLine: 12 };
+                    yield {
+                        log: `pi[${u}][${v}]=${pi[u][v]}, pi[${u}][${k}]=${pi[u][k]}, pi[${u}][${v}]=${pi[k][v]}`,
+                        codeLine: 32,
+                    };
 
-                        if (pi[u][u] > 0 && pi[v][v] > 0) {
-                            const colorEdges = this.trade(next, u, v, k);
-                            yield { colorEdge: colorEdges };
+                    if (pi[u][v] > pi[u][k] + pi[k][v] && pi[u][k] != Infinity && pi[k][v] != Infinity) {
+                        let colorEdges: Array<[number, number, KEYWORD]> = [];
+                        pi[u][v] = pi[u][k] + pi[k][v];
+                        next[u][v] = next[u][k];
+
+                        if (pi[u][u] >= 0 && pi[v][v] >= 0) {
+                            colorEdges = this.trade(next, u, v, k, "brown");
+                            const colorEdgesCopy = colorEdges.map(([u, v, color]) => [u, v, color]);
+                            yield {
+                                log: ``,
+                                colorEdge: colorEdgesCopy as Array<[number, number, KEYWORD]>,
+                            };
+                        } else checkNegativeCycle = true;
+
+                        yield { log: `pi[${u}][${v}]=${pi[u][v]}`, codeLine: 34 };
+                        yield { log: `next[${u}][${v}]=${next[u][k]}`, codeLine: 35 };
+
+                        if (!checkNegativeCycle) {
                             for (let i = 0; i < colorEdges.length; i++) {
                                 colorEdges[i][2] = "black";
                             }
-                            yield { colorEdge: colorEdges };
-                        } else {
-                            checkNegativeCycle = true;
+                            yield { log: ``, colorEdge: colorEdges };
                         }
                     }
                     if (v === u) {
@@ -127,36 +184,46 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig> {
                     } else {
                         color = "black";
                     }
-                    yield {
-                        colorVertex: [v, color],
-                        highlightVertex: [v, false],
-                    };
+                    yield { log: ``, colorVertex: [v, color], highlightVertex: [v, false] };
                 }
                 if (u === k) {
                     color = "green";
                 } else {
                     color = "black";
                 }
-                yield { colorVertex: [u, color], highlightVertex: [u, false] };
+                yield { log: ``, colorVertex: [u, color], highlightVertex: [u, false] };
             }
-            yield { colorVertex: [k, "black"], highlightVertex: [k, false] };
+            yield { log: ``, colorVertex: [k, "black"], highlightVertex: [k, false] };
         }
 
-        yield { codeLine: 13 };
+        yield { log: ``, codeLine: 39 };
+        yield { log: ``, codeLine: 40 };
+        yield { log: ``, codeLine: 41 };
 
-        if (checkNegativeCycle) {
-            yield { codeLine: 14 };
-            const vertices: Array<[number, KEYWORD]> = [];
+        for (let u = 1; u <= n; u++)
+            if (pi[u][u] < 0) {
+                let vertices: Array<[number, KEYWORD]> = [];
+                for (let v = 1; v <= n; v++) vertices.push([v, "red"]);
+                yield { log: `Tồn tại chu trình âm pi[${u}][${u}]=${pi[u][u]}`, codeLine: 43, colorVertex: vertices };
+                yield { log: ``, codeLine: 44 };
+                checkNegativeCycle = true;
+
+                break;
+            }
+
+        if (!checkNegativeCycle) {
+            let s = config.startVertex;
+            let vertices: Array<[number, KEYWORD]> = [];
+            let edges: Array<[number, number, KEYWORD]> = [];
+
             for (let u = 1; u <= n; u++) {
-                vertices.push([u, "red"]);
+                vertices.push([u, "blue"]);
+                if (u != s) edges = edges.concat(this.trade(next, s, u, 1, "red"));
             }
-            yield { colorVertex: vertices };
-        } else {
-            const s = config.startVertex;
-            const f = config.endVertex;
-            const colorEdges = this.trade(next, s, f, 0);
-            yield { colorEdge: colorEdges };
+
+            yield { log: `Không tồn tại chu trình âm`, colorVertex: vertices, colorEdge: edges };
         }
+        yield { log: ``, codeLine: 46 };
     }
 
     public override configNode(): ReactNode {
@@ -164,9 +231,6 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig> {
         return (
             <>
                 <Form.Item<FloydConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={vertexCount} />
-                </Form.Item>
-                <Form.Item<FloydConfig> label="Đỉnh kết thúc" name="endVertex" initialValue={1}>
                     <InputNumber min={1} max={vertexCount} />
                 </Form.Item>
             </>

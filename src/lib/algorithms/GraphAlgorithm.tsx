@@ -1,9 +1,9 @@
-import { ReactNode } from "react";
-import { UnweightedGraph } from "./UnweightedGraph";
-import { WeightedGraph } from "./WeightedGraph";
-import { GraphState } from "../context/graphSlice";
-import { PseudocodeLine } from "../pseudocode/Pseudocode";
-import { KEYWORD } from "color-convert/conversions";
+import { memo, ReactNode } from 'react';
+import { UnweightedGraph } from './UnweightedGraph';
+import { WeightedGraph } from './WeightedGraph';
+import { GraphState } from '../context/graphSlice'
+import { KEYWORD } from 'color-convert/conversions';
+import cytoscape from 'cytoscape';
 
 // undefined: không quan trọng
 // true: phải có
@@ -14,10 +14,21 @@ export interface AlgorithmRequirements {
     acyclic?: boolean;
 }
 
-export abstract class GraphAlgorithm<Config = object> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class GraphAlgorithm<Config = object, R = any>
+{
     public abstract get name(): string;
-    public get pseudocode(): PseudocodeLine[] {
-        return [];
+    public abstract defaultConfig(): Config;
+    protected abstract _result(result: R): ReactNode;
+
+    public get Result(): React.FC<{ result: R }>
+    {
+        return memo((props: { result: R }) => this._result(props.result));
+    }
+
+    public get code(): string | string[]
+    {
+        return '';
     }
 
     public get predicate(): AlgorithmRequirements {
@@ -27,45 +38,42 @@ export abstract class GraphAlgorithm<Config = object> {
     public configNode(): ReactNode {
         return <></>;
     }
+    
+    public abstract run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R];
+};
 
-    public abstract run(
-        g: GraphState,
-        config: Config
-    ): IterableIterator<AlgorithmStep>;
-}
+export abstract class NeutralGraphAlgorithm<Config, R> extends GraphAlgorithm<Config, R>
+{
+    protected abstract _run(g: UnweightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>;
 
-export abstract class NeutralGraphAlgorithm<
-    Config = object
-> extends GraphAlgorithm<Config> {
-    protected abstract _run(
-        g: UnweightedGraph,
-        config: Config
-    ): IterableIterator<AlgorithmStep>;
+    protected abstract _initResult(): R;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep> {
+    public run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]
+    {
         const graph = new UnweightedGraph(g.vertexCount, g.directed);
 
         for (const edge of g.edges) {
             graph.addEdge(edge);
         }
-
-        return this._run(graph, config);
+        
+        const result = this._initResult();
+        return [this._run(graph, config, result), result];
     }
 }
 
-export abstract class WeightedGraphAlgorithm<
-    Config = object
-> extends GraphAlgorithm<Config> {
-    public override get predicate(): AlgorithmRequirements {
+export abstract class WeightedGraphAlgorithm<Config, R> extends GraphAlgorithm<Config, R>
+{
+    public override get predicate(): AlgorithmRequirements 
+    {
         return { weighted: true };
     }
 
-    protected abstract _run(
-        g: WeightedGraph,
-        config: Config
-    ): IterableIterator<AlgorithmStep>;
+    protected abstract _initResult(): R;
 
-    public run(g: GraphState, config: Config): IterableIterator<AlgorithmStep> {
+    protected abstract _run(g: WeightedGraph, config: Config, result: R): IterableIterator<AlgorithmStep>;
+
+    public run(g: GraphState, config: Config): [IterableIterator<AlgorithmStep>, R]
+    {
         const graph = new WeightedGraph(g.vertexCount, g.directed);
 
         if (!g.weighted) {
@@ -76,7 +84,8 @@ export abstract class WeightedGraphAlgorithm<
             graph.addEdge(edge);
         }
 
-        return this._run(graph, config);
+        const result = this._initResult();
+        return [this._run(graph, config, result), result];
     }
 }
 
@@ -84,13 +93,29 @@ export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
 export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD];
 export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
+export type BackgourndColorVertex = [vertex: number, backgroundColor: KEYWORD];
+export type BorderColorVertex = [vertex: number, color: KEYWORD];
+export type ContentColorVertex = [vertex: number, color: KEYWORD];
 type ArrayOrSingle<T> = T | T[];
 
-export interface AlgorithmStep {
+export interface AlgorithmStep
+{
+    log: string;
+    
     colorVertex?: ArrayOrSingle<ColorVertexAnimation>;
     colorEdge?: ArrayOrSingle<ColorEdgeAnimation>;
+    backgroundColorVertex?: ArrayOrSingle<BackgourndColorVertex>;
+
     highlightVertex?: ArrayOrSingle<HighlightVertexAnimation>;
     highlightEdge?: ArrayOrSingle<HighlightEdgeAnimation>;
+
+    borderColorVertex?: ArrayOrSingle<BorderColorVertex>;
+    contentColorVertex?: ArrayOrSingle<ContentColorVertex>;
+
+    reset?: boolean;
+
+    customGraph?: (core: cytoscape.Core) => void;
+
     codeLine?: number;
 }
 
