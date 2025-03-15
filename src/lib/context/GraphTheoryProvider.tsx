@@ -12,6 +12,7 @@ import TarjanAlgorithm from '../algorithms/connectivity/Tarjan';
 import { GraphState } from './graphSlice';
 import { UnweightedGraph } from '../algorithms/UnweightedGraph';
 import { Queue } from 'data-structure-typed';
+import FlowAlgorithm from '../algorithms/maximum_flow/Flow';
 
 export const AvailableAlgorithms = [
     new BFS(),
@@ -21,6 +22,7 @@ export const AvailableAlgorithms = [
     new TarjanAlgorithm(),
     new TopoOrderingBFS(),
     new RankingGraph(),
+    new FlowAlgorithm(),
 ];
 
 
@@ -37,7 +39,7 @@ function isDAG(graphState: GraphState): boolean
         return false;
     }
 
-    const graph = new UnweightedGraph(graphState.vertexCount, false);
+    const graph = new UnweightedGraph(graphState.vertexCount, true);
     for (const edge of graphState.edges) 
     {
         graph.addEdge(edge);
@@ -96,7 +98,7 @@ function isConnectedGraph(graphState: GraphState): boolean
 
     // BFS to check connectivity
     const visited = Array.from({ length: graphState.vertexCount + 1 }, () => false);
-    const queue = new Queue<number>([1]); // Start BFS from vertex 0
+    const queue = new Queue<number>([1]); // Start BFS from vertex 1
     visited[1] = true;
 
     while (queue.length > 0) 
@@ -114,7 +116,50 @@ function isConnectedGraph(graphState: GraphState): boolean
     }
 
     // If all vertices are visited, the graph is connected
-    return visited.every((v, i) => i == 0 || v);
+    return visited.every((v, i) => i === 0 || v);
+}
+
+function validFlowGraph(graphState: GraphState): boolean
+{
+    const graph = new UnweightedGraph(graphState.vertexCount, true);
+    for (const edge of graphState.edges) 
+    {
+        graph.addEdge(edge);
+    }
+
+    let source = null;
+    let sink = null;
+
+    for (let i = 1; i <= graphState.vertexCount; i++)
+    {
+        const inDegree = graph.inDegree(i);
+        const outDegree = graph.outDegree(i);
+
+        if (inDegree === 0)
+        {
+            if (source !== null)
+            {
+                return false;
+            }
+            source = i;
+        }
+
+        if (outDegree === 0)
+        {
+            if (sink !== null)
+            {
+                return false;
+            }
+            sink = i;
+        }
+    }
+
+    if (source === null || sink === null)
+    {
+        return false;
+    }
+    
+    return true;
 }
 
 export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =>
@@ -134,6 +179,12 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
             setConfig(null);
             return 'Đồ thị không được rỗng';
         }
+
+        if (graphState.vertexCount === 1)
+        {
+            setConfig(null);
+            return 'Đồ thị phải có ít nhất 2 đỉnh';
+        }
     
         if (predicate.directed !== undefined && predicate.directed !== graphState.directed) 
         {
@@ -148,10 +199,16 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
         }
     
         // TODO: Check for acyclic graph
-        if (predicate.acyclic === true && !isDAG(graphState) && !isConnectedGraph(graphState)) 
+        if (predicate.acyclic === true && !(isConnectedGraph(graphState) && isDAG(graphState)))
         {
             setConfig(null);
             return `Đồ thị phải là đồ thị có hướng không chu trình và liên thông`;
+        }
+
+        if (algorithm.name === 'Luồng cực đại' && !validFlowGraph(graphState))
+        {
+            setConfig(null);
+            return 'Đồ thị phải có đúng một đỉnh phát và một đỉnh thu';
         }
     
         setConfig(algorithm.defaultConfig());

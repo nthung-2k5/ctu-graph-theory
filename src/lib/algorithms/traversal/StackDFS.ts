@@ -12,24 +12,24 @@ export default class StackDFS extends TraversalAlgorithm
     public override get code(): string
     {
         return `int mark[MAX_N];
-    
-    void DFS(Graph* G, int s) {
-        Stack Q; makeNullStack&Q);
-    
-        push(&Q, s);
-    
-        while (!empty(Q)) {
-            int u = top(Q); pop(&Q);
-            if (mark[u])
-                continue;
-    
-            mark[u] = 1;
-    
-            for (int v = 1; v <= n; v++)
-                if (adjacent(G, u, v) && !mark[v])
-                    push(Q, v);
-        }
-    }`;
+
+void DFS(Graph* G, int s) {
+    Stack S; makeNullStack(&S);
+
+    push(&S, s);
+
+    while (!empty(Q)) {
+        int u = top(S); pop(&S);
+        if (mark[u])
+            continue;
+
+        mark[u] = 1;
+
+        for (int v = 1; v <= n; v++)
+            if (adjacent(G, u, v) && !mark[v])
+                push(S, v);
+    }
+}`;
     }
     
     public get name()

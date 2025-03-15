@@ -4,7 +4,7 @@ import cytoscape, { EdgeSingular, Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
 import cola from "cytoscape-cola";
 // @ts-expect-error Made for Javascript version so no type
-import dagre from 'cytoscape-dagre';
+import elk from 'cytoscape-elk';
 
 import ControlBar from "./ControlBar";
 import { useAppSelector } from '../lib/context/hooks';
@@ -12,7 +12,7 @@ import { useAnimation } from '../lib/context/AnimationContext';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 cytoscape.use(cola);
-cytoscape.use(dagre);
+cytoscape.use(elk);
 
 export default function VisualGraphComponent() 
 {
@@ -84,10 +84,20 @@ export default function VisualGraphComponent()
     const refreshGraph = () => 
     {
         cy.current.layout({
-            name: algorithm.predicate.acyclic === true ? "dagre" : "cola",
+            name: algorithm.predicate.acyclic === true ? "elk" : "cola",
             // @ts-expect-error Config in cola layout
             edgeLength: edgeLength,
-            rankDir: 'LR'
+            elk: {
+                'algorithm': 'layered',
+                'elk.direction': 'RIGHT',
+                'elk.topdown.nodeType': 'ROOT_NODE',
+                'elk.spacing.nodeNode': edgeLength,
+                'elk.layered.spacing.nodeNodeBetweenLayers': edgeLength,
+                'elk.layered.layering.strategy': 'INTERACTIVE',
+                'elk.layered.nodePlacement.strategy': 'LINEAR_SEGMENTS',
+                'elk.layered.nodePlacement.favorStraightEdges': true,
+                'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES'
+            }
         }).run();
     };
 
@@ -114,7 +124,7 @@ const DefaultGraphStyle: Stylesheet[] = [
             "text-valign": "center",
             "text-halign": "center",
             "font-weight": "bold",
-            label: "data(label)",
+            label: "data(id)",
             backgroundColor: '#F8FAFC',
             "border-style": "solid",
             "border-width": '2rem',

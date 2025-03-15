@@ -1,4 +1,3 @@
-import Animator from "../../animation/Animator";
 import { PseudocodeLine } from "../../pseudocode/Pseudocode";
 import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from "../GraphAlgorithm";
 import { UnweightedGraph } from "../UnweightedGraph";
@@ -13,7 +12,7 @@ export default class ManageProject extends NeutralGraphAlgorithm<ManageProject>
         return 'Quản lý dự án';
     }
 
-    public override get pseudocode(): PseudocodeLine[] 
+    public override get code(): PseudocodeLine[] 
     {
         return [
             { text: 'Tính bậc vào của mỗi đỉnh', tab: 0 },

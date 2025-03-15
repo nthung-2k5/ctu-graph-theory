@@ -1,69 +1,30 @@
 import { ReactNode } from "react";
-import { AlgorithmRequirements, AlgorithmStep, NeutralGraphAlgorithm } from "../GraphAlgorithm";
+import { AlgorithmStep } from "../GraphAlgorithm";
 import { UnweightedGraph } from "../UnweightedGraph";
 import { Queue } from "data-structure-typed";
+import TopologicalAlgorithm from './TopologicalAlgorithm';
 
-export interface TopoOrderingBFSConfig 
+export default class TopoOrderingBFS extends TopologicalAlgorithm
 {
-    // startVertex: number;
-    traverseAll: boolean;
-}
-
-interface TopoOrderingResult
-{
-    topoOrder: number[];
-}
-
-// class TopoOrderingBFSContext {
-
-// }
-
-class TopoSortContext 
-{
-    inDegree: number[];
- 
-    queue: Queue<number>;
-
-    topoOrder: number[];
-
-    constructor(vertexCount: number) 
+    protected override _initResult(): number[]
     {
-        this.inDegree = Array(vertexCount + 1).fill(0);
-        this.queue = new Queue<number>();
-        this.topoOrder = [];
-    }
-}
-
-export default class TopoOrderingBFS extends NeutralGraphAlgorithm<TopoOrderingBFSConfig, TopoOrderingResult> 
-{
-    protected override _initResult(): TopoOrderingResult 
-    {
-        return {
-            topoOrder: [],
-        };
+        return [];
     }
 
-    protected override _result(result: TopoOrderingResult): ReactNode
+    protected override _result(result: number[]): ReactNode
     {
         return (
             <>
                 <p>Thứ tự Topo nhận được: </p>
-                {result.topoOrder.map((item: number, index: number) => 
+                {result.map((item: number, index: number) => 
                 {
-                    if (index + 1 === result.topoOrder.length) return <span>{item}</span>
+                    if (index + 1 === result.length) return <span>{item}</span>
                     else return (
                         <span>{item + ' -> '}</span>
                     )
                 })}
             </>
         );
-    }
-
-    public override defaultConfig(): TopoOrderingBFSConfig 
-    {
-        return { 
-            traverseAll: false
-        };
     }
 
     public override get code(): string
@@ -105,23 +66,10 @@ void topoSort(Graph *graph, List *list) {
         return 'Xác định thứ tự Topo';
     }
 
-    public override get predicate(): AlgorithmRequirements 
+    protected *_topologicalSort(g: UnweightedGraph, inDegree: number[], result: number[]): IterableIterator<AlgorithmStep>
     {
-        return { 
-            directed: true, // Đồ thị phải là có hướng
-            acyclic: true, // Đồ thị không được có chu trình 
-        }; // Điều kiện của đồ thị
-    }
+        const queue = new Queue<number>();
 
-    public override configNode(): ReactNode 
-    {
-        return (
-            <></>
-        );
-    }
-
-    private *_topoSort(g: UnweightedGraph, ctx: TopoSortContext, result: number[]): IterableIterator<AlgorithmStep>
-    {
         yield { codeLine: 13, log: 'Khởi tạo hàng đợi Q = {}' };
         for (let u = 1; u <= g.vertexCount; u++) 
         {
@@ -138,17 +86,17 @@ void topoSort(Graph *graph, List *list) {
                 codeLine: 15, 
                 borderColorVertex: [u, 'purple'],
                 highlightVertex: [u, true],
-                log: `d[${u}] == ${ctx.inDegree[u]} == 0 (${ctx.inDegree[u] == 0})` 
+                log: `d[${u}] == ${inDegree[u]} == 0 (${inDegree[u] == 0})` 
             }
-            if (ctx.inDegree[u] == 0) 
+            if (inDegree[u] == 0) 
             {
-                ctx.queue.push(u);
+                queue.push(u);
                 // Đưa u vào queue
                 yield { 
                     codeLine: 16, 
                     borderColorVertex: [u, 'black'],
                     backgroundColorVertex: [u, 'deeppink'], 
-                    log: `   Đưa ${u} vào Q = {${ctx.queue.join(', ')}` 
+                    log: `   Đưa ${u} vào Q = {${queue.join(', ')}` 
                 };
             }
             else 
@@ -161,13 +109,13 @@ void topoSort(Graph *graph, List *list) {
         }
       
         yield { codeLine: 18, log: 'Khởi tạo danh sách L = {}' };
-        while (ctx.queue.length > 0) 
+        while (queue.length > 0) 
         {
             yield {
                 codeLine: 19,
                 log: ``
             }
-            const u = ctx.queue.shift()!;
+            const u = queue.shift()!;
             // Xóa bỏ khỏi queue
             yield {
                 codeLine: 20,
@@ -178,7 +126,7 @@ void topoSort(Graph *graph, List *list) {
             }
             yield {
                 codeLine: 21,
-                log: `Xóa u = ${u} khỏi Q = {${ctx.queue.join(', ')}}`
+                log: `Xóa u = ${u} khỏi Q = {${queue.join(', ')}}`
             }
             result.push(u);
             yield {
@@ -200,7 +148,7 @@ void topoSort(Graph *graph, List *list) {
                 }
                 if (g.adjacent(u, v)) 
                 {
-                    ctx.inDegree[v]--;
+                    inDegree[v]--;
                     // Duyệt kề để giảm bậc 
                     yield {
                         colorEdge: [u, v, 'dodgerblue'],
@@ -211,7 +159,7 @@ void topoSort(Graph *graph, List *list) {
                         codeLine: 25,
                         borderColorVertex: [v, 'red'],
                         highlightVertex: [v, true],
-                        log: `      d[${v}]-- = ${ctx.inDegree[v]}`
+                        log: `      d[${v}]-- = ${inDegree[v]}`
                     }
                     // Trả về lúc ban đầu
                     yield {
@@ -224,23 +172,23 @@ void topoSort(Graph *graph, List *list) {
                         codeLine: 26,
                         highlightVertex: [v, true],
                         borderColorVertex: [v, 'purple'],
-                        log: `      d[${v}] == ${ctx.inDegree[v]} == 0 (${ctx.inDegree[v] == 0})`
+                        log: `      d[${v}] == ${inDegree[v]} == 0 (${inDegree[v] == 0})`
                     }
                     // Trả về lúc ban đầu
                     yield {
                         highlightVertex: [v, false],
                         log: ``
                     }
-                    if (ctx.inDegree[v] == 0) 
+                    if (inDegree[v] == 0) 
                     {
-                        ctx.queue.push(v);
+                        queue.push(v);
                         // Thêm vào ctx.queue
                         yield {
                             codeLine: 27,
                             highlightVertex: [v, false],
                             borderColorVertex: [v, 'black'],
                             backgroundColorVertex: [v, 'deeppink'],
-                            log: `Đưa v = ${v} vào Q = {${ctx.queue.join(', ')}}`
+                            log: `Đưa v = ${v} vào Q = {${queue.join(', ')}}`
                         }
                     }
                 }
@@ -248,9 +196,9 @@ void topoSort(Graph *graph, List *list) {
         }
     }
 
-    protected *_run(g: UnweightedGraph, config: TopoOrderingBFSConfig, result: TopoOrderingResult): IterableIterator<AlgorithmStep> 
+    protected override *_run(g: UnweightedGraph, _config: object, result: number[]): IterableIterator<AlgorithmStep> 
     {
-        const ctx = new TopoSortContext(g.vertexCount);
+        const inDegree = Array(g.vertexCount + 1).fill(0);
    
         // Tính bậc vào cho từng đỉnh
         for (let u = 1; u <= g.vertexCount; u++) 
@@ -273,13 +221,13 @@ void topoSort(Graph *graph, List *list) {
                 }
                 if (g.adjacent(v, u)) 
                 {
-                    ctx.inDegree[u]++;
+                    inDegree[u]++;
                     // Tăng bậc cho nó
                     yield {
                         codeLine: 9,
                         borderColorVertex: [u, 'limegreen'],
                         highlightVertex: [u, true],
-                        log: `      d[${u}]++ = ${ctx.inDegree[u]}`
+                        log: `      d[${u}]++ = ${inDegree[u]}`
                     }
                     // Cho nó quay lại bình thường giống *
                     yield {
@@ -296,11 +244,9 @@ void topoSort(Graph *graph, List *list) {
         // reset Đồ thị để nhảy vào topo sort
         yield {
             reset: true,
-            log: `d[] = {${ctx.inDegree.join(', ')}}`
+            log: `d[] = {${inDegree.join(', ')}}`
         };
 
-        yield* this._topoSort(g, ctx, result.topoOrder);
+        yield* this._topologicalSort(g, inDegree, result);
     }
-  
-
 }

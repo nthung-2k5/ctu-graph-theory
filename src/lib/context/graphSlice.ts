@@ -43,7 +43,7 @@ const toCytoscapeElements = (graph: GraphState): ElementDefinition[] =>
                 
     for (let i = 1; i <= graph.vertexCount; i++) 
     {
-        elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
+        elements.push({ group: 'nodes', data: { id: i.toString() } });
     }
 
     for (let i = 0; i < graph.edges.length; i++)

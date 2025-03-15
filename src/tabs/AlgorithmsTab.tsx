@@ -5,6 +5,7 @@ import Title from 'antd/es/typography/Title';
 import CodeBlock from './CodeBlock';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
+import { useAppSelector } from '../lib/context/hooks';
 
 const algorithms = [
     'Duyệt theo chiều rộng (BFS)',
@@ -40,6 +41,7 @@ export default function AlgorithmsTab()
     const { algorithm, setAlgorithm, setConfig, predicateError, result } = useGraphTheory();
     const [form] = Form.useForm();
     const [openDialog, setOpenDialog] = useState(false);
+    const graph = useAppSelector(state => state.graph);
 
     const items: MenuProps['items'] = useMemo(() => AvailableAlgorithms.map((algo, index) => ({
         key: index,
@@ -60,14 +62,14 @@ export default function AlgorithmsTab()
         }
 
         form.setFieldsValue(algorithm.defaultConfig());
-    }, [predicateError, algorithm, form]);
+    }, [graph, predicateError, algorithm, form]);
 
     useEffect(() => 
     {
         if (predicateError !== null) return;
         
         setConfig(form.getFieldsValue());
-    }, [predicateError, setConfig, algorithm, form]);
+    }, [graph, predicateError, setConfig, algorithm, form]);
 
     const tabs: TabsProps['items'] = [
         {

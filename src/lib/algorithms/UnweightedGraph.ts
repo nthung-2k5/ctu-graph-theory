@@ -85,6 +85,34 @@ export class UnweightedGraph
     
         return neighbors;
     }
+
+    inDegree(u: number): number 
+    {
+        this._assertVertex(u);
+        
+        let count = 0;
+        for (let v = 1; v <= this._vertexCount; v++) 
+        {
+            if (this._matrix[v][u] > 0) 
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    outDegree(u: number): number 
+    {
+        this._assertVertex(u);
+        
+        return this._matrix[u].reduce((acc, value) => acc + value, 0);
+    }
+
+    degree(u: number): number 
+    {
+        this._assertVertex(u);
+        return this.directed ? this.inDegree(u) + this.outDegree(u) : this.outDegree(u);
+    }
     
     protected _assertVertex(u: number): void
     {
