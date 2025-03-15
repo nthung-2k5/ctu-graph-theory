@@ -14,29 +14,13 @@ export default class PseudocodeAnimator extends SubAnimator
         this.handle = handle;
     }
 
-    public get currentLine(): number | null
-    {
-        return this.handle?.currentLine() ?? null;
-    }
-
-    public set currentLine(line: number)
+    public set currentLine(line: number | [number, number])
     {
         this.handle?.highlightLine(line);
-    }
-
-    public next(by: number = 1)
-    {
-        this.currentLine = this.currentLine ?? 0 + by;
-    }
-
-    public previous(by: number = 1)
-    {
-        this.currentLine = this.currentLine ?? 0 - by;
     }
 }
 
 export type PseudoCodeHandle = {
-    currentLine: () => number | null;
-    highlightLine: (line: number) => void;
+    highlightLine: (line: number | [number, number]) => void;
     reset: () => void;
 }

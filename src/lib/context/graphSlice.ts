@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import UnweightedEdge from '../graphs/unweighted/Edge';
 import WeightedEdge from '../graphs/weighted/Edge';
+import { ElementDefinition } from 'cytoscape';
+import { uuidv7 } from 'uuidv7';
 
 class IntStream 
 {
@@ -35,11 +37,35 @@ class IntStream
     }
 }
 
+const toCytoscapeElements = (graph: GraphState): ElementDefinition[] =>
+{
+    const elements: ElementDefinition[] = [];
+                
+    for (let i = 1; i <= graph.vertexCount; i++) 
+    {
+        elements.push({ group: 'nodes', data: { id: i.toString(), label: i.toString() } });
+    }
+
+    for (let i = 0; i < graph.edges.length; i++)
+    {
+        const edge = graph.edges[i];
+        const el: ElementDefinition = { group: 'edges', data: { id: uuidv7(), source: edge.u.toString(), target: edge.v.toString() }, classes: graph.directed ? 'directed' : '' };
+        
+        el.data.label = graph.weighted ? graph.edges[i].weight.toString() : '';
+        el.data.labelOverride = '';
+        
+        elements.push(el);
+    }
+
+    return elements;
+}
+
 export interface GraphStateBase 
 {
     vertexCount: number;
     directed: boolean;
     weighted: boolean;
+    elements: ElementDefinition[];
 }
 
 export interface WeightedGraphState
@@ -61,6 +87,7 @@ const initialState: GraphState = {
     edges: [],
     directed: false,
     weighted: false,
+    elements: [],
 };
 
 export const graphSlice = createSlice({
@@ -70,6 +97,7 @@ export const graphSlice = createSlice({
         setDirected: (state, action: PayloadAction<boolean>) =>
         {
             state.directed = action.payload;
+            state.elements = toCytoscapeElements(state);
         },
 
         setGraph: (state, action: PayloadAction<{ input: string, weighted: boolean }>) => 
@@ -115,6 +143,8 @@ export const graphSlice = createSlice({
 
                 state.edges = graph;
             }
+
+            state.elements = toCytoscapeElements(state);
         },
     },
 });

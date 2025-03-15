@@ -1,7 +1,7 @@
 import { Segmented, Switch, Tabs } from "antd";
 import { Editor } from "prism-react-editor";
 import { BasicSetup } from "prism-react-editor/setups";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import "prism-react-editor/layout.css";
 import "prism-react-editor/themes/github-light.css";
@@ -10,11 +10,23 @@ import GraphOption from "./GraphOption";
 import { useAppDispatch, useAppSelector } from '../lib/context/hooks';
 import { setDirected, setGraph } from '../lib/context/graphSlice';
 import ConsoleLog from './ConsoleOutput';
+import { useAnimation } from '../lib/context/AnimationContext';
 
 export default function GraphInputTab() 
 {
     const inputRef = useRef('');
     const state = useAppSelector(state => state.graph);
+    
+    const [activeTab, setActiveTab] = useState('1');
+    const { playing } = useAnimation();
+    
+    useEffect(() => 
+    {
+        if (playing) 
+        {
+            setActiveTab('2');
+        }
+    }, [playing]);
 
     const dispatch = useAppDispatch();
 
@@ -81,7 +93,7 @@ export default function GraphInputTab()
                     forceRender: true
                 }
             ]}
-            className="expanded-tabs"
+            className="expanded-tabs" activeKey={activeTab} onChange={setActiveTab}
         />
     );
 }

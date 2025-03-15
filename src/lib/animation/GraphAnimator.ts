@@ -7,6 +7,14 @@ export default class GraphAnimator extends SubAnimator
 {
     private _cy: cytoscape.Core | null = null;
 
+    private _resetHandler: (() => void) | null = null;
+
+    public setResetHandler(handler: () => void): GraphAnimator
+    {
+        this._resetHandler = handler;
+        return this;
+    }
+
     public setCytoscape(cy: cytoscape.Core): GraphAnimator
     {
         this._cy = cy;
@@ -26,18 +34,38 @@ export default class GraphAnimator extends SubAnimator
             'line-outline-width': 0,
             'target-arrow-color': 'black',
         });
+
+        this._cy?.edges().forEach(edge => { edge.scratch('label', ''); });
+
+        this._resetHandler?.();
         return this;
     }
 
+<<<<<<< HEAD
    
+=======
+    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._setVertexStyle(vertex, { 'background-color': color });
+        return this;
+    }
+>>>>>>> 7dac3109a4b159bf16eed75f0b114179357fb0dd
 
     public borderColorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ 'border-color': color });
+        this._setVertexStyle(vertex, { 'border-color': color });
         return this;
     }
 
+<<<<<<< HEAD
   
+=======
+    public contentColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    {
+        this._setVertexStyle(vertex, { color });
+        return this;
+    }
+>>>>>>> 7dac3109a4b159bf16eed75f0b114179357fb0dd
 
     private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
@@ -94,6 +122,20 @@ export default class GraphAnimator extends SubAnimator
     public backgroundColorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
         return this._setVertexStyle(vertex, { 'background-color': color });
+    }
+
+    public labelEdge(u: number, v: number, label: string): GraphAnimator
+    {
+        if (!this._cy) return this;
+
+        const source = this._cy.$id(u.toString());
+        const target = this._cy.$id(v.toString());
+
+        const directed = store.getState().graph.directed;
+
+        const edge = (directed ? source.edgesTo(target) : source.edgesWith(target)).first();
+        edge.scratch('label', label);
+        return this;
     }
 
     public customAction(action: (cy: cytoscape.Core) => void): GraphAnimator

@@ -114,9 +114,11 @@ export interface AlgorithmStep
 
     reset?: boolean;
 
+    labelEdge?: ArrayOrSingle<[u: number, v: number, label: string]>;
+
     customGraph?: (core: cytoscape.Core) => void;
 
-    codeLine?: number;
+    codeLine?: number | [number, number];
 }
 
 export const MustBeUndirectedError = "Đồ thị phải là đồ thị vô hướng";

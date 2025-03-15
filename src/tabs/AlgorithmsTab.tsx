@@ -1,6 +1,6 @@
-import { Button, ConfigProvider, Dropdown, Form, Modal, Space, Tabs, TabsProps } from "antd";
+import { Button, ConfigProvider, Dropdown, Form, MenuProps, Modal, Space, Tabs, TabsProps } from "antd";
 import { CloseCircleOutlined, DownOutlined } from "@ant-design/icons";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import Title from "antd/es/typography/Title";
 import CodeBlock from "./CodeBlock";
 import { useGraphTheory } from "../lib/context/GraphTheoryContext";
@@ -37,10 +37,18 @@ export default function AlgorithmsTab() {
     const [form] = Form.useForm();
     const [openDialog, setOpenDialog] = useState(false);
 
-    const items = AvailableAlgorithms.map((algo, index) => ({
-        key: index,
-        label: <button type="button" onClick={() => setAlgorithm(algo)}>{`${index + 1}. ${algo.name}`}</button>,
-    }));
+    const items: MenuProps["items"] = useMemo(
+        () =>
+            AvailableAlgorithms.map((algo, index) => ({
+                key: index,
+                label: `${index + 1}. ${algo.name}`,
+            })),
+        []
+    );
+
+    const onClick: MenuProps["onClick"] = ({ key }: { key: string }) => {
+        setAlgorithm(AvailableAlgorithms[parseInt(key)]);
+    };
 
     useEffect(() => {
         if (predicateError !== null) {
@@ -64,7 +72,7 @@ export default function AlgorithmsTab() {
             children: (
                 <div className="h-full flex flex-col max-h-full">
                     <div>
-                        <Dropdown trigger={["click"]} menu={{ items }}>
+                        <Dropdown trigger={["click"]} menu={{ items, onClick }}>
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
                                     Chọn thuật toán
@@ -73,7 +81,12 @@ export default function AlgorithmsTab() {
                             </a>
                         </Dropdown>
                     </div>
-                    <Form layout="horizontal" form={form} onValuesChange={(_, values) => setConfig(values)} className="w-full flex flex-col justify-start">
+                    <Form
+                        layout="horizontal"
+                        form={form}
+                        onValuesChange={(_, values) => setConfig(values)}
+                        className="w-full flex flex-col justify-start"
+                    >
                         <Title level={5}>{algorithm.name}</Title>
                         <ConfigProvider
                             theme={{
@@ -84,17 +97,30 @@ export default function AlgorithmsTab() {
                                 },
                             }}
                         >
-                            <div className="flex flex-col">{predicateError ? <InvalidMessage>{predicateError}</InvalidMessage> : algorithm.configNode()}</div>
+                            <div className="flex flex-col">
+                                {predicateError ? (
+                                    <InvalidMessage>{predicateError}</InvalidMessage>
+                                ) : (
+                                    algorithm.configNode()
+                                )}
+                            </div>
                         </ConfigProvider>
                     </Form>
                     <CodeBlock />
-                    <Button block type="primary" disabled={predicateError !== null} onClick={() => setOpenDialog(true)} className="mt-2">
+                    <Button
+                        block
+                        type="primary"
+                        disabled={predicateError !== null}
+                        onClick={() => setOpenDialog(true)}
+                        className="mt-2"
+                    >
                         Kết quả thuật toán
                     </Button>
                     <Modal
                         title="Kết quả thuật toán"
                         open={openDialog}
                         centered
+                        destroyOnClose
                         onCancel={() => setOpenDialog(false)}
                         footer={
                             <Button type="primary" onClick={() => setOpenDialog(false)}>

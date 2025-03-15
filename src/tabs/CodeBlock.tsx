@@ -9,13 +9,12 @@ const CodeBlock = () =>
     const { algorithm } = useGraphTheory();
     const lines = useMemo(() => algorithm.code, [algorithm]);
 
-    const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
+    const [highlightedLine, setHighlightedLine] = useState<number | [number, number] | null>(null);
     const editorRef = useRef<editor.IStandaloneCodeEditor>();
     const decoration = useRef<editor.IEditorDecorationsCollection>();
     const { code: codeAnimator } = useAnimation();
 
     codeAnimator.setHandle({
-        currentLine: () => highlightedLine,
         highlightLine: setHighlightedLine,
         reset: () => setHighlightedLine(null)
     });
@@ -36,7 +35,7 @@ const CodeBlock = () =>
             editorRef.current?.revealLineNearTop(1);
             return;
         }
-        else
+        else if (typeof highlightedLine === 'number')
         {
             editorRef.current?.revealLineInCenterIfOutsideViewport(highlightedLine);
             decoration.current?.set([
@@ -47,7 +46,21 @@ const CodeBlock = () =>
                         className: 'code-highlight'
                     }
                 }
-            ])
+            ]);
+        }
+        else if (Array.isArray(highlightedLine))
+        {
+            const [start, end] = highlightedLine;
+            editorRef.current?.revealLinesInCenterIfOutsideViewport(start, end);
+            decoration.current?.set([
+                {
+                    range: new Range(start, 1, end, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'code-highlight'
+                    }
+                }
+            ]);
         }
     }, [highlightedLine]);
 
