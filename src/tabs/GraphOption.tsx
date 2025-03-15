@@ -41,7 +41,7 @@ export default function GraphOption()
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={nodeColor} onChangeComplete={(value) => { dispatch(setNodeColor(value.toCssString())); }} showText />
+                    <ColorPicker value={nodeColor} onChange={(value) => { dispatch(setNodeColor(value.toCssString())); }} showText />
                 </Col>
             </Row>
             <Row className="mb-[10px]">
@@ -52,7 +52,7 @@ export default function GraphOption()
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={edgeColor} onChangeComplete={(value) => dispatch(setEdgeColor(value.toCssString()))} showText />
+                    <ColorPicker value={edgeColor} onChange={(value) => dispatch(setEdgeColor(value.toCssString()))} showText />
                 </Col>
             </Row>
             <Row>
@@ -63,7 +63,7 @@ export default function GraphOption()
                     </p>
                 </Col>
                 <Col span={12} className="flex items-center">
-                    <ColorPicker value={labelColor} onChangeComplete={(value) => dispatch(setLabelColor(value.toCssString()))} showText />
+                    <ColorPicker value={labelColor} onChange={(value) => dispatch(setLabelColor(value.toCssString()))} showText />
                 </Col>
             </Row>
         </div>

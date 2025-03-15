@@ -113,6 +113,7 @@ export default function AlgorithmsTab()
                         title="Kết quả thuật toán"
                         open={openDialog}
                         centered
+                        destroyOnClose
                         onCancel={() => setOpenDialog(false)}
                         footer={<Button type='primary' onClick={() => setOpenDialog(false)}>Xong</Button>}
                     >
