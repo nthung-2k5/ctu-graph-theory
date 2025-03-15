@@ -231,12 +231,34 @@ int kruskal(Graph *G, Graph *tree) {
         const edges = g.edges;
         const m = g.edgeCount
         for (let i = 0; i < m; i++) {
+            yield {
+                log: `Xét cạnh (${edges[i].u}, ${edges[i].v}, ${edges[i].weight})`,
+                codeLine: 11,
+                // highlightEdge: [edges[i].u, edges[i].v, true],
+                colorEdge: [edges[i].u, edges[i].v, "red"]
+            }
             for (let j = i + 1; j < m; j++) {
-                if (edges[i].weight > edges[j].weight) {
-                    // swap bằng desctructering
-                    [edges[i], edges[j]] = [edges[j], edges[i]];
+                if (edges[j].u != edges[i].u && edges[j].v != edges[i].v) {
+                    yield {
+                        log: `  Xét (${edges[j].u}, ${edges[j].v}, ${edges[j].weight})`,
+                        codeLine: 12,
+                        colorEdge: [edges[j].u, edges[j].v, "blue"]
+                    }
+                    yield {
+                        log: `  -> Thực hiện sao sánh với (${edges[i].u, edges[i].v}, ${edges[j].u}, ${edges[j].v})`,
+                        codeLine: 13
+                    }
+                    if (edges[i].weight > edges[j].weight) {
+                        // swap bằng desctructering
+                        [edges[i], edges[j]] = [edges[j], edges[i]];
+                        yield {
+                            log: `  Điều kiện đúng -> Hóa đổi trọng số 2 cạnh`,
+                            codeLine: 14
+                        }
+                    }
                 }
             }
+            yield { reset: true, log: `` }
         }
 
         for (let i = 1; i <= g.vertexCount; i++) ctx.parent[i] = i;
