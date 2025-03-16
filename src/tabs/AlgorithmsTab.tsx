@@ -7,22 +7,22 @@ import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 import { AvailableAlgorithms } from '../lib/context/GraphTheoryProvider';
 import { useAppSelector } from '../lib/context/hooks';
 
-const algorithms = [
-    "Duyệt theo chiều rộng (BFS)",
-    "Duyệt theo chiều sâu (DFS) bằng đệ quy",
-    "Duyệt theo chiều sâu (DFS) bằng ngăn xếp",
-    "Kiểm tra đồ thị phân đôi",
-    "Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)",
-    "Tìm đường đi ngắn nhất (Thuật toán Moore-Dijkstra)",
-    "Tìm đường đi ngắn nhất (Thuật toán Bellman-Ford)",
-    "Tìm đường đi ngắn nhất (Thuật toán Floyd-Warshall)",
-    "Sắp xếp topology",
-    "Xếp hạng đồ thị",
-    "Tìm cây khung vô hướng nhỏ nhất (Thuật toán Kruskal)",
-    "Tìm cây khung vô hướng nhỏ nhất (Thuật toán Prim)",
-    // 'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)', (không làm nổi)
-    "Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)",
-];
+// const algorithms = [
+//     "Duyệt theo chiều rộng (BFS)",
+//     "Duyệt theo chiều sâu (DFS) bằng đệ quy",
+//     "Duyệt theo chiều sâu (DFS) bằng ngăn xếp",
+//     "Kiểm tra đồ thị phân đôi",
+//     "Tìm các bộ phận liên thông mạnh (Thuật toán Tarjan)",
+//     "Tìm đường đi ngắn nhất (Thuật toán Moore-Dijkstra)",
+//     "Tìm đường đi ngắn nhất (Thuật toán Bellman-Ford)",
+//     "Tìm đường đi ngắn nhất (Thuật toán Floyd-Warshall)",
+//     "Sắp xếp topology",
+//     "Xếp hạng đồ thị",
+//     "Tìm cây khung vô hướng nhỏ nhất (Thuật toán Kruskal)",
+//     "Tìm cây khung vô hướng nhỏ nhất (Thuật toán Prim)",
+//     // 'Tìm cây khung có hướng nhỏ nhất (Thuật toán Chu-Liu/Edmonds)', (không làm nổi)
+//     "Tìm luồng cực đại trong mạng (Thuật toán Ford-Fulkerson)",
+// ];
 
 const InvalidMessage = (props: PropsWithChildren) => {
     return (

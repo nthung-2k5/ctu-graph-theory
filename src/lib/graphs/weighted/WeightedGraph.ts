@@ -8,7 +8,7 @@ export default abstract class WeightedGraph implements Graph
 
     private _vertexCount: number;
 
-    private _edgeCount: number = 0;
+    protected _edgeCount: number = 0;
 
     get directed() 
     {

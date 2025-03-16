@@ -5,6 +5,12 @@ export default class AdjacencyMatrix extends WeightedGraph
 {
     private _matrix: (number | null)[][];
 
+    protected *_getEdgesUndirected() { }
+    protected *_getEdgesDirected() { }
+    override toMemoryGraph(): React.ReactNode {
+        return '';
+    }
+
     constructor(n: number, directed: boolean = false) 
     {
         super(n, directed);

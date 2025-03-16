@@ -106,7 +106,7 @@ void BellmanFord(Graph *pG, int s)
         return colorEdges;
     }
 
-    protected *_run(g: WeightedGraph, config: BellmanConfig, result: number[]): IterableIterator<AlgorithmStep> {
+    protected *_run(g: WeightedGraph, config: BellmanConfig, _result: number[]): IterableIterator<AlgorithmStep> {
         const pi = Array(g.vertexCount + 1).fill(Infinity);
         const p = Array<number>(g.vertexCount + 1).fill(-1);
 
@@ -208,7 +208,7 @@ void BellmanFord(Graph *pG, int s)
                     } else yield { log: `p[${v}]=${u}`, codeLine: 30 };
                 }
 
-                result = pi;
+                _result = pi;
 
                 if (!haveWay) {
                     //tắt màu cung và đỉnh u-v

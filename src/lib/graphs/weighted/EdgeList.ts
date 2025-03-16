@@ -4,6 +4,11 @@ import WeightedGraph from './WeightedGraph';
 export default class EdgeList extends WeightedGraph
 {
     private _edges: Edge[];
+    protected *_getEdgesUndirected() { }
+    protected *_getEdgesDirected() { }
+    override toMemoryGraph(): React.ReactNode {
+        return '';
+    }
 
     constructor(n: number = 0, directed: boolean = false) 
     {

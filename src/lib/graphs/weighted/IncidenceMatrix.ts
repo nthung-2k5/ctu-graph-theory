@@ -5,7 +5,13 @@ export default class IncidenceMatrix extends WeightedGraph
 {
     private _matrix: (number | null)[][];
 
-    private _edgeCount: number = 0;
+    protected *_getEdgesUndirected() { }
+    protected *_getEdgesDirected() { }
+    override toMemoryGraph(): React.ReactNode {
+        return '';
+    }
+
+    protected override _edgeCount: number = 0;
 
     constructor(n: number = 0, directed: boolean = false) 
     {
@@ -43,12 +49,12 @@ export default class IncidenceMatrix extends WeightedGraph
         }
     }
 
-    protected override _weightUndirected(u: number, v: number): number | null
+    protected override _weightUndirected(_u: number, _v: number): number | null
     {
         throw new Error('Method not implemented.');
     }
 
-    protected override _weightDirected(u: number, v: number): number | null
+    protected override _weightDirected(_u: number, _v: number): number | null
     {
         throw new Error('Method not implemented.');
     }

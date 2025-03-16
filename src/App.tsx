@@ -1,5 +1,5 @@
 import CTULogo from '/public/CTU.svg?react';
-import './app.css'
+import './App.css'
 import { Col, Row } from 'antd';
 import GraphInputTab from './tabs/GraphInputTab';
 import AlgorithmsTab from './tabs/AlgorithmsTab';

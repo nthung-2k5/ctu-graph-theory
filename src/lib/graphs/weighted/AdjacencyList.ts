@@ -5,6 +5,12 @@ export default class AdjacencyList extends WeightedGraph
 {
     private _adjList: {v: number, weight: number}[][];
 
+    protected *_getEdgesUndirected() { }
+    protected *_getEdgesDirected() { }
+    override toMemoryGraph(): React.ReactNode {
+        return '';
+    }
+
     constructor(n: number = 0, directed: boolean = false) 
     {
         super(n, directed);

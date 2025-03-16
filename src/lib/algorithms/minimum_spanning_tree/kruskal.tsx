@@ -317,7 +317,7 @@ int kruskal(Graph *G, Graph *tree) {
 
     protected override *_run(
         g: WeightedGraph,
-        config: KruskalConfig,
+        _config: KruskalConfig,
         result: KruskalResult
     ): IterableIterator<AlgorithmStep> {
         const ctx = new KruskalContext(g.vertexCount);

@@ -94,7 +94,7 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
         return colorEdges;
     }
 
-    protected *_run(g: WeightedGraph, config: DijkstraConfig, result: number[]): IterableIterator<AlgorithmStep> {
+    protected *_run(g: WeightedGraph, config: DijkstraConfig, _result: number[]): IterableIterator<AlgorithmStep> {
         const pi = Array(g.vertexCount + 1).fill(Infinity);
         const p = Array(g.vertexCount + 1).fill(-1);
         const mark = Array(g.vertexCount + 1).fill(false);
@@ -188,7 +188,7 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
 
             const edges: Array<[number, number, KEYWORD]> = [];
             const vertices: Array<[number, KEYWORD]> = [];
-            for (const { v, weight } of g.neighbors(u)) {
+            for (const { v } of g.neighbors(u)) {
                 edges.push([u, v, "black"]);
                 if (mark[v]) vertices.push([v, "gray"]);
                 else vertices.push([v, "white"]);
@@ -214,7 +214,7 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
                 edges.push([p[u], u, "red"]);
                 vertexs.push([u, "blue"]);
             }
-        result = pi;
+        _result = pi;
         yield { log: ``, codeLine: 36, colorVertex: vertexs, colorEdge: edges };
     }
 
