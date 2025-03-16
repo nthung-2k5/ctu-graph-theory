@@ -1,17 +1,22 @@
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react';
-import { AlgorithmStep, GraphAlgorithm } from '../algorithms/GraphAlgorithm';
-import { GraphTheoryContext } from './GraphTheoryContext';
-import Bipartite from '../algorithms/connectivity/Bipartite';
-import BFS from '../algorithms/traversal/BFS';
-import RecursionDFS from '../algorithms/traversal/RecursionDFS';
-import StackDFS from '../algorithms/traversal/StackDFS';
-import { useAppSelector } from './hooks';
-import TopoOrderingBFS from '../algorithms/topological/TopoOrderingBFS';
-import RankingGraph from '../algorithms/topological/RankingGraph';
-import TarjanAlgorithm from '../algorithms/connectivity/Tarjan';
-import { GraphState } from './graphSlice';
-import { UnweightedGraph } from '../algorithms/UnweightedGraph';
-import { Queue } from 'data-structure-typed';
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { AlgorithmStep, GraphAlgorithm } from "../algorithms/GraphAlgorithm";
+import { GraphTheoryContext } from "./GraphTheoryContext";
+import Bipartite from "../algorithms/connectivity/Bipartite";
+import BFS from "../algorithms/traversal/BFS";
+import RecursionDFS from "../algorithms/traversal/RecursionDFS";
+import StackDFS from "../algorithms/traversal/StackDFS";
+import { useAppSelector } from "./hooks";
+import TopoOrderingBFS from "../algorithms/topological/TopoOrderingBFS";
+import RankingGraph from "../algorithms/topological/RankingGraph";
+import TarjanAlgorithm from "../algorithms/connectivity/Tarjan";
+import { GraphState } from "./graphSlice";
+import { UnweightedGraph } from "../algorithms/UnweightedGraph";
+import { Queue } from "data-structure-typed";
+import Kruskal from "../algorithms/minimum_spanning_tree/kruskal";
+import Dijkstra from "../algorithms/shortest-path/Dijkstra";
+import Floyd from "../algorithms/shortest-path/Floyd";
+import Bellman from "../algorithms/shortest-path/Bellman";
+import prim from "../algorithms/minimum_spanning_tree/prim";
 import FlowAlgorithm from '../algorithms/maximum_flow/Flow';
 
 export const AvailableAlgorithms = [
@@ -22,20 +27,22 @@ export const AvailableAlgorithms = [
     new TarjanAlgorithm(),
     new TopoOrderingBFS(),
     new RankingGraph(),
+    new Dijkstra(),
+    new Floyd(),
+    new Bellman(),
+    new Kruskal(),
+    new prim(),
     new FlowAlgorithm(),
 ];
-
 
 /**
  * Checks if the graph is a Directed Acyclic Graph (DAG)
  * @param graphState The graph state
  * @returns true if the graph is a DAG, false otherwise
  */
-function isDAG(graphState: GraphState): boolean 
-{
+function isDAG(graphState: GraphState): boolean {
     // If not directed, it's not a DAG
-    if (!graphState.directed) 
-    {
+    if (!graphState.directed) {
         return false;
     }
 
@@ -48,18 +55,13 @@ function isDAG(graphState: GraphState): boolean
     const visited = Array.from({ length: graphState.vertexCount + 1 }, () => 0);
 
     // DFS to detect cycles
-    const hasCycle = (vertex: number): boolean => 
-    {
+    const hasCycle = (vertex: number): boolean => {
         visited[vertex] = 1;
 
-        for (const v of graph.neighbors(vertex)) 
-        {
-            if (visited[v] === 1) 
-            {
+        for (const v of graph.neighbors(vertex)) {
+            if (visited[v] === 1) {
                 return true; // Cycle detected
-            } 
-            else if (visited[v] === 0 && hasCycle(v)) 
-            {
+            } else if (visited[v] === 0 && hasCycle(v)) {
                 return true; // Cycle detected
             }
         }
@@ -69,10 +71,8 @@ function isDAG(graphState: GraphState): boolean
     };
 
     // Check all vertices
-    for (let v = 1; v <= graphState.vertexCount; v++) 
-    {
-        if (!visited[v] && hasCycle(v)) 
-        {
+    for (let v = 1; v <= graphState.vertexCount; v++) {
+        if (!visited[v] && hasCycle(v)) {
             return false; // Contains cycle, not a DAG
         }
     }
@@ -86,13 +86,11 @@ function isDAG(graphState: GraphState): boolean
  * @param graphState The graph state
  * @returns true if the graph is connected, false otherwise
  */
-function isConnectedGraph(graphState: GraphState): boolean 
-{
+function isConnectedGraph(graphState: GraphState): boolean {
     if (graphState.vertexCount === 0) return true;
-  
+
     const graph = new UnweightedGraph(graphState.vertexCount, false);
-    for (const edge of graphState.edges) 
-    {
+    for (const edge of graphState.edges) {
         graph.addEdge(edge);
     }
 
@@ -101,14 +99,11 @@ function isConnectedGraph(graphState: GraphState): boolean
     const queue = new Queue<number>([1]); // Start BFS from vertex 1
     visited[1] = true;
 
-    while (queue.length > 0) 
-    {
+    while (queue.length > 0) {
         const u = queue.shift()!;
-    
-        for (const v of graph.neighbors(u)) 
-        {
-            if (!visited[v]) 
-            {
+
+        for (const v of graph.neighbors(u)) {
+            if (!visited[v]) {
                 visited[v] = true;
                 queue.push(v);
             }
@@ -162,22 +157,19 @@ function validFlowGraph(graphState: GraphState): boolean
     return true;
 }
 
-export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =>
-{
-    const graphState = useAppSelector(state => state.graph);
+export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) => {
+    const graphState = useAppSelector((state) => state.graph);
     const [algorithm, setAlgorithm] = useState<GraphAlgorithm>(AvailableAlgorithms[0]);
     const [config, setConfig] = useState<object | null>({});
     const [steps, setSteps] = useState<AlgorithmStep[]>([]);
     const [result, setResult] = useState<unknown | null>(null);
 
-    const error = useMemo(() => 
-    {
+    const error = useMemo(() => {
         const predicate = algorithm.predicate;
-    
-        if (graphState.vertexCount === 0)
-        {
+
+        if (graphState.vertexCount === 0) {
             setConfig(null);
-            return 'Đồ thị không được rỗng';
+            return "Đồ thị không được rỗng";
         }
 
         if (graphState.vertexCount === 1)
@@ -189,15 +181,14 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
         if (predicate.directed !== undefined && predicate.directed !== graphState.directed) 
         {
             setConfig(null);
-            return `Đồ thị phải là đồ thị ${ predicate.directed ? "có" : "vô" } hướng`;
+            return `Đồ thị phải là đồ thị ${predicate.directed ? "có" : "vô"} hướng`;
         }
 
-        if (predicate.weighted !== undefined && predicate.weighted !== graphState.weighted)
-        {
+        if (predicate.weighted !== undefined && predicate.weighted !== graphState.weighted) {
             setConfig(null);
-            return `Đồ thị phải ${ predicate.weighted ? "có" : "không" } trọng số`;
+            return `Đồ thị phải ${predicate.weighted ? "có" : "không"} trọng số`;
         }
-    
+
         // TODO: Check for acyclic graph
         if (predicate.acyclic === true && !(isConnectedGraph(graphState) && isDAG(graphState)))
         {
@@ -214,25 +205,23 @@ export const GraphTheoryProvider: React.FC<PropsWithChildren> = ({ children }) =
         setConfig(algorithm.defaultConfig());
         return null;
     }, [algorithm, graphState]);
-    
-    useEffect(() =>
-    {
-        if (config !== null)
-        {
+
+    useEffect(() => {
+        if (config !== null) {
             const [steps, result] = algorithm.run(graphState, config);
             setSteps(Array.from(steps));
             setResult(result);
-        }
-        else
-        {
+        } else {
             setSteps([]);
             setResult(null);
         }
     }, [algorithm, graphState.edges, graphState.directed, graphState.weighted, config, graphState]);
 
     return (
-        <GraphTheoryContext.Provider value={{algorithm, setAlgorithm, config, setConfig, animationSteps: steps, result, predicateError: error}}>
+        <GraphTheoryContext.Provider
+            value={{ algorithm, setAlgorithm, config, setConfig, animationSteps: steps, result, predicateError: error }}
+        >
             {children}
         </GraphTheoryContext.Provider>
     );
-}
+};

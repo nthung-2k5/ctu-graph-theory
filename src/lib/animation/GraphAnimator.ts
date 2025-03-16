@@ -109,7 +109,7 @@ export default class GraphAnimator extends SubAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
     }
-
+    
     public colorEdge(u: number, v: number, color: KEYWORD | 'default'): GraphAnimator
     {
         const config = store.getState().config;
