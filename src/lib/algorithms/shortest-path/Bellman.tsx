@@ -20,7 +20,21 @@ export default class Bellman extends WeightedGraphAlgorithm<BellmanConfig, numbe
         };
     }
     protected override _result(result: number[]): ReactNode {
-        return <></>;
+        const { startVertex } = this.defaultConfig(); // Lấy đỉnh bắt đầu từ cấu hình mặc định
+        console.log(result);
+        return (
+            <div>
+                <h3>Kết quả Bellman-ford</h3>
+                <p>Độ dài đường đi từ đỉnh {startVertex} đến:</p>
+                <ul>
+                    {result.map((dist, index) => (
+                        <li key={index}>
+                            Đỉnh {index}: {dist === Infinity ? "∞" : dist}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
     }
     public get name(): string {
         return "Thuật toán Bellman-Ford";
@@ -92,7 +106,7 @@ void BellmanFord(Graph *pG, int s)
         return colorEdges;
     }
 
-    protected *_run(g: WeightedGraph, config: BellmanConfig): IterableIterator<AlgorithmStep> {
+    protected *_run(g: WeightedGraph, config: BellmanConfig, result: number[]): IterableIterator<AlgorithmStep> {
         const pi = Array(g.vertexCount + 1).fill(Infinity);
         const p = Array<number>(g.vertexCount + 1).fill(-1);
 
@@ -150,7 +164,7 @@ void BellmanFord(Graph *pG, int s)
                     };
 
                     //tắt màu cạnh và đỉnh u-v
-                    vertices[0][1] = vertices[1][1] = "black";
+                    vertices[0][1] = vertices[1][1] = "white";
                     yield { log: ``, colorEdge: [u, v, "black"], colorVertex: vertices, highlightVertex: [u, false] };
                     // bỏ qua
                     continue;
@@ -184,8 +198,8 @@ void BellmanFord(Graph *pG, int s)
                             colorVertex: [s, "red"],
                         };
                         //tắt màu đừng đi, đỉnh s và u-v
-                        vertices[0][1] = vertices[1][1] = "black";
-                        vertices.push([s, "black"]);
+                        vertices[0][1] = vertices[1][1] = "white";
+                        vertices.push([s, "white"]);
                         for (let i = 0; i < colorEdges.length; i++) {
                             colorEdges[i][2] = "black";
                         }
@@ -194,9 +208,11 @@ void BellmanFord(Graph *pG, int s)
                     } else yield { log: `p[${v}]=${u}`, codeLine: 30 };
                 }
 
+                result = pi;
+
                 if (!haveWay) {
                     //tắt màu cung và đỉnh u-v
-                    vertices[0][1] = vertices[1][1] = "black";
+                    vertices[0][1] = vertices[1][1] = "white";
                     yield { log: ``, colorEdge: [u, v, "black"], colorVertex: vertices };
                 }
             }

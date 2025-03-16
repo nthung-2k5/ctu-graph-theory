@@ -14,11 +14,23 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
         return [];
     }
 
-    public override _result(result: number[]): ReactNode {
-        const visitOrder = result.join(" -> ");
-        return <></>;
+    protected override _result(result: number[]): ReactNode {
+        const { startVertex } = this.defaultConfig(); // Lấy đỉnh bắt đầu từ cấu hình mặc định
+        console.log(result);
+        return (
+            <div>
+                <h3>Kết quả Dijkstra</h3>
+                <p>Độ dài đường đi từ đỉnh {startVertex} đến:</p>
+                <ul>
+                    {result.map((dist, index) => (
+                        <li key={index}>
+                            Đỉnh {index}: {dist === Infinity ? "∞" : dist}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
     }
-
     public override defaultConfig(): DijkstraConfig {
         return {
             startVertex: 1,
@@ -89,8 +101,8 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
         // khai bao bien + khoi tao 3 mảng
         yield { log: ``, codeLine: 5 };
         yield { log: "", codeLine: 7 };
-        yield { log: "${pi}", codeLine: 9 };
-        yield { log: "${mark}", codeLine: 10 };
+        yield { log: `${pi}`, codeLine: 9 };
+        yield { log: `${mark}`, codeLine: 10 };
         const s = config.startVertex;
 
         // khoi tao cho dinh S
@@ -178,7 +190,8 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
             const vertices: Array<[number, KEYWORD]> = [];
             for (const { v, weight } of g.neighbors(u)) {
                 edges.push([u, v, "black"]);
-                vertices.push([v, "black"]);
+                if (mark[v]) vertices.push([v, "gray"]);
+                else vertices.push([v, "white"]);
             }
             // tắt màu các đỉnh và các cạnh kề của u
             if (vertices.length > 0) {
@@ -201,7 +214,7 @@ export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, num
                 edges.push([p[u], u, "red"]);
                 vertexs.push([u, "blue"]);
             }
-
+        result = pi;
         yield { log: ``, codeLine: 36, colorVertex: vertexs, colorEdge: edges };
     }
 

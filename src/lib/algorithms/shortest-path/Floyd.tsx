@@ -19,7 +19,21 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]>
         };
     }
     protected override _result(result: number[]): ReactNode {
-        return <></>;
+        const { startVertex } = this.defaultConfig(); // Lấy đỉnh bắt đầu từ cấu hình mặc định
+        console.log(result);
+        return (
+            <div>
+                <h3>Kết quả Floyd-warshall</h3>
+                <p>Độ dài đường đi từ đỉnh {startVertex} đến:</p>
+                <ul>
+                    {result.map((dist, index) => (
+                        <li key={index}>
+                            Đỉnh {index}: {dist === Infinity ? "∞" : dist}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
     }
     public get name(): string {
         return "Thuật toán Floyd-Warshall";
@@ -182,18 +196,18 @@ void FloydWarshall(Graph *pG)
                     } else if (v === k) {
                         color = "green";
                     } else {
-                        color = "black";
+                        color = "white";
                     }
                     yield { log: ``, colorVertex: [v, color], highlightVertex: [v, false] };
                 }
                 if (u === k) {
                     color = "green";
                 } else {
-                    color = "black";
+                    color = "white";
                 }
                 yield { log: ``, colorVertex: [u, color], highlightVertex: [u, false] };
             }
-            yield { log: ``, colorVertex: [k, "black"], highlightVertex: [k, false] };
+            yield { log: ``, colorVertex: [k, "white"], highlightVertex: [k, false] };
         }
 
         yield { log: ``, codeLine: 39 };
@@ -223,6 +237,9 @@ void FloydWarshall(Graph *pG)
 
             yield { log: `Không tồn tại chu trình âm`, colorVertex: vertices, colorEdge: edges };
         }
+
+        for (let u = 1; u <= n; u++) result[u] = pi[config.startVertex][u];
+
         yield { log: ``, codeLine: 46 };
     }
 

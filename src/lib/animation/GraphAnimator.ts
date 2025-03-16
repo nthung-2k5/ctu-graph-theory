@@ -41,31 +41,17 @@ export default class GraphAnimator extends SubAnimator
         return this;
     }
 
-<<<<<<< HEAD
-   
-=======
-    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
-    {
-        this._setVertexStyle(vertex, { 'background-color': color });
-        return this;
-    }
->>>>>>> 7dac3109a4b159bf16eed75f0b114179357fb0dd
-
     public borderColorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
         this._setVertexStyle(vertex, { 'border-color': color });
         return this;
     }
 
-<<<<<<< HEAD
-  
-=======
     public contentColorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
         this._setVertexStyle(vertex, { color });
         return this;
     }
->>>>>>> 7dac3109a4b159bf16eed75f0b114179357fb0dd
 
     private _setVertexStyle(vertex: number, style: Css.Node): GraphAnimator
     {
@@ -106,13 +92,13 @@ export default class GraphAnimator extends SubAnimator
     {
         return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
     }
-    
-
-     public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
+       
+    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
     {
-        this._cy?.$id(vertex.toString()).style({ color, 'border-color': color }).attr('marked', color);
+        this._setVertexStyle(vertex, { 'background-color': color });
         return this;
     }
+
 
     public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator
     {
