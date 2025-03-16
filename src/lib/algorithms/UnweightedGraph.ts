@@ -54,7 +54,15 @@ export class UnweightedGraph
 
         if (e.u === e.v) return;
         
-        this._edges.push(e);
+        if (this._directed || e.u < e.v)
+        {
+            this._edges.push(e);
+        }
+        else
+        {
+            this._edges.push({ u: e.v, v: e.u });
+        }
+
         this._matrix[e.u][e.v] = 1;
         if (!this._directed)
         {

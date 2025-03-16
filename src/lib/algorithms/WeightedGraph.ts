@@ -60,7 +60,15 @@ export class WeightedGraph
         
         if (e.u === e.v) return;
         
-        this._edges.push(e);
+        if (this._directed || e.u < e.v)
+        {
+            this._edges.push(e);
+        }
+        else
+        {
+            this._edges.push({ u: e.v, v: e.u, weight: e.weight });
+        }
+        
         this._matrix[e.u][e.v] = Math.min(this._matrix[e.u][e.v], e.weight);
         if (!this._directed)
         {

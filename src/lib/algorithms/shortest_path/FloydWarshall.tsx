@@ -1,31 +1,23 @@
-import { Form, InputNumber } from "antd";
 import { ReactNode } from "react";
-import store from "../../context/store";
 import { AlgorithmStep, WeightedGraphAlgorithm } from "../GraphAlgorithm";
 import { WeightedGraph } from "../WeightedGraph";
 import { KEYWORD } from "color-convert/conversions";
-interface FloydConfig 
-{
-    startVertex: number;
-}
 
-export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]> 
+
+export default class Floyd extends WeightedGraphAlgorithm<object, number[]> 
 {
     protected override _initResult(): number[] 
     {
         return [];
     }
 
-    public override defaultConfig(): FloydConfig 
+    public override defaultConfig(): object 
     {
-        return {
-            startVertex: 1,
-        };
+        return {};
     }
 
     protected override _result(result: number[]): ReactNode 
     {
-        const { startVertex } = this.defaultConfig(); // Lấy đỉnh bắt đầu từ cấu hình mặc định
         console.log(result);
         return (
             <div>
@@ -53,33 +45,33 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]>
 int pi[MAX_N][MAX_N];
 int next[MAX_N][MAX_N];
 
-void FloydWarshall(Graph* pG)
+void FloydWarshall(Graph* G)
 {
     //Khởi tạo pi[][], next[][]
     int u, v, k;
-    for (u=1; u<=pG->n; u++)
-        for (v=1; v<=pG->n; v++)
+    for (u=1; u<=G->n; u++)
+        for (v=1; v<=G->n; v++)
         { 
             pi[u][v] = oo;
             next[u][v] = -1;
         }
     //đường đi từ u->u = 0
-    for (u=1; u<=pG->n; u++)
+    for (u=1; u<=G->n; u++)
         pi[u][u] = 0;
     //Khởi tạo các đường đi trực tiếp
-    for (u=1; u<=pG->n; u++)
-        for (v=1; v<=pG->n; v++)
-            if (pG->W[u][v] != NO_EDGE)
+    for (u=1; u<=G->n; u++)
+        for (v=1; v<=G->n; v++)
+            if (G->W[u][v] != NO_EDGE)
             {
-                pi[u][v] = pG->W[u][v];//đi trực tiếp từ u->v
+                pi[u][v] = G->W[u][v];//đi trực tiếp từ u->v
                 next[u][v] = v;
             }
     // nếu đường đi từ u->v thông qua k cho chi phí thấp hơn 
     // và từ có đường đi từ u->k, k->v
     // -> cập nhật lại đường đi
-    for (k=1; k<=pG->n; k++)
-        for (u=1; u<=pG->n; u++)
-            for (v=1; v<=pG->n; v++)
+    for (k=1; k<=G->n; k++)
+        for (u=1; u<=G->n; u++)
+            for (v=1; v<=G->n; v++)
                 if (pi[u][k] + pi[k][v] < pi[u][v] && pi[u][k]!=oo && pi[k][v]!=oo)
                 {
                     pi[u][k] = pi[u][k] + pi[k][v];
@@ -88,7 +80,7 @@ void FloydWarshall(Graph* pG)
 
     //kiểm tra chu trình âm
     int negative_cycle = 0;
-    for (u=1; u<=pG->n; u++)
+    for (u=1; u<=G->n; u++)
         if (pi[u][u] < 0)
         {
             negative_cycle = 1;
@@ -116,7 +108,7 @@ void FloydWarshall(Graph* pG)
         return edges;
     }
 
-    protected *_run(g: WeightedGraph, config: FloydConfig, result: number[]): IterableIterator<AlgorithmStep> 
+    protected *_run(g: WeightedGraph, _config: object, result: number[]): IterableIterator<AlgorithmStep> 
     {
         const n = g.vertexCount;
 
@@ -279,13 +271,6 @@ void FloydWarshall(Graph* pG)
 
     public override configNode(): ReactNode 
     {
-        const vertexCount = store.getState().graph.vertexCount;
-        return (
-            <>
-                <Form.Item<FloydConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={vertexCount} />
-                </Form.Item>
-            </>
-        );
+        return (<></>);
     }
 }

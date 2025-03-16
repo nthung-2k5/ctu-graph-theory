@@ -1,53 +1,9 @@
-import { ReactNode } from "react";
-import { WeightedGraphAlgorithm, AlgorithmStep } from "../GraphAlgorithm";
+import { AlgorithmStep } from "../GraphAlgorithm";
 import { WeightedGraph } from "../WeightedGraph";
-import { Form, InputNumber } from "antd";
-import store from "../../context/store";
+import { ShortestPathAlgorithm, ShortestPathConfig, ShortestPathResult } from './ShortestPathAlgorithm';
 
-interface DijkstraConfig 
+export default class Dijkstra extends ShortestPathAlgorithm
 {
-    startVertex: number;
-}
-
-interface DijkstraResult 
-{
-    startVertex: number;
-    dist: number[];
-}
-
-export default class Dijkstra extends WeightedGraphAlgorithm<DijkstraConfig, DijkstraResult> 
-{
-    override _initResult(): DijkstraResult
-    {
-        return {
-            startVertex: 1,
-            dist: [],
-        };
-    }
-
-    protected override _result(result: DijkstraResult): ReactNode 
-    {
-        return (
-            <div>
-                <p>Độ dài đường đi từ đỉnh {result.startVertex} đến:</p>
-                <ul>
-                    {result.dist.slice(1).map((dist, index) => (
-                        <li key={index}>
-                            Đỉnh {index + 1}: {dist === Infinity ? "∞" : dist}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    }
-
-    public override defaultConfig(): DijkstraConfig 
-    {
-        return {
-            startVertex: 1,
-        };
-    }
-
     public get name(): string 
     {
         return "Tìm đường đi ngắn nhất (Thuật toán Dijkstra)";
@@ -99,7 +55,7 @@ void MooreDijkstra(Graph* G, int s) {
 }`;
     }
 
-    protected *_run(g: WeightedGraph, config: DijkstraConfig, result: DijkstraResult): IterableIterator<AlgorithmStep> 
+    protected *_run(g: WeightedGraph, config: ShortestPathConfig, result: ShortestPathResult): IterableIterator<AlgorithmStep> 
     {
         const s = config.startVertex;
         yield { log: `MooreDijkstra(G, ${s})` };
@@ -168,15 +124,15 @@ void MooreDijkstra(Graph* G, int s) {
     
                 if (!mark[v] && pi[u] + weight < pi[v]) 
                 {
-                    pi[v] = weight;
+                    pi[v] = pi[u] + weight;
                     yield {
-                        log: `dist[${v}] = ${weight}`,
+                        log: `π[${v}] = ${pi[u] + weight}`,
                         codeLine: 36,
                         backgroundColorVertex: [v, "orange"],
                         contentColorVertex: [v, "white"]
                     };
     
-                    yield { log: `parent[${v}] = ${u}`, codeLine: 37, colorEdge: [[parent[v], v, 'default'], [u, v, "deepskyblue"]] };
+                    yield { log: `p[${v}] = ${u}`, codeLine: 37, colorEdge: [[parent[v], v, 'default'], [u, v, "deepskyblue"]] };
                     parent[v] = u;
                 }
     
@@ -184,7 +140,7 @@ void MooreDijkstra(Graph* G, int s) {
             }
     
             yield {
-                log: `Kết thúc duyệt đỉnh ${u}, i = ${i + 1}`,
+                log: `Kết thúc duyệt đỉnh ${u}, it = ${i + 1}`,
                 codeLine: 41,
                 highlightVertex: [u, false],
                 borderColorVertex: [u, 'default']
@@ -193,18 +149,6 @@ void MooreDijkstra(Graph* G, int s) {
 
         yield { log: `Kết thúc thuật toán`, codeLine: 42 };
 
-        result.dist = pi;
-    }
-
-    public override configNode(): ReactNode 
-    {
-        const vertexCount = store.getState().graph.vertexCount;
-        return (
-            <>
-                <Form.Item<DijkstraConfig> label="Đỉnh bắt đầu" name="startVertex" initialValue={1}>
-                    <InputNumber min={1} max={vertexCount} />
-                </Form.Item>
-            </>
-        );
+        result.distance = pi;
     }
 }

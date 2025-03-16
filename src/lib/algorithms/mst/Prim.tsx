@@ -177,7 +177,7 @@ int Prim(Graph* G, Graph* tree, int s) {
                         contentColorVertex: [v, "white"]
                     };
 
-                    yield { log: `parent[${v}] = ${u}`, codeLine: 36, colorEdge: [[parent[v], v, 'default'], [u, v, "deepskyblue"]] };
+                    yield { log: `p[${v}] = ${u}`, codeLine: 36, colorEdge: [[parent[v], v, 'default'], [u, v, "deepskyblue"]] };
                     parent[v] = u;
                 }
 
