@@ -61,33 +61,45 @@ export default function VisualGraphComponent()
         animator.setCytoscape(core);
     };
 
-    useEffect(() => {
-        if (cy.current) {
-            cy.current.nodes().forEach(node => {
+    useEffect(() => 
+    {
+        if (cy.current) 
+        {
+            cy.current.nodes().forEach(node => 
+            {
                 node.style('background-color', nodeColor);
             });
         }
     }, [nodeColor]);
 
-    useEffect(() => {
-        if (cy.current) {
-            cy.current.nodes().forEach(node => {
+    useEffect(() => 
+    {
+        if (cy.current) 
+        {
+            cy.current.nodes().forEach(node => 
+            {
                 node.style('color', labelColor);
             });
         }
     }, [labelColor]);
     
-    useEffect(() => {
-        if (cy.current) {
-            cy.current.nodes().forEach(node => {
+    useEffect(() => 
+    {
+        if (cy.current) 
+        {
+            cy.current.nodes().forEach(node => 
+            {
                 node.style({ width: nodeRadius, height: nodeRadius });
             });
         }
     }, [nodeRadius]);
 
-    useEffect(() => {
-        if (cy.current) {
-            cy.current.edges().forEach(edge => {
+    useEffect(() => 
+    {
+        if (cy.current) 
+        {
+            cy.current.edges().forEach(edge => 
+            {
                 edge.style('line-color', edgeColor);
             });
         }
