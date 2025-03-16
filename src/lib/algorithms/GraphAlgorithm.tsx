@@ -95,13 +95,13 @@ export abstract class WeightedGraphAlgorithm<Config, R> extends GraphAlgorithm<C
     }
 }
 
-export type ColorVertexAnimation = [vertex: number, color: KEYWORD];
-export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD];
+export type ColorVertexAnimation = [vertex: number, color: KEYWORD | 'default'];
+export type ColorEdgeAnimation = [u: number, v: number, color: KEYWORD | 'default'];
 export type HighlightVertexAnimation = [vertex: number, highlight: boolean];
 export type HighlightEdgeAnimation = [u: number, v: number, highlight: boolean];
-export type BackgourndColorVertex = [vertex: number, backgroundColor: KEYWORD];
-export type BorderColorVertex = [vertex: number, color: KEYWORD];
-export type ContentColorVertex = [vertex: number, color: KEYWORD];
+export type BackgourndColorVertex = [vertex: number, backgroundColor: KEYWORD | 'default'];
+export type BorderColorVertex = [vertex: number, color: KEYWORD | 'default'];
+export type ContentColorVertex = [vertex: number, color: KEYWORD | 'default'];
 type ArrayOrSingle<T> = T | T[];
 
 export interface AlgorithmStep
@@ -119,6 +119,7 @@ export interface AlgorithmStep
     contentColorVertex?: ArrayOrSingle<ContentColorVertex>;
 
     reset?: boolean;
+    resetLabels?: boolean;
 
     labelEdge?: ArrayOrSingle<[u: number, v: number, label: string]>;
 

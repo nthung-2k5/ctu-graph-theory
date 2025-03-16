@@ -55,7 +55,11 @@ export default function ControlBar(props: { onDownloadClicked?: () => void, onRe
                     </div>
 
                     <Tooltip title="Đặt lại đồ thị" placement="top">
-                        <FaArrowRotateLeft className="control-bar-icon" onClick={props.onRefreshClicked} />
+                        <FaArrowRotateLeft className="control-bar-icon" onClick={() => 
+                        {
+                            anim.setCursor(0);
+                            props.onRefreshClicked?.();
+                        }} />
                     </Tooltip>
 
                     <Tooltip title="Tải xuống hình ảnh đồ thị" placement="top">

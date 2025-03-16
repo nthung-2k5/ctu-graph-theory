@@ -17,17 +17,19 @@ void DFS(Graph* G, int s) {
     Stack S; makeNullStack(&S);
 
     push(&S, s);
+    mark[s] = 1;
 
-    while (!empty(Q)) {
-        int u = top(S); pop(&S);
-        if (mark[u])
-            continue;
+    while (!empty(S)) {
+        int u = top(Q); pop(&S);
 
-        mark[u] = 1;
-
-        for (int v = 1; v <= n; v++)
-            if (adjacent(G, u, v) && !mark[v])
-                push(S, v);
+        for (int v = 1; v <= n; v++) {
+            if (adjacent(G, u, v)) {
+                if (!mark[v]) {
+                    mark[v] = 1;
+                    push(&S, v);
+                }
+            }
+        }
     }
 }`;
     }
@@ -41,103 +43,100 @@ void DFS(Graph* G, int s) {
     {
         yield {
             codeLine: 3,
-            log: `DFS(G, ${startVertex})`
+            log: `BFS(G, ${startVertex})`
         };
+
         const stack: Stack<number> = new Stack<number>();
         yield {
             codeLine: 4,
-            log: `Q = {}`
+            log: `S = {}`
         };
             
         stack.push(startVertex);
         yield { 
             codeLine: 6,
-            highlightVertex: [startVertex, true],
-            colorVertex: [startVertex, 'orange'],
-            log: `Q = {${startVertex}}`
+            borderColorVertex: [startVertex, 'red'],
+            log: `S = {${startVertex}}`
+        };
+    
+        yield {
+            codeLine: 7,
+            log: `mark[${startVertex}] = 1`,
+            backgroundColorVertex: [startVertex, 'deepskyblue'],
+            contentColorVertex: [startVertex, 'white']
         };
             
-        yield {
-            codeLine: 8,
-            log: `Q = {${startVertex}} => Bắt đầu duyệt`
-        };
-        while (!stack.isEmpty())
+        while (1)
         {
+            yield { codeLine: 9, log: `S = {${stack.toArray().join(', ')}} => !(empty(S)) = ${!stack.isEmpty()}` };
+    
+            if (stack.isEmpty()) break;
             const u = stack.pop()!;
     
             yield { 
-                codeLine: 9,
-                highlightVertex: [u, true],
-                colorVertex: [u, 'yellow'], 
-                log: `u = ${u}, Q = {${stack.toArray().join(', ')}}`
-            };
-    
-            yield {
                 codeLine: 10,
-                log: `mark[${u}] = ${visited[u]}`
+                highlightVertex: [u, true],
+                borderColorVertex: [u, 'default'],
+                log: `u = ${u}, S = {${stack.toArray().join(', ')}}`
             };
-            if (visited[u])
-            {
-                yield { codeLine: 11, log: `Đã duyệt ${u}, bỏ qua` };
-                continue;
-            }
     
-            visited[u] = true;
             traverseOrder.push(u);
-            yield {
-                colorVertex: [u, 'red'],
-                colorEdge: parent[u] !== -1 ? [parent[u], u, 'red'] : undefined,
-                codeLine: 13,
-                log: `mark[${u}] = true`
-            };
     
-            yield {
-                codeLine: 15,
-                log: `v = 1`
-            };
-            for (let v = 1; v <= g.vertexCount; v++)
+            for (const v of g.neighbors(u))
             {
                 yield {
-                    codeLine: 16, 
+                    codeLine: [12, 13], 
                     highlightVertex: [v, true],
                     highlightEdge: [u, v, true],
-                    log: `G->A[${u}][${v}] = ${g.matrix[u][v]}, mark[${v}] = ${visited[v]}`
+                    log: `Xét đỉnh ${v}`
                 };
     
-                if (g.matrix[u][v] && !visited[v])
+                yield {
+                    codeLine: 14,
+                    log: `!(mark[${v}] = ${visited[v] ? 1 : 0}) => ${!visited[v]}`
+                }
+                if (!visited[v])
                 {
+                    visited[v] = true;
+    
+                    yield {
+                        codeLine: 15,
+                        log: `mark[${v}] = 1`,
+                        backgroundColorVertex: [v, 'deepskyblue'],
+                        contentColorVertex: [v, 'white']
+                    };
+    
                     stack.push(v);
-    
-                    let colorEdge = {};
-    
-                    if (parent[v] === -1)
-                    {
-                        parent[v] = u;
-                        colorEdge = {
-                            colorEdge: [u, v, 'blue'],
-                        };
-                    }
     
                     yield { 
                         codeLine: 17,
-                        colorVertex: [v, 'orange'],
-                        ...colorEdge,
-                        log: `Q = {${stack.toArray().join(', ')}}`
+                        borderColorVertex: [v, 'red'],
+                        colorEdge: [u, v, 'deepskyblue'],
+                        log: `S = {${stack.toArray().join(', ')}}`
                     };
+    
+                    parent[v] = u;
+                    yield {
+                        codeLine: 18,
+                        log: `parent[${v}] = ${u}`
+                    }
                 }
-                yield { codeLine: 15, highlightVertex: u !== v ? [v, false]: undefined, highlightEdge: [u, v, false], log: `v = ${v + 1}` };
+    
+                yield {
+                    codeLine: 19,
+                    log: `Kết thúc xét đỉnh ${v}`,
+                    highlightVertex: [v, false],
+                    highlightEdge: [u, v, false],
+                };
             }
     
-            yield { 
-                codeLine: 18, 
-                highlightVertex: [u, false],
-                colorVertex: [u, 'purple'],
-                log: `Kết thúc duyệt ${u}`
-            };
-    
-            yield { codeLine: 8, log: `Q = {${stack.toArray().join(', ')}}` };
+            yield {
+                codeLine: 20,
+                log: `Kết thúc duyệt đỉnh ${u}`,
+                highlightVertex: [u, false]
+            }
         }
     
-        yield { codeLine: 19, log: 'Kết thúc' };
+        yield { codeLine: 21, log: 'Kết thúc thuật toán' };
     }
 }

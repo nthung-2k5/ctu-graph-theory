@@ -11,9 +11,13 @@ export default class RecursionDFS extends TraversalAlgorithm
 void DFS(Graph* G, int u) {
     mark[u] = 1;
 
-    for (int v = 1; v <= n; v++)
-        if (adjacent(G, u, v) && !mark[v])
-            DFS(G, v);
+    for (int v = 1; v <= n; v++) {
+        if (adjacent(G, u, v)) {
+            if (!mark[v]) {
+                DFS(G, v);
+            }
+        }
+    }
 }`;
     }
 
@@ -30,31 +34,42 @@ void DFS(Graph* G, int u) {
         traverseOrder.push(startVertex);
 
         yield {
-            colorVertex: [startVertex, 'red'],
-            colorEdge: parent[startVertex] !== -1 ? [parent[startVertex], startVertex, 'red'] : undefined,
             codeLine: 4,
-            log: `mark[${startVertex}] = true`
+            log: `mark[${startVertex}] = 1`,
+            backgroundColorVertex: [startVertex, 'deepskyblue'],
+            contentColorVertex: [startVertex, 'white'],
+            highlightVertex: [startVertex, true]
         };
 
-        yield { codeLine: 6, log: `v = 1` };
-        for (let v = 1; v <= g.vertexCount; v++)
+        for (const v of g.neighbors(startVertex))
         {
-            yield { codeLine: 7, log: `G->A[${startVertex}][${v}] = ${g.matrix[startVertex][v]}, mark[${v}] = ${visited[v]}` };
+            yield { codeLine: [6, 7], log: `Xét đỉnh ${v}`, highlightVertex: [v, true], highlightEdge: [startVertex, v, true] };
 
-            if (g.matrix[startVertex][v] && !visited[v])
+            yield { codeLine: 8, log: `!(mark[${v}] = ${visited[v] ? 1 : 0}) => ${!visited[v]}` };
+            if (!visited[v])
             {
+                parent[v] = startVertex;
                 yield {
-                    colorVertex: [v, 'orange'],
-                    colorEdge: [startVertex, v, 'orange'],
-                    codeLine: 8,
-                    log: `Đệ quy DFS`
+                    colorEdge: [startVertex, v, 'deepskyblue'],
+                    codeLine: 9,
+                    log: `DFS(G, ${v})`
                 };
 
-                parent[v] = startVertex;
                 yield* this._traverse(g, v, visited, parent, traverseOrder);
             }
 
-            yield { codeLine: 6, log: `v = ${v + 1}` };
+            yield {
+                codeLine: 12,
+                log: `Kết thúc xét đỉnh ${v}`,
+                highlightVertex: [v, false],
+                highlightEdge: [startVertex, v, false],
+            };
         }
+
+        yield {
+            codeLine: 13,
+            log: `Kết thúc duyệt đỉnh ${startVertex}`,
+            highlightVertex: [startVertex, false]
+        };
     }
 }

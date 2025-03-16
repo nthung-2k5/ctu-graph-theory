@@ -10,7 +10,7 @@ export class WeightedGraph
 {
     private _edges: Edge[] = [];
 
-    private _list: Neighbor[][];
+    private _matrix: number[][];
 
     private _directed: boolean;
     
@@ -41,16 +41,16 @@ export class WeightedGraph
         return this._edges;
     }
 
-    get list()
+    get matrix()
     {
-        return this._list;
+        return this._matrix;
     }
     
     constructor(n: number, directed: boolean = false) 
     {
         this._directed = directed;
         this._vertexCount = n;
-        this._list = Array.from({ length: n + 1 }, () => []);
+        this._matrix = Array.from({ length: n + 1 }, () => Array.from({ length: n + 1 }, () => Infinity));
     }
     
     addEdge(e: Edge): void 
@@ -61,10 +61,10 @@ export class WeightedGraph
         if (e.u === e.v) return;
         
         this._edges.push(e);
-        this._list[e.u].push({ v: e.v, weight: e.weight });
+        this._matrix[e.u][e.v] = Math.min(this._matrix[e.u][e.v], e.weight);
         if (!this._directed)
         {
-            this._list[e.v].push({ v: e.u, weight: e.weight });
+            this._matrix[e.v][e.u] = Math.min(this._matrix[e.v][e.u], e.weight);
         }
     }
     
@@ -73,13 +73,58 @@ export class WeightedGraph
         this._assertVertex(u);
         this._assertVertex(v);
         
-        return this._list[u].some(neighbor => neighbor.v === v);
+        return this._matrix[u][v] !== Infinity;
+    }
+
+    weight(u: number, v: number): number
+    {
+        this._assertVertex(u);
+        this._assertVertex(v);
+        
+        return this._matrix[u][v];
     }
     
     neighbors(u: number): Neighbor[] 
     {
         this._assertVertex(u);
-        return this._list[u];
+        return this._matrix[u].map((weight, v) => ({ v, weight })).filter(neighbor => neighbor.weight !== Infinity);
+    }
+
+    inDegree(u: number): number 
+    {
+        this._assertVertex(u);
+        
+        let count = 0;
+        for (let v = 1; v <= this._vertexCount; v++) 
+        {
+            if (this._matrix[v][u] > 0) 
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    outDegree(u: number): number 
+    {
+        this._assertVertex(u);
+        
+        let count = 0;
+        for (let v = 1; v <= this._vertexCount; v++) 
+        {
+            if (this._matrix[u][v] > 0) 
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    degree(u: number): number 
+    {
+        this._assertVertex(u);
+        return this.directed ? this.inDegree(u) + this.outDegree(u) : this.outDegree(u);
     }
     
     protected _assertVertex(u: number): void

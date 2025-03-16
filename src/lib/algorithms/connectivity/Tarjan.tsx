@@ -46,7 +46,7 @@ export default class TarjanAlgorithm extends NeutralGraphAlgorithm<TarjanConfig,
                 <p>Các bộ phận liên thông mạnh:</p>
                 <ul>
                     {result.map((scc, i) => (
-                        <li key={i}>SCC {i + 1}: {scc.join(', ')}</li>
+                        <li key={i}>SCC {i + 1}: {scc.toSorted((a, b) => a - b).join(', ')}</li>
                     ))}
                 </ul>
             </>
@@ -87,7 +87,7 @@ void SCC(Graph* G, int u) {
     }
 
     if (minNum[u] == num[u]) {
-        int v;
+        int v = -1;
         do {
             v = top(S); pop(&S);
             onStack[v] = 0;
@@ -115,55 +115,57 @@ void SCC(Graph* G, int u) {
         yield { codeLine: 9, log: `num[${u}] = minNum[${u}] = ${ctx.index[u]}, k++ = ${ctx.sccCount}` };
 
         ctx.sccStack.push(u);
-        yield { codeLine: 10, log: `S = {${ctx.sccStack.toArray().join(', ')}}` };
+        yield { codeLine: 10, borderColorVertex: [u, 'red'], highlightVertex: [u, true], log: `S = {${ctx.sccStack.toArray().join(', ')}}` };
 
         ctx.onStack[u] = true;
-        yield { codeLine: 11, log: `onStack[${u}] = true`, colorVertex: [u, 'gray'] };
+        yield { codeLine: 11, log: `onStack[${u}] = 1` };
 
-        yield { codeLine: 13, log: `v = 1` };
-        for (let v = 1; v <= g.vertexCount; v++)
+        for (const v of g.neighbors(u))
         {
-            yield { codeLine: 14, log: `G->A[${u}][${v}] = ${g.matrix[u][v]}` };
-            if (g.adjacent(u, v))
+            yield { codeLine: [13, 14], log: `Xét đỉnh ${v}`, highlightEdge: [u, v, true] };
+            yield { codeLine: 15, log: `num[${v}] = ${ctx.index[v]} => ${ctx.index[v] === 0}` };
+            if (ctx.index[v] === 0)
             {
-                yield { codeLine: 15, log: `num[${v}] = ${ctx.index[v]}` };
-                if (ctx.index[v] === 0)
-                {
-                    yield { codeLine: 16, log: 'Đệ quy gọi SCC(G, v)' };
-                    yield* this._scc(g, v, ctx, result);
-                    yield { codeLine: 17, log: `minNum[${u}] = min(minNum[${u}], minNum[${v}]) = min(${ctx.minIndex[u]}, ${ctx.minIndex[v]}) = ${Math.min(ctx.minIndex[u], ctx.minIndex[v])}` };
-                    ctx.minIndex[u] = Math.min(ctx.minIndex[u], ctx.minIndex[v]);
-                    continue;
-                }
-                
-                yield { codeLine: 18, log: `onStack[${v}] = ${ctx.onStack[v]}` };
+                yield { codeLine: 16, log: `SCC(G, ${v})` };
+                yield* this._scc(g, v, ctx, result);
+                yield { codeLine: 17, log: `minNum[${u}] = min(minNum[${u}], minNum[${v}]) = min(${ctx.minIndex[u]}, ${ctx.minIndex[v]}) = ${Math.min(ctx.minIndex[u], ctx.minIndex[v])}` };
+                ctx.minIndex[u] = Math.min(ctx.minIndex[u], ctx.minIndex[v]);
+            }
+            else
+            {
+                yield { codeLine: 19, log: `onStack[${v}] = ${ctx.onStack[v] ? 1 : 0} => ${ctx.onStack[v]}` };
                 if (ctx.onStack[v])
                 {
-                    yield { codeLine: 19, log: `minNum[${u}] = min(minNum[${u}], num[${v}]) = min(${ctx.minIndex[u]}, ${ctx.index[v]}) = ${Math.min(ctx.minIndex[u], ctx.index[v])}` };
+                    yield { codeLine: 20, log: `minNum[${u}] = min(minNum[${u}], num[${v}]) = min(${ctx.minIndex[u]}, ${ctx.index[v]}) = ${Math.min(ctx.minIndex[u], ctx.index[v])}` };
                     ctx.minIndex[u] = Math.min(ctx.minIndex[u], ctx.index[v]);
                 }
             }
-
-            yield { codeLine: 13, log: `v = ${v + 1}` };
+            yield { codeLine: 22, log: `Kết thúc xét đỉnh ${v}`, highlightEdge: [u, v, false] };
         }
 
-        yield { codeLine: 24, log: `minNum[${u}] = ${ctx.minIndex[u]}, num[${u}] = ${ctx.index[u]}` };
+        yield { codeLine: 24, log: `(minNum[${u}] = ${ctx.minIndex[u]}) == (num[${u}] = ${ctx.index[u]}) => ${ctx.minIndex[u] === ctx.index[u]}` };
         if (ctx.minIndex[u] === ctx.index[u])
         {
             yield { codeLine: 25, log: `v = -1` };
             result.push([]);
             let v: number;
+            let parent = u;
             do
             {
                 v = ctx.sccStack.pop()!;
                 result[result.length - 1].push(v);
-                yield { codeLine: 27, log: `v = ${v}, S = {${ctx.sccStack.toArray().join(', ')}}` };
+                yield { codeLine: 27, log: `v = ${v}, S = {${ctx.sccStack.toArray().join(', ')}}`, borderColorVertex: [v, 'deepskyblue'] };
                 ctx.onStack[v] = false;
-                yield { codeLine: 28, log: `onStack[${v}] = false` };
-                yield { codeLine: 29, log: `scc[${v}] = ${u}`, colorVertex: [v, 'red'] };
-                yield { codeLine: 30, log: `v = ${v}, u = ${u}` };
-            } while (v !== u);
+                yield { codeLine: 28, log: `onStack[${v}] = 0` };
+                yield { codeLine: 29, log: `scc[${v}] = ${u}`, backgroundColorVertex: [v, 'deepskyblue'], colorEdge: [v, parent, 'deepskyblue'], contentColorVertex: [v, 'white'] };
+                parent = v;
+
+                yield { codeLine: 30, log: `(v = ${v}) != (u = ${u}) => ${v != u}` };
+                if (v === u) break;
+            } while (1);
         }
+
+        yield { codeLine: 32, log: `Kết thúc duyệt đỉnh ${u}`, highlightVertex: [u, false] };
     }
 
     protected *_run(g: UnweightedGraph, config: TarjanConfig, result: number[][]): IterableIterator<AlgorithmStep>

@@ -32,30 +32,41 @@ export default class GraphAnimator extends SubAnimator
             'border-color': 'black', 
             'border-width': 2,
             'line-outline-width': 0,
+            'line-outline-color': config.edgeColor,
             'target-arrow-color': 'black',
         });
-
-        this._cy?.edges().forEach(edge => { edge.scratch('label', ''); });
 
         this._resetHandler?.();
         return this;
     }
 
-    public colorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    public resetLabels(): GraphAnimator
     {
-        this._setVertexStyle(vertex, { 'background-color': color });
+        this._cy?.edges().forEach(edge => { edge.scratch('label', ''); });
         return this;
     }
 
-    public borderColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    public colorVertex(vertex: number, color: KEYWORD | 'default'): GraphAnimator
     {
-        this._setVertexStyle(vertex, { 'border-color': color });
+        const config = store.getState().config;
+        const nodeColor = config.nodeColor;
+
+        this._setVertexStyle(vertex, { 'background-color': color === 'default' ? nodeColor : color });
         return this;
     }
 
-    public contentColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    public borderColorVertex(vertex: number, color: KEYWORD | 'default'): GraphAnimator
     {
-        this._setVertexStyle(vertex, { color });
+        this._setVertexStyle(vertex, { 'border-color': color === 'default' ? 'black' : color });
+        return this;
+    }
+
+    public contentColorVertex(vertex: number, color: KEYWORD | 'default'): GraphAnimator
+    {
+        const config = store.getState().config;
+        const labelColor = config.labelColor;
+
+        this._setVertexStyle(vertex, { color: color === 'default' ? labelColor : color });
         return this;
     }
 
@@ -99,14 +110,21 @@ export default class GraphAnimator extends SubAnimator
         return this._setEdgeStyle(u, v, { 'line-outline-width': 0 });
     }
 
-    public colorEdge(u: number, v: number, color: KEYWORD): GraphAnimator
+    public colorEdge(u: number, v: number, color: KEYWORD | 'default'): GraphAnimator
     {
-        return this._setEdgeStyle(u, v, { 'line-color': color, 'target-arrow-color': color });
+        const config = store.getState().config;
+        const edgeColor = config.edgeColor;
+        const realColor = color === 'default' ? edgeColor : color;
+
+        return this._setEdgeStyle(u, v, { 'line-color': realColor, 'target-arrow-color': realColor, 'line-outline-color': realColor });
     }
 
-    public backgroundColorVertex(vertex: number, color: KEYWORD): GraphAnimator
+    public backgroundColorVertex(vertex: number, color: KEYWORD | 'default'): GraphAnimator
     {
-        return this._setVertexStyle(vertex, { 'background-color': color });
+        const config = store.getState().config;
+        const edgeColor = config.nodeColor;
+        
+        return this._setVertexStyle(vertex, { 'background-color': color === 'default' ? edgeColor : color });
     }
 
     public labelEdge(u: number, v: number, label: string): GraphAnimator

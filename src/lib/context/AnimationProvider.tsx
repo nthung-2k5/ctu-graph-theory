@@ -110,6 +110,11 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
             const labelEdges = singleToArray(step.labelEdge);
             labelEdges.forEach(([u, v, label]) => animator.current.graph.labelEdge(u, v, label));
         }
+
+        if (step.resetLabels)
+        {
+            animator.current.graph.resetLabels();
+        }
     
         if (step.codeLine !== undefined)
         {
@@ -177,6 +182,7 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
         }
 
         reset();
+        animator.current.graph.resetLabels();
         for (let i = 0; i < cursorRef.current - by; i++)
         {
             animate(steps[i]);

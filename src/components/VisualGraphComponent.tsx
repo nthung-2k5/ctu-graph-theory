@@ -4,7 +4,7 @@ import cytoscape, { EdgeSingular, Stylesheet } from "cytoscape";
 // @ts-expect-error Made for Javascript version so no type
 import cola from "cytoscape-cola";
 // @ts-expect-error Made for Javascript version so no type
-import elk from 'cytoscape-elk';
+import dagre from 'cytoscape-dagre';
 
 import ControlBar from "./ControlBar";
 import { useAppSelector } from '../lib/context/hooks';
@@ -12,7 +12,7 @@ import { useAnimation } from '../lib/context/AnimationContext';
 import { useGraphTheory } from '../lib/context/GraphTheoryContext';
 
 cytoscape.use(cola);
-cytoscape.use(elk);
+cytoscape.use(dagre);
 
 export default function VisualGraphComponent() 
 {
@@ -84,20 +84,22 @@ export default function VisualGraphComponent()
     const refreshGraph = () => 
     {
         cy.current.layout({
-            name: algorithm.predicate.acyclic === true ? "elk" : "cola",
+            name: algorithm.predicate.acyclic === true ? "dagre" : "cola",
             // @ts-expect-error Config in cola layout
             edgeLength: edgeLength,
-            elk: {
-                'algorithm': 'layered',
-                'elk.direction': 'RIGHT',
-                'elk.topdown.nodeType': 'ROOT_NODE',
-                'elk.spacing.nodeNode': edgeLength,
-                'elk.layered.spacing.nodeNodeBetweenLayers': edgeLength,
-                'elk.layered.layering.strategy': 'INTERACTIVE',
-                'elk.layered.nodePlacement.strategy': 'LINEAR_SEGMENTS',
-                'elk.layered.nodePlacement.favorStraightEdges': true,
-                'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES'
-            }
+            rankDir: 'LR',
+            spacingFactor: edgeLength / 100,
+            // elk: {
+            //     'algorithm': 'layered',
+            //     'elk.direction': 'RIGHT',
+            //     'elk.topdown.nodeType': 'ROOT_NODE',
+            //     'elk.spacing.nodeNode': edgeLength,
+            //     'elk.layered.spacing.nodeNodeBetweenLayers': edgeLength,
+            //     'elk.layered.layering.strategy': 'INTERACTIVE',
+            //     'elk.layered.nodePlacement.strategy': 'LINEAR_SEGMENTS',
+            //     'elk.layered.nodePlacement.favorStraightEdges': true,
+            //     'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES'
+            // }
         }).run();
     };
 
