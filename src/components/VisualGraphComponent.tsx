@@ -61,24 +61,36 @@ export default function VisualGraphComponent()
         animator.setCytoscape(core);
     };
 
-    useEffect(() =>
-    {
-        cy.current.style().selector('node').style({ backgroundColor: nodeColor }).update();
+    useEffect(() => {
+        if (cy.current) {
+            cy.current.nodes().forEach(node => {
+                node.style('background-color', nodeColor);
+            });
+        }
     }, [nodeColor]);
 
-    useEffect(() =>
-    {
-        cy.current.style().selector('node').style({ color: labelColor }).update();
+    useEffect(() => {
+        if (cy.current) {
+            cy.current.nodes().forEach(node => {
+                node.style('color', labelColor);
+            });
+        }
     }, [labelColor]);
-
-    useEffect(() =>
-    {
-        cy.current.style().selector('node').style({ width: nodeRadius, height: nodeRadius }).update();
+    
+    useEffect(() => {
+        if (cy.current) {
+            cy.current.nodes().forEach(node => {
+                node.style({ width: nodeRadius, height: nodeRadius });
+            });
+        }
     }, [nodeRadius]);
 
-    useEffect(() =>
-    {
-        cy.current.style().selector('edge').style({ 'line-color': edgeColor }).update();
+    useEffect(() => {
+        if (cy.current) {
+            cy.current.edges().forEach(edge => {
+                edge.style('line-color', edgeColor);
+            });
+        }
     }, [edgeColor]);
 
     const refreshGraph = () => 
