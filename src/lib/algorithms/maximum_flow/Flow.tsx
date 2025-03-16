@@ -3,7 +3,6 @@ import { AlgorithmRequirements, AlgorithmStep, WeightedGraphAlgorithm } from '..
 import { WeightedGraph } from '../WeightedGraph';
 import store from '../../context/store';
 import { Queue } from "data-structure-typed";
-import { KEYWORD } from 'color-convert/conversions';
 import { UnweightedGraph } from '../UnweightedGraph';
 
 class FlowContext
@@ -62,7 +61,7 @@ export default class FlowAlgorithm extends WeightedGraphAlgorithm<object, FlowRe
     {
         return `int flow[MAX_N][MAX_N];
 
-int TimDuongTangLuong(Graph *G, int s, int t, int parent[]) {
+int TimDuongTangLuong(Graph* G, int s, int t, int parent[]) {
     for (int u = 1; u <= n; u++) {
         parent[u] = -1;
     }
@@ -89,12 +88,12 @@ int TimDuongTangLuong(Graph *G, int s, int t, int parent[]) {
 }
 
 #define oo 1000000007
-void TangLuong(Graph *G, int s, int t, int parent[], int* maxFlow) {
+void TangLuong(Graph* G, int s, int t, int parent[], int* maxFlow) {
     int v     = t;
     int delta = oo;
     while (v != s) {
         int u = parent[v];
-        delta = min(delta, G->A[u][v] - flow[u][v]);
+        delta = min(delta, G->W[u][v] - flow[u][v]);
         v = u;
     }
 
@@ -109,7 +108,7 @@ void TangLuong(Graph *G, int s, int t, int parent[], int* maxFlow) {
     *maxFlow += delta;
 }
 
-int EdmondsKarp(Graph *G, int s, int t) {
+int EdmondsKarp(Graph* G, int s, int t) {
     int maxFlow = 0;
     int parent[G->n + 1];
     
@@ -132,16 +131,16 @@ int EdmondsKarp(Graph *G, int s, int t) {
     
     public get name(): string
     {
-        return 'Luồng cực đại';
+        return 'Tìm luồng cực đại trong mạng (Thuật toán Edmonds-Karp)';
     }
 
     private *_TimDuongTangLuong(g: WeightedGraph, s: number, t: number, ctx: FlowContext, result: FlowResult): IterableIterator<AlgorithmStep>
     {
-        yield {codeLine: 3, log: `TimDuongTangLuong(G, ${s}, ${t}), parent`};
+        yield { codeLine: 3, log: `TimDuongTangLuong(G, ${s}, ${t}, parent)` };
         
         const n = g.vertexCount;
 
-        yield {codeLine: [4, 6], log: `parent[1..${g.vertexCount}] = -1`};
+        yield { codeLine: [4, 6], log: `parent[1..${n}] = -1` };
 
         ctx.parent = Array(n + 1).fill(-1);
         result.S = [];
@@ -149,43 +148,44 @@ int EdmondsKarp(Graph *G, int s, int t) {
 
         const Q = new Queue<number>();
         yield {codeLine: 8, log: `Q = {}`};
-        yield {codeLine: 10, log: `Q = {${s}}`};
+
         Q.push(s);
+        yield {codeLine: 10, log: `Q = {${s}}`};
         
         ctx.parent[s] = s;
-        
-        const edges: Array<[number, number, KEYWORD]> = [];
-        const contentVerties: Array<[number, KEYWORD]> = [];
-        const verties: Array<[number, KEYWORD]> = [];
+        yield {codeLine: 11, log: `parent[${s}] = ${s}`, borderColorVertex: [s, 'red'] };
 
-        while (!Q.isEmpty())
+        while (1)
         {
+            yield { codeLine: 12, log: `Q = {${Q.toArray().join(', ')}} => !empty(Q) = ${!Q.isEmpty()}` };
+            if (Q.isEmpty()) break;
+
             const u = Q.shift()!;
-            yield { codeLine: 13, log: `u = ${u}`, borderColorVertex: [u, "deeppink"], backgroundColorVertex: [u, "mediumpurple"], contentColorVertex: [u, "whitesmoke"] };
+            yield { codeLine: 13, log: `u = ${u}`, backgroundColorVertex: [u, 'orange'], contentColorVertex: [u, "white"], borderColorVertex: [u, 'default'] };
             yield { codeLine: 14, log: `Q = {${Q.toArray().join(', ')}}` };
 
             for (const { v, weight: capacity } of g.neighbors(u))
             {
-                yield {codeLine: [16, 17], log: `Xét đỉnh ${v}`, borderColorVertex: [v, 'deeppink'], backgroundColorVertex: [v, 'darkorange'], contentColorVertex: [v, 'whitesmoke'] };
+                yield {codeLine: [16, 17], log: `Xét đỉnh ${v}`, highlightVertex: [v, true], highlightEdge: [u, v, true] };
                 
-                yield { codeLine: 18, log: `(parent[${v}] = ${ctx.parent[v]}) == -1 => ${ctx.parent[v] == -1}, (G->W[${u}][${v}] = ${capacity}) > (flow[${u}][${v}] = ${ctx.flow[u][v]}) => ${capacity > ctx.flow[u][v]}`, borderColorVertex: [v, 'deeppink'], backgroundColorVertex: [v, 'darkorange'], contentColorVertex: [v, 'whitesmoke'] };
+                yield { codeLine: 18, log: `(parent[${v}] = ${ctx.parent[v]}) == -1 => ${ctx.parent[v] == -1}, (G->W[${u}][${v}] = ${capacity}) > (flow[${u}][${v}] = ${ctx.flow[u][v]}) => ${capacity > ctx.flow[u][v]}` };
                 if (ctx.parent[v] == -1 && capacity > ctx.flow[u][v])
                 {
-                    yield { log: `((${u}, ${v}), ${capacity - ctx.flow[u][v]})`, colorEdge: [u, v, 'dodgerblue']};
-                    edges.push([u, v, 'black']);
                     Q.push(v);
-                    yield { codeLine: 19, log: `Q = {${Q.toArray().join(', ')}}`, colorVertex: [v, 'deeppink'], borderColorVertex: [v, 'black'] };
-                    yield { codeLine: 20, log: `parent[${v}] = ${u}`, borderColorVertex: [v, 'black'], backgroundColorVertex: [v, 'darkorange'] };
+                    yield { codeLine: 19, log: `Q = {${Q.toArray().join(', ')}}`, borderColorVertex: [v, 'red'] };
+
                     ctx.parent[v] = u;
+                    yield { codeLine: 20, log: `parent[${v}] = ${u}`, colorEdge: [u, v, 'orange'], borderColorVertex: [v, 'red'] };
+
                 }
+
+                yield { codeLine: 23, log: `Kết thúc xét đỉnh ${v}`, highlightVertex: [v, false], highlightEdge: [u, v, false] };
             }
 
-            yield {codeLine: 22, log: ``, borderColorVertex: [u, 'black'], contentColorVertex: [u, 'whitesmoke'], backgroundColorVertex: [u, 'darkorange']}
-            verties.push([u, 'white']);
-            contentVerties.push([u, 'black'])
+            yield {  codeLine: 24, log: `Kết thúc xét đỉnh ${u}`, backgroundColorVertex: [u, 'deepskyblue'], contentColorVertex: [u, 'white'] };
         }
 
-        yield { codeLine: 26, log: `Kết quả trả về: (parent[${t}] = ${ctx.parent[t]}) != -1 => ${ctx.parent[t] != -1}`, reset: true };
+        yield { codeLine: 26, log: `Kết quả trả về: (parent[${t}] = ${ctx.parent[t]}) != -1 => ${ctx.parent[t] != -1}` };
         ctx.found = ctx.parent[t] != -1;
 
         for (let v = 1; v <= g.vertexCount; v++)
@@ -206,58 +206,78 @@ int EdmondsKarp(Graph *G, int s, int t) {
         yield { codeLine: 30, log: `TangLuong(G, ${s}, ${t}, parent, &maxFlow)` };
 
         let v = t;
-        yield { codeLine: 31, log: `v = ${v}` };
-        let del = 1000000007;
-        yield { codeLine: 32, log: `delta = ∞` };
-
-        yield { codeLine: 30, log: `Đường tăng luồng: `, borderColorVertex: [v, "deeppink"], backgroundColorVertex: [v, "mediumpurple"], contentColorVertex: [v, "whitesmoke"] };
+        yield { codeLine: 31, log: `v = ${v}`, highlightVertex: [v, true], backgroundColorVertex: [v, 'deepskyblue'], contentColorVertex: [v, "white"] };
         
+        let delta = Infinity;
+        yield { codeLine: 32, log: `delta = ∞` };
+        
+        const augPath = [];
+        augPath.push(t);
         while (1)
         {
             yield { codeLine: 33, log: `(v = ${v}) != ${s} => ${v != s}` };
             if (v == s) break;
 
             const u = ctx.parent[v];
-            yield { log: `u = ${u}`, codeLine: 34 };
             
-            const w = g.weight(u, v);
             yield {
                 codeLine: 34,
-                log: `((${u}, ${v}), ${w - ctx.flow[u][v]})`,
-                colorEdge: [u, v, 'dodgerblue'],
-                borderColorVertex: [v, "deeppink"], backgroundColorVertex: [v, "mediumpurple"], contentColorVertex: [v, "whitesmoke"]
+                log: `u = parent[${v}] = ${u}`,
+                colorEdge: [u, v, 'deepskyblue'],
+                backgroundColorVertex: [u, 'deepskyblue'],
+                contentColorVertex: [u, "white"]
             };
 
-            yield {codeLine: 35, log: `del = min(${del}, ${w} - ${ctx.flow[u][v]}) = ${Math.min(del, w - ctx.flow[u][v])}`};
-            del = Math.min(del, w - ctx.flow[u][v]);
+            const w = g.weight(u, v);
+            yield {codeLine: 35, log: `delta = min(${delta}, ${w} - ${ctx.flow[u][v]}) = ${Math.min(delta, w - ctx.flow[u][v])}`};
+            delta = Math.min(delta, w - ctx.flow[u][v]);
+            
+            yield {
+                codeLine: 36,
+                log: `v = ${u}`,
+                highlightVertex: [[v, false], [u, true]]
+            };
             v = u;
-            yield {codeLine: 36, log: `v = ${v}`};
+            augPath.push(v);
         }
-        yield {codeLine: 37, log: "", borderColorVertex: [v, "deeppink"], backgroundColorVertex: [v, "mediumpurple"], contentColorVertex: [v, "whitesmoke"]}
+
+
+        yield {codeLine: 37, log: `=> delta = ${delta}, Đường tăng luồng: ${augPath.toReversed().join(' -> ')}`, highlightVertex: [v, false] };
 
         v = t;
-        yield { codeLine: 39, log: `v = ${v}` };
+        yield { codeLine: 39, log: `v = ${v}`, highlightVertex: [v, true], backgroundColorVertex: [v, 'tomato'], contentColorVertex: [v, "white"] };
+        
         while (1)
         {
             yield { codeLine: 40, log: `(v = ${v}) != ${s} => ${v != s}` };
             if (v == s) break;
 
             const u = ctx.parent[v];
-            yield { codeLine: 41, log: `u = ${u}` };
+            yield {
+                codeLine: 41,
+                log: `u = parent[${v}] = ${u}`,
+                colorEdge: [u, v, 'red'],
+                backgroundColorVertex: [u, 'tomato'],
+                contentColorVertex: [u, "white"]
+            };
 
-            ctx.flow[u][v] += del;
+            ctx.flow[u][v] += delta;
             const w = g.weight(u, v);
-            yield { codeLine: 42, log: `(flow[${u}][${v}] += ${del}) = ${ctx.flow[u][v]}`, labelEdge: [u, v, `${ctx.flow[u][v]}/${w}`] };
+            yield { codeLine: 42, log: `(flow[${u}][${v}] += ${delta}) = ${ctx.flow[u][v]}`, colorEdge: [u, v, 'red'], labelEdge: [u, v, `${ctx.flow[u][v]}/${w}`] };
             
-            ctx.flow[v][u] -= del;
-            yield { codeLine: 43, log: `(flow[${v}][${u}] -= ${del}) = ${ctx.flow[v][u]}`, labelEdge: [v, u, `${ctx.flow[v][u]}/${w}`] };
+            ctx.flow[v][u] -= delta;
+            yield { codeLine: 43, log: `(flow[${v}][${u}] -= ${delta}) = ${ctx.flow[v][u]}`, colorEdge: [v, u, 'red'], labelEdge: [v, u, `${ctx.flow[v][u]}/${w}`] };
 
+            yield {
+                codeLine: 44,
+                log: `v = ${u}`,
+                highlightVertex: [[v, false], [u, true]]
+            };
             v = u;
-            yield { codeLine: 44, log: `v = ${v}` };
         }
 
-        result.maximumFlow += del;
-        yield {codeLine: 47, log: `(maxFlow += ${del}) = ${result.maximumFlow + del}`, reset: true };
+        result.maximumFlow += delta;
+        yield {codeLine: 47, log: `(maxFlow += ${delta}) = ${result.maximumFlow + delta}`, reset: true };
     }
 
     protected override *_run(g: WeightedGraph, _config: object, result: FlowResult): IterableIterator<AlgorithmStep>
@@ -294,17 +314,18 @@ int EdmondsKarp(Graph *G, int s, int t) {
             throw new Error("Invalid graph");
         }
 
-        const labelFlows: Array<[number, number, string]> = [];
+        const labelFlows: [number, number, string][] = [];
         for (const e of g.edges)
         {
             labelFlows.push([e.u, e.v, `0/${e.weight}`]);
         }
 
-        yield { codeLine: 1, log: `flow[1..${g.vertexCount}][1..${g.vertexCount}] = 0`, labelEdge: labelFlows };
+        const n = g.vertexCount;
+        yield { codeLine: 1, log: `flow[1..${n}][1..${n}] = 0`, labelEdge: labelFlows };
 
         yield { codeLine: 50, log: `EdmondsKarp(G, ${s}, ${t})` };
         yield { codeLine: 51, log: 'maxFlow = 0' };
-        yield { codeLine: 52, log: `parent[${g.vertexCount + 1}] = {}` };
+        yield { codeLine: 52, log: `parent[1..${n}] = {}` };
 
         while (1)
         {
@@ -317,11 +338,11 @@ int EdmondsKarp(Graph *G, int s, int t) {
                 break;
             }
 
-            yield {codeLine: 55, log: `TangLuong(G, ${s}, ${t}, parent, &maxFlow)`};
+            yield {codeLine: 55, reset: true, log: `TangLuong(G, ${s}, ${t}, parent, &maxFlow)`};
             yield* this._TangLuong(g, s, t, ctx, result);
         }
 
-        yield {codeLine: 58, log: `Kết quả cuối cùng: luồng cực đại = ${result.maximumFlow}`};
+        yield {codeLine: 58, reset: true, log: `Kết quả cuối cùng: luồng cực đại = ${result.maximumFlow}`};
 
         /// TODO: Min Cut
     }

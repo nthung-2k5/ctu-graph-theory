@@ -116,15 +116,14 @@ export default class GraphAnimator extends SubAnimator
         const edgeColor = config.edgeColor;
         const realColor = color === 'default' ? edgeColor : color;
 
-        return this._setEdgeStyle(u, v, { 'line-color': realColor, 'target-arrow-color': realColor, 'line-outline-color': realColor });
+        return this._setEdgeStyle(u, v, { 'line-color': realColor, color: realColor, 'target-arrow-color': realColor, 'line-outline-color': realColor });
     }
 
     public backgroundColorVertex(vertex: number, color: KEYWORD | 'default'): GraphAnimator
     {
         const config = store.getState().config;
-        const edgeColor = config.nodeColor;
         
-        return this._setVertexStyle(vertex, { 'background-color': color === 'default' ? edgeColor : color });
+        return this._setVertexStyle(vertex, { 'background-color': color === 'default' ? config.nodeColor : color });
     }
 
     public labelEdge(u: number, v: number, label: string): GraphAnimator

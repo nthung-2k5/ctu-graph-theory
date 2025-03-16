@@ -1,24 +1,30 @@
 import { Form, InputNumber } from "antd";
 import { ReactNode } from "react";
 import store from "../../context/store";
-// import { PseudocodeLine } from "../../pseudocode/Pseudocode";
 import { AlgorithmStep, WeightedGraphAlgorithm } from "../GraphAlgorithm";
 import { WeightedGraph } from "../WeightedGraph";
 import { KEYWORD } from "color-convert/conversions";
-interface FloydConfig {
+interface FloydConfig 
+{
     startVertex: number;
 }
 
-export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]> {
-    protected override _initResult(): number[] {
+export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]> 
+{
+    protected override _initResult(): number[] 
+    {
         return [];
     }
-    public override defaultConfig(): FloydConfig {
+
+    public override defaultConfig(): FloydConfig 
+    {
         return {
             startVertex: 1,
         };
     }
-    protected override _result(result: number[]): ReactNode {
+
+    protected override _result(result: number[]): ReactNode 
+    {
         const { startVertex } = this.defaultConfig(); // Lấy đỉnh bắt đầu từ cấu hình mặc định
         console.log(result);
         return (
@@ -35,16 +41,19 @@ export default class Floyd extends WeightedGraphAlgorithm<FloydConfig, number[]>
             </div>
         );
     }
-    public get name(): string {
-        return "Thuật toán Floyd-Warshall";
+
+    public get name(): string 
+    {
+        return "Tìm đường đi ngắn nhất (Thuật toán Floyd-Warshall)";
     }
 
-    public override get code(): string {
+    public override get code(): string 
+    {
         return `
-int pi[MAXN][MAXN];
-int next[MAXN][MAXN];
+int pi[MAX_N][MAX_N];
+int next[MAX_N][MAX_N];
 
-void FloydWarshall(Graph *pG)
+void FloydWarshall(Graph* pG)
 {
     //Khởi tạo pi[][], next[][]
     int u, v, k;
@@ -89,14 +98,17 @@ void FloydWarshall(Graph *pG)
         `;
     }
 
-    private trade(next: number[][], u: number, v: number, k: number, color: KEYWORD): Array<[number, number, KEYWORD]> {
+    private trade(next: number[][], u: number, v: number, k: number, color: KEYWORD): Array<[number, number, KEYWORD]> 
+    {
         const edges: Array<[number, number, KEYWORD]> = [];
-        while (u != k && u != 0) {
+        while (u != k && u != 0) 
+        {
             edges.push([u, next[u][k], color]);
             u = next[u][k];
         }
 
-        while (u != v && u != 0) {
+        while (u != v && u != 0) 
+        {
             edges.push([u, next[u][v], color]);
             u = next[u][v];
         }
@@ -104,12 +116,14 @@ void FloydWarshall(Graph *pG)
         return edges;
     }
 
-    protected *_run(g: WeightedGraph, config: FloydConfig, result: number[]): IterableIterator<AlgorithmStep> {
+    protected *_run(g: WeightedGraph, config: FloydConfig, result: number[]): IterableIterator<AlgorithmStep> 
+    {
         const n = g.vertexCount;
 
         const pi: number[][] = [];
         const next: number[][] = [];
-        for (let i = 0; i < n + 1; i++) {
+        for (let i = 0; i < n + 1; i++) 
+        {
             pi[i] = new Array(n + 1).fill(Infinity);
             next[i] = new Array(n + 1).fill(0);
         }
@@ -117,7 +131,8 @@ void FloydWarshall(Graph *pG)
         for (let u = 1; u <= n; u++) pi[u][u] = 0;
 
         const edges = g.edges;
-        for (let i = 0; i < g.edgeCount; i++) {
+        for (let i = 0; i < g.edgeCount; i++) 
+        {
             const e = edges[i];
             pi[e.u][e.v] = e.weight;
             next[e.u][e.v] = e.v;
@@ -135,9 +150,10 @@ void FloydWarshall(Graph *pG)
         yield { log: `${pi}`, codeLine: 23 }; //
         yield { log: `${next}`, codeLine: 24 }; //
 
-        var color: KEYWORD;
-        var checkNegativeCycle = false;
-        for (let k = 1; k <= n && !checkNegativeCycle; k++) {
+        let color: KEYWORD;
+        let checkNegativeCycle = false;
+        for (let k = 1; k <= n && !checkNegativeCycle; k++) 
+        {
             //tô màu đỉnh k
             yield {
                 log: `k = ${k}`,
@@ -146,7 +162,8 @@ void FloydWarshall(Graph *pG)
                 highlightVertex: [k, true],
             };
 
-            for (let u = 1; u <= n && !checkNegativeCycle; u++) {
+            for (let u = 1; u <= n && !checkNegativeCycle; u++) 
+            {
                 //tô màu đỉnh u
                 yield {
                     log: `u=${u}`,
@@ -154,7 +171,8 @@ void FloydWarshall(Graph *pG)
                     colorVertex: [u, "blue"],
                     highlightVertex: [u, true],
                 };
-                for (let v = 1; v <= n && !checkNegativeCycle; v++) {
+                for (let v = 1; v <= n && !checkNegativeCycle; v++) 
+                {
                     //tô màu đỉnh v
                     yield {
                         log: `k=${k}, u=${u}, v=${v}`,
@@ -167,42 +185,55 @@ void FloydWarshall(Graph *pG)
                         codeLine: 32,
                     };
 
-                    if (pi[u][v] > pi[u][k] + pi[k][v] && pi[u][k] != Infinity && pi[k][v] != Infinity) {
+                    if (pi[u][v] > pi[u][k] + pi[k][v] && pi[u][k] != Infinity && pi[k][v] != Infinity) 
+                    {
                         let colorEdges: Array<[number, number, KEYWORD]> = [];
                         pi[u][v] = pi[u][k] + pi[k][v];
                         next[u][v] = next[u][k];
 
-                        if (pi[u][u] >= 0 && pi[v][v] >= 0) {
+                        if (pi[u][u] >= 0 && pi[v][v] >= 0) 
+                        {
                             colorEdges = this.trade(next, u, v, k, "brown");
                             const colorEdgesCopy = colorEdges.map(([u, v, color]) => [u, v, color]);
                             yield {
                                 log: ``,
                                 colorEdge: colorEdgesCopy as Array<[number, number, KEYWORD]>,
                             };
-                        } else checkNegativeCycle = true;
+                        }
+                        else checkNegativeCycle = true;
 
                         yield { log: `pi[${u}][${v}]=${pi[u][v]}`, codeLine: 34 };
                         yield { log: `next[${u}][${v}]=${next[u][k]}`, codeLine: 35 };
 
-                        if (!checkNegativeCycle) {
-                            for (let i = 0; i < colorEdges.length; i++) {
+                        if (!checkNegativeCycle) 
+                        {
+                            for (let i = 0; i < colorEdges.length; i++) 
+                            {
                                 colorEdges[i][2] = "black";
                             }
                             yield { log: ``, colorEdge: colorEdges };
                         }
                     }
-                    if (v === u) {
+                    if (v === u) 
+                    {
                         color = "blue";
-                    } else if (v === k) {
+                    }
+                    else if (v === k) 
+                    {
                         color = "green";
-                    } else {
+                    }
+                    else 
+                    {
                         color = "white";
                     }
                     yield { log: ``, colorVertex: [v, color], highlightVertex: [v, false] };
                 }
-                if (u === k) {
+                if (u === k) 
+                {
                     color = "green";
-                } else {
+                }
+                else 
+                {
                     color = "white";
                 }
                 yield { log: ``, colorVertex: [u, color], highlightVertex: [u, false] };
@@ -215,8 +246,9 @@ void FloydWarshall(Graph *pG)
         yield { log: ``, codeLine: 41 };
 
         for (let u = 1; u <= n; u++)
-            if (pi[u][u] < 0) {
-                let vertices: Array<[number, KEYWORD]> = [];
+            if (pi[u][u] < 0) 
+            {
+                const vertices: Array<[number, KEYWORD]> = [];
                 for (let v = 1; v <= n; v++) vertices.push([v, "red"]);
                 yield { log: `Tồn tại chu trình âm pi[${u}][${u}]=${pi[u][u]}`, codeLine: 43, colorVertex: vertices };
                 yield { log: ``, codeLine: 44 };
@@ -225,12 +257,14 @@ void FloydWarshall(Graph *pG)
                 break;
             }
 
-        if (!checkNegativeCycle) {
-            let s = config.startVertex;
-            let vertices: Array<[number, KEYWORD]> = [];
+        if (!checkNegativeCycle) 
+        {
+            const s = config.startVertex;
+            const vertices: Array<[number, KEYWORD]> = [];
             let edges: Array<[number, number, KEYWORD]> = [];
 
-            for (let u = 1; u <= n; u++) {
+            for (let u = 1; u <= n; u++) 
+            {
                 vertices.push([u, "blue"]);
                 if (u != s) edges = edges.concat(this.trade(next, s, u, 1, "red"));
             }
@@ -243,7 +277,8 @@ void FloydWarshall(Graph *pG)
         yield { log: ``, codeLine: 46 };
     }
 
-    public override configNode(): ReactNode {
+    public override configNode(): ReactNode 
+    {
         const vertexCount = store.getState().graph.vertexCount;
         return (
             <>

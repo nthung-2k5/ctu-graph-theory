@@ -171,12 +171,12 @@ void SCC(Graph* G, int u) {
     protected *_run(g: UnweightedGraph, config: TarjanConfig, result: number[][]): IterableIterator<AlgorithmStep>
     {
         const ctx = new TarjanContext(g);
-        yield { codeLine: 1, log: `num = {${ctx.index.join(', ')}}` };
-        yield { codeLine: 2, log: `minNum = {${ctx.minIndex.join(', ')}}` };
-        yield { codeLine: 3, log: `scc = {${Array(g.vertexCount + 1).fill(-1).join(', ')}}` };
+        yield { codeLine: 1, log: `num[1..${g.vertexCount}] = -1` };
+        yield { codeLine: 2, log: `minNum[1..${g.vertexCount}] = -1` };
+        yield { codeLine: 3, log: `scc[1..${g.vertexCount}] = -1` };
         yield { codeLine: 4, log: `k = 1` };
         yield { codeLine: 5, log: `S = {}` };
-        yield { codeLine: 6, log: `onStack = {${ctx.onStack.join(', ')}}` };
+        yield { codeLine: 6, log: `onStack[1..${g.vertexCount}] = 0` };
 
         yield* this._scc(g, config.startVertex, ctx, result);
         if (config.traverseAll)
