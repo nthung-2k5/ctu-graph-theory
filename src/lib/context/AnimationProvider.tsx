@@ -45,6 +45,10 @@ export const AnimationProvider: React.FC<PropsWithChildren> = ({ children }) =>
         {
             rewind(cursor - newCursor);
         }
+        else if (newCursor === 0)
+        {
+            reset();
+        }
     }
 
     const { animationSteps: steps } = useGraphTheory();

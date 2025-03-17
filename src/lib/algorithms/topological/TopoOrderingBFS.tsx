@@ -31,7 +31,7 @@ export default class TopoOrderingBFS extends TopologicalAlgorithm
     {
         return `#define MAX_VERTICES 100
 int d[MAX_VERTICES];
-void topoSort(Graph *graph, List *list) {
+void topoSort(Graph* graph, List *list) {
    // Tính bậc vào các đỉnh 
 	for (int i = 1; i <= graph->n; i++) {
 		d[i] = 0;

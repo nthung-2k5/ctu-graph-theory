@@ -43,7 +43,7 @@ export default abstract class TraversalAlgorithm extends NeutralGraphAlgorithm<T
         const visited: boolean[] = Array(g.vertexCount + 1).fill(false);
         const parent: number[] = Array(g.vertexCount + 1).fill(-1);
 
-        yield { codeLine: 1, log: `mark[${g.vertexCount + 1}] = {${visited.join(', ')}}` };
+        yield { codeLine: 1, log: `mark[1..${g.vertexCount}] = 0` };
 
         yield* this._traverse(g, config.startVertex, visited, parent, result);
 
